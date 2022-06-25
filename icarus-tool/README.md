@@ -7,13 +7,15 @@ Create a virtual environment and install dependencies before running the applica
 ```
 py -m venv .venv
 .venv\Scripts\activate
-py -m pip install pyreadline
-```
+python -m pip install pyreadline
+python -m pip install pyinstaller
 
-```
-py -m unittest
-py application.py
+python -m unittest
+python application.py
+
+pyinstaller --onefile application.py
 deactivate
+dist\application.exe
 ```
 
 ### Linux
@@ -22,9 +24,7 @@ deactivate
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install readline
-```
 
-```
 python -m unittest
 python application.py
 deactivate
