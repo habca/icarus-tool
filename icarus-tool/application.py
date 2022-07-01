@@ -52,24 +52,40 @@ class Application:
         self.calculator.syntax_check(equation)
         self.calculator.value_check(equation)
 
-    def assign(self, equation: str):
-        self.calculator.assign_equation(equation)
-
-    def calculate(self, equation: str):
+    def calculate(self, equation: str) -> None:
         if "=" in equation:
-            self.assign(equation)
+            self.calculator.assign_equation(equation)
             return
 
-        expression = self.calculator.calculate(equation)
-        first_layer = self.calculator.print_first_layer(equation)
-        last_layer = self.calculator.print_last_layer(expression)
-
         separator = "-" * (len(equation) + 2)
-        print(separator)
-        print(first_layer)
-        if first_layer != last_layer:
+        equation_list = self.calculator.calculate(equation)
+
+        if equation_list == []:
+            raise ValueError("Error occured: " + equation)
+        
+        for i in range(1, len(equation_list)):
+            previous = equation_list[i - 1].split(" + ")
+            current = equation_list[i].split(" + ")
+
+            resources = [r for r in current if r not in previous]
+            resources = Calculator.sort_resources(resources)
+            resources = Calculator.format_resources(resources)
+
             print(separator)
-            print(last_layer)
+            for resource in resources:
+                resources = Calculator.sort_resources(resources)
+                resources = Calculator.format_resources(resources)
+                print(resource)
+
+        print()
+        print("TOTAL RESOURCES")
+        
+        current = Calculator.sort_resources(current)
+        current = Calculator.format_resources(current)
+
+        print(separator)
+        for resource in current:
+            print(resource)
 
     def quess(self, equation: str) -> None:
         similar_words = self.calculator.check_equation(equation)

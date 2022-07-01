@@ -22,11 +22,11 @@ class TestFileSystem(unittest.TestCase):
         tiedosto = FileSystem("tech_tree.txt")
         tiedosto.read(calc)
 
-        self.assertEqual(calc.calculate("1 crafting_bench"), "60 fiber + 50 wood + 12 stone + 20 leather")
-        self.assertEqual(calc.calculate("1 anvil_bench"), "80 iron_ore + 20 wood + 10 stone")
-        self.assertEqual(calc.calculate("2 stone_furnace"), "25 wood + 160 stone + 24 leather")
-        self.assertEqual(calc.calculate("2 20 iron_ingot"), "80 iron_ore")
-        self.assertEqual(calc.calculate("8 stick"), "1 wood")
+        self.assertEqual(calc.calculate("1 crafting_bench")[-1], "60 fiber + 50 wood + 12 stone + 20 leather")
+        self.assertEqual(calc.calculate("1 anvil_bench")[-1], "80 iron_ore + 20 wood + 10 stone")
+        self.assertEqual(calc.calculate("2 stone_furnace")[-1], "25 wood + 160 stone + 24 leather")
+        self.assertEqual(calc.calculate("2 20 iron_ingot")[-1], "80 iron_ore")
+        self.assertEqual(calc.calculate("8 stick")[-1], "1 wood")
 
 class TestApplication(unittest.TestCase):
 
@@ -52,10 +52,7 @@ class TestApplication(unittest.TestCase):
             "1 iron_ingot = 2 iron_ore",
             "10 stick = 1 wood",
 
-            "1 anvil_bench",
-            "2 stone_furnace",
-            "40 iron_ingot",
-            "8 stick",
+            "1 crafting_bench",
             "exit",
         ]
 
@@ -64,18 +61,18 @@ class TestApplication(unittest.TestCase):
             '--------------------------',
             'amount name = amount name [+ amount name]',
             'amount name [+ amount name]',
-            '---------------',
-            '40 iron_ingot\n20 wood\n10 stone',
-            '---------------',
-            '80 iron_ore\n20 wood\n10 stone',
-            '-----------------',
-            '160 stone\n 24 leather\n 24 wood\n  8 stick',
-            '-----------------',
-            '160 stone\n 25 wood\n 24 leather',
-            '---------------',
-            '80 iron_ore',
-            '---------',
-            '1 wood',
+            '------------------',
+            '60 fiber',
+            '50 wood',
+            '20 leather',
+            '12 stone',
+
+            'TOTAL RESOURCES',
+            '------------------',
+            '60 fiber',
+            '50 wood',
+            '20 leather',
+            '12 stone',
         ]
 
         self.maxDiff = None

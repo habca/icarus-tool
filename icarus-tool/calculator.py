@@ -4,9 +4,8 @@ import string
 import utils
 import math
 import re
-
+        
 class Calculator:
-
     def __init__(self):
         self.resources = dict()
 
@@ -71,14 +70,19 @@ class Calculator:
         self.resources[name] = f"{multiplier} ( {equation} )"
 
     def calculate(self, equation: str) -> str:
+        equations = []
+
         while True:
-            previous = equation
+            equations.append(equation)
             equation = self.replace_variables(equation)
             equation = Calculator.multiply(equation, Fraction(1))
             equation = Calculator.subtract(equation)
-            if equation == previous:
+            
+            # Equation did not change so it is ready.
+            if equation == equations[-1]:
                 break
-        return equation
+
+        return equations
 
     def search_variable(self, variable: str, equation: str, not_first = False) -> list:
         """
@@ -102,13 +106,14 @@ class Calculator:
     def replace_variables(self, equation: str) -> str:
         """ Korvaa muuttujan sitä vastaavalla lausekkeella. """
 
+        new_equation = equation[:]
         for resource in equation.split():
             temp = equation.replace(resource, "")
             found = self.search_variable(resource, temp)
             if found == [] and resource in self.resources:
                 expression = self.resources[resource]
-                equation = equation.replace(resource, expression)
-        return equation
+                new_equation = new_equation.replace(resource, expression)
+        return new_equation
 
     @classmethod
     def multiply(cls, equation: str, multiplier: Fraction) -> str:
@@ -168,32 +173,6 @@ class Calculator:
             sb += f" + {amount} {name}"
         sb = sb.removeprefix(" + ")
         return sb
-
-    def print_first_layer(self, equation: str) -> list[str]:
-        resource_list = []
-        for parts in equation.split(" + "):
-            amount, name = parts.split()
-            if name in self.resources:
-                resource = f"{amount} {self.resources[name]}"
-                resource = Calculator.multiply(resource, Fraction(1))
-                resource = Calculator.subtract(resource)
-                for res in resource.split(" + "):
-                    resource_list.append(res)
-        equation = " + ".join(resource_list)
-        equation = Calculator.subtract(equation)
-        resource_list = equation.split(" + ")
-        resource_list = Calculator.sort_resources(resource_list)
-        resource_list = Calculator.format_resources(resource_list)
-        return "\n".join(resource_list)
-
-    def print_last_layer(self, expression: str) -> list[str]:
-        resource_list = []
-
-        for resource in expression.split(" + "):
-            resource_list.append(resource)
-        resource_list = Calculator.sort_resources(resource_list)
-        resource_list = Calculator.format_resources(resource_list)
-        return "\n".join(resource_list)
 
     @classmethod
     def sort_resources(cls, resources: list[str]) -> list[str]:
