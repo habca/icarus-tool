@@ -32,7 +32,7 @@ deactivate
 
 ## Usage
 
-GNU readline provides a `TAB` completion, `^R` reverse search `↑↓` history search to name a few.
+GNU readline provides a `TAB` completion, `^R` reverse search, `↑↓` history search and so on.
 
 ```
 > 1 bio
@@ -49,6 +49,30 @@ biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
  8 copper_ingot
  5 refined_gold
  2 glass
+-------------------------------------------
+44 copper_ingot
+30 iron_ore
+24 epoxy
+24 organic_resin
+21 steel_ingot
+17 refined_gold
+ 2 silica_ore
+-------------------------------------------
+96 tree_sap
+88 copper_ore
+48 sulfur
+34 gold_ore
+24 oxite
+24 wood
+21 steel_bloom
+-------------------------------------------
+384 stick
+156 iron_ore
+ 21 coal_ore
+-------------------------------------------
+63 wood
+
+TOTAL RESOURCES
 -------------------------------------------
 156 iron_ore
  88 copper_ore
