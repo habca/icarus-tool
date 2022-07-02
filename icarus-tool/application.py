@@ -1,6 +1,7 @@
 from calculator import Calculator
 import utils
 import readline
+import sys, getopt
 
 class FileSystem:
     """ Read equations from file rather than user input. """
@@ -9,7 +10,10 @@ class FileSystem:
         self.filename = filename
 
     def read(self, calculator: Calculator) -> None:
-        """ Forward equations to the calculator. """
+        """
+        Forwards assignment equations to the calculator.
+        Function caller should handle FileNotFoundError!
+        """
 
         with open(self.filename) as file:
             for line in file:
@@ -17,7 +21,7 @@ class FileSystem:
                 # Skip comments and empty lines.
                 if not (line == "" or line.startswith("#")):
                     calculator.assign_equation(line)
-
+        
 class Completer:
 
     def __init__(self, keywords: list[str]):
@@ -47,7 +51,7 @@ class Application:
         print("amount name [+ amount name]")
 
     def validate_user_input(self, equation: str) -> None:
-        """ Raise an exception for not valid input. """
+        """ Raise an exception for invalid input. """
 
         self.calculator.syntax_check(equation)
         self.calculator.value_check(equation)
@@ -98,26 +102,22 @@ class Application:
                 print("- " + name + ": " + ", ".join(word_list))
 
     def main(self):
-        self.help()
         while True:
+            # Line break before calculations.
+            print()
+
+            # Listen and preprocess user input.
+            equation = input("> ")
+            _, equation = utils.extract(equation, sep="")
+
+            # Exit application.
+            if equation in ["exit", "quit"]:
+                break
+
             try:
-                # Line break before calculations.
-                print()
-
-                # Listen and preprocess user input.
-                equation = input("> ")
-                _, equation = utils.extract(equation, sep="")
-
-                # Exit application.
-                if equation in ["exit", "quit"]:
-                    break
-
                 # Validate and postprocess user input.
                 self.validate_user_input(equation)
                 self.calculate(equation)
-
-            except KeyboardInterrupt:
-                break
             except SyntaxError as err:
                 print(str(err))
             except ValueError as err:
@@ -127,15 +127,35 @@ class Application:
 if __name__ == "__main__":
     # Create data structures.
     calculator = Calculator()
-
-    # Import equations from a file.
-    file_system = FileSystem("tech_tree.txt")
-    file_system.read(calculator)
-
-    # Apply GNU readline functionality.
-    variables = calculator.get_keywords()
-    completer = Completer(variables)
-
-    # Start text-based user interface.
     application = Application(calculator)
-    application.main()
+
+    try:
+        # Parse command line arguments.
+        opts, args = getopt.getopt(sys.argv[1:], "ghi:", ["gnu", "help", "file="])
+
+        # Configure program based on the arguments.
+        for opt, arg in opts:
+
+            # Apply GNU readline functionality.
+            if opt in ("-g", "--gnu"):    
+                variables = calculator.get_keywords()
+                Completer(variables)
+
+            # Print manual at the beginning.
+            if opt in ("-h", "--help"):
+                application.help()
+
+            # Import equations from a file.
+            if opt in ("-i", "--file"):
+                file_system = FileSystem(arg)
+                file_system.read(calculator)
+
+        # Start text-based user interface.
+        application.main()
+
+    except getopt.GetoptError as err:
+        print("Usage:", sys.argv[0], '-i <inputfile> -gh')
+    except FileNotFoundError as err:
+        print("No such file:", arg)
+    except KeyboardInterrupt as err:
+        pass

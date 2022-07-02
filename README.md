@@ -32,6 +32,31 @@ deactivate
 
 ## Usage
 
+```
+.\application.py -i <inputfile> -gh
+```
+
+The command line arguments supported by the program are as follows:
+
+```
+-i --file=    A text file where each line contains an equation.
+-h --help     Print manual at the beginning of the program.
+-g --gnu      Apply GNU readline functionality to python's input.
+```
+
+The manual will be displayed and program waits for a text input.
+
+```
+Welcome to use Icarus tool
+--------------------------
+amount name = amount name [+ amount name]
+amount name [+ amount name]
+
+> 
+```
+
+## Features
+
 GNU readline provides a `TAB` completion, `^R` reverse search, `↑↓` history search and so on.
 
 ```

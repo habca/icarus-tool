@@ -42,7 +42,7 @@ class TestApplication(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected_output, 
             TestApplication.get_output(user_input,
-                Application().main))
+                Application().help))
 
     def test_main(self):
         user_input = [
@@ -57,10 +57,6 @@ class TestApplication(unittest.TestCase):
         ]
 
         expected_output = [
-           'Welcome to use Icarus tool',
-            '--------------------------',
-            'amount name = amount name [+ amount name]',
-            'amount name [+ amount name]',
             '------------------',
             '60 fiber',
             '50 wood',

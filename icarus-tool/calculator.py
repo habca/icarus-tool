@@ -14,7 +14,7 @@ class Calculator:
 
     def syntax_check(self, equation: str) -> None:
         num = "[1-9]+[0-9]*"
-        var = "[a-z/]+([-_][a-z/]+)*"
+        var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
         pattern1 = f"{num} {var}( \+ {num} {var})*"
         pattern2 = f"{num} {var} = {num} {var}( \+ {num} {var})*"
         
@@ -27,7 +27,7 @@ class Calculator:
         if "=" in equation:
             return
 
-        pattern = "[a-z/]+(?:[-_][a-z/]+)*"
+        pattern = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
         variables = re.findall(pattern, equation)
         for variable in variables:
             if variable not in self.resources:
