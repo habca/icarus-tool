@@ -1,97 +1,91 @@
 from fractions import Fraction
 import difflib
 import string
-import utils
 import math
 import re
-        
+
 class Calculator:
+    pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
+    pattern_var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
+
     def __init__(self):
         self.resources = dict()
-
-    def get_keywords(self):
-        return self.resources.keys()
-
-    def syntax_check(self, equation: str) -> None:
-        num = "[1-9]+[0-9]*"
-        var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
-        pattern1 = f"{num} {var}( \+ {num} {var})*"
-        pattern2 = f"{num} {var} = {num} {var}( \+ {num} {var})*"
-        
-        if not re.fullmatch(pattern1, equation):
-            if not re.fullmatch(pattern2, equation):
-                raise SyntaxError(f"SyntaxError: {equation}")
-
-    def value_check(self, equation: str) -> None:
-        # Skip assignments.
-        if "=" in equation:
-            return
-
-        pattern = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
-        variables = re.findall(pattern, equation)
-        for variable in variables:
-            if variable not in self.resources:
-                raise ValueError(f"ValueError: {variable}")
+        self.variables = list()
     
-    def check_equation(self, equation: str) -> dict[str]:
+    def get_keywords(self) -> list:
+        return list(self.resources.keys())
+
+    def find_similar(self, equation: str) -> dict[str]:
         similar_words = dict()
-        for variable in equation.split():
-            if variable.isdigit():
-                continue
-            if variable in string.punctuation:
-                continue
-            words = self.spell_check(variable)
-            if words == []:
-                continue
-            similar_words[variable] = words
+        pattern = re.compile(Calculator.pattern_var)
+        for name in pattern.findall(equation):
+            if name not in self.variables:
+                words = difflib.get_close_matches(name, self.get_keywords())
+                if words != []:
+                    similar_words[name] = words
         return similar_words
 
-    def spell_check(self, variable: str) -> list[str]:
-        if variable not in self.resources:
-            return difflib.get_close_matches(variable, self.resources)
-        return []
+    def assign_equation(self, equation: str) -> tuple[str, str]:
+        num = Calculator.pattern_num
+        var = Calculator.pattern_var
 
-    def assign_equation(self, equation: str) -> str:
-        """
-        Selvittää materiaalien määrän suhteessa resurssiin.
-        equation: "100 steel_screw = 1 steel_ingot"
-        return: "1 steel_screw = 1/100 ( 1 steel_ingot )")
-        """
+        # Validate an equation before processing any further.
+        pattern = re.compile(f"{num} {var} = {num} {var}( \+ {num} {var})*")
+        if not pattern.fullmatch(equation):
+            raise SyntaxError("SyntaxError: " + equation)
 
-        amount, equation = utils.extract(equation)
-        name, equation = utils.extract(equation)
-        _, equation = utils.extract(equation)
+        iterator = iter(equation.split())
+        amount = next(iterator)
+        name = next(iterator)
+        _ = next(iterator)
 
+        # Variable name can be assigned just once.
         if name in self.resources:
-            # Variable name can be assigned just once.
-            raise ValueError("Variable name is assigned.")
+            raise ValueError(f"Name is already in use: {name}")
 
+        # Variables will be removed when re-assigned.
+        if name in self.variables:
+            self.variables.remove(name)
+
+        equation = " ".join(iterator)
         multiplier = Fraction(1, int(amount))
         self.resources[name] = f"{multiplier} ( {equation} )"
 
-    def calculate(self, equation: str) -> str:
-        equations = []
+        # Add new variables into the unassigned variables list.
+        variables = re.findall(Calculator.pattern_var, equation)
+        for variable in variables:
+            if variable not in self.resources:
+                if variable not in self.variables:
+                    self.variables.append(variable)
 
+    def calculate(self, equation: str) -> str:
+        num = Calculator.pattern_num
+        var = Calculator.pattern_var
+
+        pattern = f"{num} {var}( \+ {num} {var})*"
+        if not re.fullmatch(pattern, equation):
+            raise SyntaxError(f"SyntaxError: {equation}")
+
+        equations = []
         while True:
             equations.append(equation)
             equation = self.replace_variables(equation)
-            equation = Calculator.multiply(equation, Fraction(1))
+            iterator = iter(equation.split())
+            equation = Calculator.multiply(iterator, Fraction(1))
             equation = Calculator.subtract(equation)
             
             # Equation did not change so it is ready.
             if equation == equations[-1]:
+                # Ensure there are only pre-assigned variable names.
+                variables = re.findall(Calculator.pattern_var, equation)
+                for variable in variables:
+                    if variable not in self.variables:
+                        raise ValueError(f"ValueError: {variable}")
                 break
 
         return equations
 
-    def search_variable(self, variable: str, equation: str, not_first = False) -> list:
-        """
-        Palauttaa listan epäsuorista viittauksista muuttujaan.
-        variable: "iron_ingot"
-        equation: "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
-        return: ["steel_screw"]
-        """
-        
+    def search_variable(self, variable: str, equation: str, not_first: bool = False) -> list[str]:
         variables = []
         for part in equation.split():
             if part == variable and not_first:
@@ -104,8 +98,6 @@ class Calculator:
         return variables
 
     def replace_variables(self, equation: str) -> str:
-        """ Korvaa muuttujan sitä vastaavalla lausekkeella. """
-
         new_equation = equation[:]
         for resource in equation.split():
             temp = equation.replace(resource, "")
@@ -116,68 +108,72 @@ class Calculator:
         return new_equation
 
     @classmethod
-    def multiply(cls, equation: str, multiplier: Fraction) -> str:
-        frac = multiplier
-        sb = ""
-        while equation != "":
-            word, equation = utils.extract(equation)
+    def multiply(cls, iterator, multiplier: Fraction) -> str:
+        """
+        Iterator is a mutable object so it's shared between recursions.
+        """
+        fraction = multiplier
+        equation = ""
+        pattern = re.compile(Calculator.pattern_num)
 
-            if word.isdigit() or "/" in word:
+        for word in iterator:
+            if pattern.fullmatch(word):
                 # Next word is an integer number.
-                frac *= Fraction(word)
+                fraction *= Fraction(word)
                 continue
 
             if word == "(":
-                start, equation = Calculator.multiply(equation, frac)
-                sb += " " + start
-                frac = multiplier
+                word = Calculator.multiply(iterator, fraction)
+                equation += " " + word
+                fraction = multiplier
                 continue
 
             if word == ")":
-                return sb, equation
+                return equation
 
             if word == "+":
-                sb += " " + word
+                equation += " " + word
                 continue
                 
             # Next word is the name of a variable.
-            sb += f" {frac} {word}"
-            frac = multiplier
-        return sb.lstrip()
+            equation += f" {fraction} {word}"
+            fraction = multiplier
+
+        return equation.strip()
 
     @classmethod
     def subtract(cls, equation: str) -> str:
-        amount, equation = utils.extract(equation)
-        name, equation = utils.extract(equation)
+        iterator = iter(equation.split())
+        amount = next(iterator)
+        name = next(iterator)
 
-        variables = { name: Fraction(amount) }
+        variables = {name: Fraction(amount)}
 
-        while equation != "":
-            operator, equation = utils.extract(equation)
-            amount, equation = utils.extract(equation)
-            name, equation = utils.extract(equation)
+        for operator in iterator:
+            amount = next(iterator)
+            name = next(iterator)
 
-            frac = Fraction(amount)
+            fraction = Fraction(amount)
             if operator == "-":
-                frac = -frac
+                fraction = -fraction
             
             if name in variables:
-                variables[name] += frac
+                variables[name] += fraction
                 continue
 
-            variables[name] = frac
+            variables[name] = fraction
 
-        sb = ""
+        equation = ""
         for name, amount in variables.items():
             amount = math.ceil(amount)
-            sb += f" + {amount} {name}"
-        sb = sb.removeprefix(" + ")
-        return sb
+            equation += f" + {amount} {name}"
+        return equation.removeprefix(" + ")
 
     @classmethod
     def sort_resources(cls, resources: list[str]) -> list[str]:
-        """ Sort resources by the amount and then by the name. """
-
+        """
+        Sort resources by the amount and then by the name.
+        """
         resources = sorted(resources, key=get_name, reverse=False)
         resources = sorted(resources, key=get_amount, reverse=True)
         return resources
@@ -193,10 +189,9 @@ class Calculator:
         return resource_list
 
 def get_amount(resource: str) -> int:
-    return int(utils.extract(resource)[0])
+    return int(resource.split()[0])
 
 def get_name(resource: str) -> str:
-    return utils.extract(resource, reverse=True)[0]
+    return resource.split()[-1]
 
-def get_both(resource: str) -> tuple:
-    return tuple(resource.split())
+# TODO tee resurssi-luokka

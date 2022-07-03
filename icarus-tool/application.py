@@ -1,11 +1,9 @@
 from calculator import Calculator
-import utils
 import readline
 import sys, getopt
 
 class FileSystem:
     """ Read equations from file rather than user input. """
-
     def __init__(self, filename: str):
         self.filename = filename
 
@@ -17,13 +15,12 @@ class FileSystem:
 
         with open(self.filename) as file:
             for line in file:
-                _, line = utils.extract(line, sep="")
+                line = line.replace("\n", "")
                 # Skip comments and empty lines.
                 if not (line == "" or line.startswith("#")):
                     calculator.assign_equation(line)
         
 class Completer:
-
     def __init__(self, keywords: list[str]):
         self.keywords = sorted(keywords)
         readline.parse_and_bind("tab: complete")
@@ -37,7 +34,6 @@ class Completer:
             return None
 
 class Application:
-
     def __init__(self, calculator: Calculator = None):
         self.calculator = calculator
 
@@ -50,11 +46,21 @@ class Application:
         print("amount name = amount name [+ amount name]")
         print("amount name [+ amount name]")
 
-    def validate_user_input(self, equation: str) -> None:
-        """ Raise an exception for invalid input. """
+    def ask_input(self) -> str:
+        """ Throws SyntaxError, ValueError or SystemExit! """
 
-        self.calculator.syntax_check(equation)
-        self.calculator.value_check(equation)
+        # Line break for a readable terminal output.
+        print()
+
+        # Replace whitespace sequences with a spacebar.
+        equation = " ".join(input("> ").split())
+
+        # Terminates the program by raising a SystemExit.
+        if equation in ("exit", "quit"):
+            raise SystemExit
+
+        # Return a valid equation.
+        return equation
 
     def calculate(self, equation: str) -> None:
         if "=" in equation:
@@ -92,9 +98,9 @@ class Application:
             print(resource)
 
     def quess(self, equation: str) -> None:
-        similar_words = self.calculator.check_equation(equation)
+        similar_words = self.calculator.find_similar(equation)
         if similar_words != {}:
-            # Line break before suggestions.
+            # Line break for a readable terminal output.
             print()
 
             print(f"Did you mean?")
@@ -103,59 +109,58 @@ class Application:
 
     def main(self):
         while True:
-            # Line break before calculations.
-            print()
-
-            # Listen and preprocess user input.
-            equation = input("> ")
-            _, equation = utils.extract(equation, sep="")
-
-            # Exit application.
-            if equation in ["exit", "quit"]:
-                break
-
             try:
-                # Validate and postprocess user input.
-                self.validate_user_input(equation)
+                equation = self.ask_input()
                 self.calculate(equation)
             except SyntaxError as err:
                 print(str(err))
             except ValueError as err:
                 print(str(err))
                 self.quess(equation)
+            except SystemExit:
+                break
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
     # Create data structures.
     calculator = Calculator()
     application = Application(calculator)
 
     try:
         # Parse command line arguments.
-        opts, args = getopt.getopt(sys.argv[1:], "ghi:", ["gnu", "help", "file="])
+        opts, args = getopt.getopt(argv[1:], "gi:", ["gnu", "file="])
 
         # Configure program based on the arguments.
         for opt, arg in opts:
 
             # Apply GNU readline functionality.
-            if opt in ("-g", "--gnu"):    
+            if opt in ("-g", "--gnu"):
                 variables = calculator.get_keywords()
                 Completer(variables)
-
-            # Print manual at the beginning.
-            if opt in ("-h", "--help"):
-                application.help()
 
             # Import equations from a file.
             if opt in ("-i", "--file"):
                 file_system = FileSystem(arg)
                 file_system.read(calculator)
+        
+        if args != []:
+            # User may drag-n-drop text files over script.
+            file_system = FileSystem(args[0])
+            file_system.read(calculator)
+            
+            # In that case, use tab completion by default.
+            variables = calculator.get_keywords()
+            Completer(variables)
 
         # Start text-based user interface.
+        application.help()
         application.main()
 
-    except getopt.GetoptError as err:
-        print("Usage:", sys.argv[0], '-i <inputfile> -gh')
-    except FileNotFoundError as err:
+    except getopt.GetoptError:
+        print("Usage:", argv[0], '-i <inputfile> -gh')
+    except FileNotFoundError:
         print("No such file:", arg)
-    except KeyboardInterrupt as err:
+    except KeyboardInterrupt:
         pass
+
+if __name__ == "__main__":
+    main(sys.argv)

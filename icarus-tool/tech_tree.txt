@@ -378,3 +378,5 @@
 1 carbon_fiber = 1 carbon_paste
 1 titanium_ingot = 5 titanium_ore
 1 rope = 12 fiber
+
+# TODO korvaa alaviivat välilyönneillä

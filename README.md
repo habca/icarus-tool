@@ -1,6 +1,7 @@
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
+An unit testing framework `unittest` and Python linter `mypy` proved to be very useful in the developing process.
 
 ### Windows
 
@@ -8,14 +9,12 @@ Create a virtual environment and install dependencies before running the applica
 py -m venv .venv
 .venv\Scripts\activate
 python -m pip install pyreadline
-python -m pip install pyinstaller
+python -m pip install mypy
 
 python -m unittest
-python application.py
-
-pyinstaller --onefile application.py
+python -m mypy application.py
+python application.py <inputfile>
 deactivate
-dist\application.exe
 ```
 
 ### Linux
@@ -24,27 +23,31 @@ dist\application.exe
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install readline
+python -m pip install mypy
 
 python -m unittest
-python application.py
+python -m mypy application.py
+python application.py <inputfile>
 deactivate
 ```
 
 ## Usage
 
+There is no special meaning behind providing same functionality between command line options/arguments.
+
 ```
-.\application.py -i <inputfile> -gh
+.\application.py <inputfile>
+.\application.py -i <inputfile> -g
 ```
 
-The command line arguments supported by the program are as follows:
+The command line options supported by the program are as follows.
 
 ```
 -i --file=    A text file where each line contains an equation.
--h --help     Print manual at the beginning of the program.
 -g --gnu      Apply GNU readline functionality to python's input.
 ```
 
-The manual will be displayed and program waits for a text input.
+The manual will be displayed and program waits for a keyboard input.
 
 ```
 Welcome to use Icarus tool

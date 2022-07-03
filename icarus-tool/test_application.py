@@ -1,35 +1,34 @@
 from application import Application, FileSystem
 from calculator import Calculator
-import utils
 
 import unittest
 import unittest.mock
 
 class TestFileSystem(unittest.TestCase):
+    filename = "tech_tree.txt"
 
     def test_file(self):
-        calc = Calculator()
+        """ Reading a file should not raise any errors. """
 
-        with open("tech_tree.txt") as tiedosto:
+        calc = Calculator()
+        with open(TestFileSystem.filename) as tiedosto:
             for line in tiedosto:
-                _, line = utils.extract(line, sep="")
-                if line == "" or line.startswith("#"):
-                    continue
-                calc.syntax_check(line)
+                line = line.replace("\n", "")
+                if line != "" and not line.startswith("#"):
+                    calc.assign_equation(line)
         
     def test_read(self):
         calc = Calculator()
-        tiedosto = FileSystem("tech_tree.txt")
+        tiedosto = FileSystem(TestFileSystem.filename)
         tiedosto.read(calc)
 
         self.assertEqual(calc.calculate("1 crafting_bench")[-1], "60 fiber + 50 wood + 12 stone + 20 leather")
         self.assertEqual(calc.calculate("1 anvil_bench")[-1], "80 iron_ore + 20 wood + 10 stone")
         self.assertEqual(calc.calculate("2 stone_furnace")[-1], "25 wood + 160 stone + 24 leather")
-        self.assertEqual(calc.calculate("2 20 iron_ingot")[-1], "80 iron_ore")
+        self.assertEqual(calc.calculate("40 iron_ingot")[-1], "80 iron_ore")
         self.assertEqual(calc.calculate("8 stick")[-1], "1 wood")
 
 class TestApplication(unittest.TestCase):
-
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
@@ -88,6 +87,8 @@ class TestApplication(unittest.TestCase):
                 for mock_call in mock_print.mock_calls:
                     actual += list(map(str, mock_call.args))
                 return actual
+
+# TODO testaa paaohjelmasta komentorivin parametrit
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,7 +14,7 @@
     <TestFramework>unittest</TestFramework>
     <InterpreterId>MSBuild|.venv|$(MSBuildProjectFullPath)</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i tech_tree.txt -gh</CommandLineArguments>
+    <CommandLineArguments>-i tech_tree.txt -g</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -34,8 +34,6 @@
     <Compile Include="calculator.py" />
     <Compile Include="test_application.py" />
     <Compile Include="test_calculator.py" />
-    <Compile Include="test_utils.py" />
-    <Compile Include="utils.py" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include=".venv\">
