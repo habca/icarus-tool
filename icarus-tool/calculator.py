@@ -1,8 +1,20 @@
 from fractions import Fraction
 import difflib
-import string
 import math
 import re
+
+# TODO vertailumetodi järjestämiseen
+class Resource:
+    def __init__(self, amount: int, name: str):
+        self.amount = amount
+        self.name = name
+
+    # TODO toteuta vertailu järjestämiseen
+    def get_amount(self) -> int:
+        return self.amount
+
+    def get_name(self) -> str:
+        return self.name
 
 class Calculator:
     pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
@@ -188,10 +200,9 @@ class Calculator:
             resource_list.append(resource_text)
         return resource_list
 
+# TODO poista kun ei tarvita
 def get_amount(resource: str) -> int:
     return int(resource.split()[0])
 
 def get_name(resource: str) -> str:
     return resource.split()[-1]
-
-# TODO tee resurssi-luokka

@@ -156,7 +156,7 @@ def main(argv: list[str]) -> None:
         application.main()
 
     except getopt.GetoptError:
-        print("Usage:", argv[0], '-i <inputfile> -gh')
+        print("Usage:", argv[0], "<inputfile>")
     except FileNotFoundError:
         print("No such file:", arg)
     except KeyboardInterrupt:
