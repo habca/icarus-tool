@@ -4,14 +4,14 @@ from calculator import Calculator
 import unittest
 import unittest.mock
 
-class TestFileSystem(unittest.TestCase):
+class FileSystemTest(unittest.TestCase):
     filename = "tech_tree.txt"
 
     def test_file(self):
         """ Reading a file should not raise any errors. """
 
         calc = Calculator()
-        with open(TestFileSystem.filename) as tiedosto:
+        with open(FileSystemTest.filename) as tiedosto:
             for line in tiedosto:
                 line = line.replace("\n", "")
                 if line != "" and not line.startswith("#"):
@@ -19,7 +19,7 @@ class TestFileSystem(unittest.TestCase):
         
     def test_read(self):
         calc = Calculator()
-        tiedosto = FileSystem(TestFileSystem.filename)
+        tiedosto = FileSystem(FileSystemTest.filename)
         tiedosto.read(calc)
 
         self.assertEqual(calc.calculate("1 crafting_bench")[-1], "60 fiber + 50 wood + 12 stone + 20 leather")
@@ -28,7 +28,7 @@ class TestFileSystem(unittest.TestCase):
         self.assertEqual(calc.calculate("40 iron_ingot")[-1], "80 iron_ore")
         self.assertEqual(calc.calculate("8 stick")[-1], "1 wood")
 
-class TestApplication(unittest.TestCase):
+class ApplicationTest(unittest.TestCase):
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
@@ -40,7 +40,7 @@ class TestApplication(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(expected_output, 
-            TestApplication.get_output(user_input,
+            ApplicationTest.get_output(user_input,
                 Application().help))
 
     def test_main(self):
@@ -72,7 +72,7 @@ class TestApplication(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(expected_output, 
-            TestApplication.get_output(user_input,
+            ApplicationTest.get_output(user_input,
                 Application().main))
 
     @classmethod

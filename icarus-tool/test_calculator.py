@@ -1,60 +1,96 @@
 from fractions import Fraction
 from application import FileSystem
-from calculator import Calculator
+from calculator import Calculator, Equation, Resource
 
 import unittest
 
-class TestCalculator(unittest.TestCase):
+class ResourceTest(unittest.TestCase):
+    # TODO voiko korvata tuplella
+    def test_str(self):
+        self.assertEqual("1 anvil_bench", str(Resource(1, "anvil_bench")))
+        self.assertEqual("10 iron_ingot", str(Resource(10, "iron_ingot")))
+
+class EquationTest(unittest.TestCase):
+    def test_str(self):
+        r1 = Resource(1, "wood_spear")
+        r2 = Resource(12, "fiber")
+        r3 = Resource(18, "stick")
+
+        e1 = Equation(r1, [r2])
+        e2 = Equation(r1, [r2, r3])
+
+        self.assertEqual("1 wood_spear = 12 fiber", str(e1))
+        self.assertEqual("1 wood_spear = 12 fiber + 18 stick", str(e2))
+
+    def test_parse(self):
+        e1 = Equation.parse("1 wood_spear = 12 fiber + 18 stick")
+        e2 = Equation.parse("10 stick = 1 wood")
+        e3 = Equation.parse("100 steel_screw = 1 steel_ingot")
+
+        self.assertEqual("1 wood_spear = 12 fiber + 18 stick", str(e1))
+        self.assertEqual("1 stick = 1/10 wood", str(e2))
+        self.assertEqual("1 steel_screw = 1/100 steel_ingot", str(e3))
+
+    def test_parse_list(self):
+        r1, r2 = Equation.parse_list("12 fiber + 18 stick")
+
+        self.assertEqual("fiber", r1.name)
+        self.assertEqual(12, int(r1.amount))
+
+        self.assertEqual("stick", r2.name)
+        self.assertEqual(18, int(r2.amount))
+
+class CalculatorTest(unittest.TestCase):
     filename = "tech_tree.txt"
 
     def setUp(self) -> None:
-        """
-        Create a calculator before any test method.
-        """
+        # TODO mieti onko tarpeen lukea tiedostosta
         self.calc = Calculator()
-        file = FileSystem(TestCalculator.filename)
+        file = FileSystem(CalculatorTest.filename)
         file.read(self.calc)
 
     def test_get_keywords(self):
-        """
-        Test fires off to notify changes on getters.
-        """
-        calc = self.calc
+        calc = Calculator()
+
+        calc.assign_equation("1 wood_spear = 12 fiber + 18 stick")
+        calc.assign_equation("10 stick = 1 wood")
+        calc.assign_equation("1 steel_screw = 1/100 steel_ingot")
+
+        expected = ["wood_spear", "stick", "steel_screw"]
+        
         self.assertIsInstance(calc.get_keywords(), list)
         self.assertTrue(type(calc.get_keywords()) is list)
+        self.assertEquals(expected, calc.get_keywords())
 
-    def test_find_similar(self):
-        """
-        There may be none, one or many good enough matches.
-        The dictionary omits searches that have no matches.
-        """
-        calc = self.calc
-        self.assertEqual(["anvil_bench"], calc.find_similar("anvil")["anvil"])
-        self.assertEqual(["anvil_bench"], calc.find_similar("anvil_bvve")["anvil_bvve"])
-        self.assertIn("anvil_bench", calc.find_similar("anvil_benchs")["anvil_benchs"])
-        with self.assertRaises(KeyError):
-            calc.find_similar("anvi")["anvi"]
+    def test_assign_equation1(self):
+        calc = Calculator()
 
-    def test_assign_equation(self):
-        """
-        An equation should be stored in a dictionary as follows.
-        """
-        calc = self.calc
-        self.assertEqual(calc.resources["steel_screw"], "1/100 ( 1 steel_ingot )")
-        self.assertEqual(calc.resources["stick"], "1/10 ( 1 wood )")
-        self.assertEqual(calc.resources["iron_ingot"], "1 ( 2 iron_ore )")
-        self.assertEqual(calc.resources["steel_bloom"], "1 ( 6 iron_ore + 1 coal_ore )")
+        calc.assign_equation("1 wood_spear = 12 fiber + 18 stick")
+        calc.assign_equation("10 stick = 1 wood")
+        calc.assign_equation("1 steel_screw = 1/100 steel_ingot")
 
-    def test_assign_equation_duplicate(self):
-        """
-        A duplicate equation should raise an exception.
-        Resources or variables should not have duplicate entries.
-        """
+        e1 = calc.resources["wood_spear"]
+        e2 = calc.resources["stick"]
+        e3 = calc.resources["steel_screw"]
+
+        self.assertEqual("1 wood_spear = 12 fiber + 18 stick", str(e1))
+        self.assertEqual("1 stick = 1/10 wood", str(e2))
+        self.assertEqual("1 steel_screw = 1/100 steel_ingot", str(e3))
+
+    def test_assign_equation2(self):
+        calc = Calculator()
+
+        calc.assign_equation("1 rope = 12 fiber")
+        with self.assertRaises(ValueError) as err1:
+            calc.assign_equation("1 rope = 12 fiber")
+        with self.assertRaises(ValueError) as err2:
+            calc.assign_equation("1 rope = 5 leather")
+
+        self.assertEqual("Name is already in use: rope", str(err1.exception))
+        self.assertEqual("Name is already in use: rope", str(err2.exception))
+
+    def test_assign_equation3(self):
         calc = self.calc
-        with self.assertRaisesRegex(ValueError, "Name is already in use: rope"):
-           calc.assign_equation("1 rope = 12 fiber")
-        with self.assertRaisesRegex(ValueError, "Name is already in use: rope"):
-           calc.assign_equation("1 rope = 5 leather")
 
         resources = list(calc.resources)
         variables = list(calc.variables)
@@ -66,22 +102,9 @@ class TestCalculator(unittest.TestCase):
             self.assertEqual(1, variables.count(variable))
             self.assertFalse(variable in resources)
 
-    def test_assign_equation_aliases(self):
-        """
-        More than one equation may have the same resource cost.
-        """
-        calc = self.calc
-        chest_armor = calc.resources["ghillie_chest_armor"]
-        leg_armor = calc.resources["ghillie_leg_armor"]
-
-        self.assertEqual(chest_armor, leg_armor)
-        self.assertEqual(chest_armor, "1 ( 160 fiber + 8 stick + 6 rope )")
-
-    def test_assign_equation_syntax_error(self):
-        """
-        A wrong equation should raise an exception.
-        """
+    def test_assign_equation4(self):
         calc = Calculator()
+
         error_input = [
             "1 lightning_rod = 10 copper ingot",
             "1 lightning rod = 10 copper_ingot",
@@ -94,20 +117,61 @@ class TestCalculator(unittest.TestCase):
             "1 lightning_rod 10 copper_ingot",
             "1 lightning_rod + 10 copper_ingot",
         ]
+
         for error in error_input:
             with self.assertRaises(SyntaxError) as err:
                 calc.assign_equation(error)
             self.assertEqual(f"SyntaxError: {error}", str(err.exception))
 
-    def test_calculate_reject_unknown_resources(self):
-        """
-        The final form of an equation should contain known variables.
-        """
+    def test_replace_variables(self):
         calc = self.calc
+
+        r1 = Resource(Fraction(2), "hunting_rifle")
+        r2 = Resource(Fraction(16), "steel_screw")
+        r3 = Resource(Fraction(10), "stick")
+
+        # TODO keksi naille jotain
+        l1 = calc.replace_variables([r1])
+        l1 = " + ".join(map(str, l1))
+
+        l2 = calc.replace_variables([r2])
+        l2 = " + ".join(map(str, l2))
+
+        l3 = calc.replace_variables([r3])
+        l3 = " + ".join(map(str, l3))
+
+        self.assertEqual("24 wood + 16 leather + 80 titanium_ingot + 8 epoxy + 32 steel_screw", l1)
+        self.assertEqual("4/25 steel_ingot", l2)
+        self.assertEqual("1 wood", l3)
+
+    def test_search_variable(self):
+        calc = Calculator()
+
+        calc.assign_equation("1 hunting_rifle = 12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw")
+        calc.assign_equation("100 steel_screw = 1 steel_ingot")
+        calc.assign_equation("1 steel_ingot = 1 steel_bloom")
+        calc.assign_equation("1 steel_bloom = 6 iron_ore + 1 coal_ore")
+
+        l1 = calc.resources["hunting_rifle"].resources
+        l2 = calc.resources["steel_ingot"].resources
+        l3 = calc.resources["steel_bloom"].resources
+
+        self.assertEqual(["steel_screw"], calc.search_variable("iron_ore", l1))
+        self.assertEqual(["steel_bloom"], calc.search_variable("iron_ore", l2))
+        self.assertEqual([], calc.search_variable("iron_ore", l3))
+
+    def test_calculate1(self):
+        calc = self.calc
+
         calc.calculate("1 iron_ingot")
+
         with self.assertRaises(ValueError) as err:
-            calc.calculate("1 not_exist")
-        self.assertEqual(f"ValueError: not_exist", str(err.exception))
+            calc.calculate("1 iron_ore")
+        self.assertEqual(f"ValueError: iron_ore", str(err.exception))
+        
+        with self.assertRaises(ValueError) as err:
+            calc.calculate("1 null + 1 none")
+        self.assertEqual(f"ValueError: null, none", str(err.exception))
 
     def test_calculate_hunting_rifle(self):
         calc = self.calc
@@ -166,30 +230,36 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(calc.calculate("3 electric_extractor")[-1], calc.calculate(electric_extractor2)[-1])
         self.assertEqual(calc.calculate("3 electric_extractor")[-1], electric_extractor2)
 
-    def test_search_variable(self):
-        calc = self.calc
-
-        self.assertEqual(["steel_screw"], calc.search_variable("iron_ore", "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"))
-        self.assertEqual(["steel_bloom"], calc.search_variable("iron_ore", "1 steel_bloom"))
-        self.assertEqual([], calc.search_variable("iron_ore", "6 iron_ore + 1 coal_ore"))
-        self.assertEqual([], calc.search_variable("iron_ore", "iron_ore"))
-        self.assertEqual([], calc.search_variable("iron_ore", "coal_ore"))
-
-    def test_replace_variables(self):
-        self.assertEqual(self.calc.replace_variables("1 hunting_rifle"), "1 1 ( 12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw )")
-        self.assertEqual(self.calc.replace_variables("16 steel_screw"), "16 1/100 ( 1 steel_ingot )")
-        self.assertEqual(self.calc.replace_variables("10 stick"), "10 1/10 ( 1 wood )")
-
-    def test_multiply(self):
-        iterator = iter("1 1 ( 40 1 ( 2 iron_ore ) + 20 wood + 10 stone )".split())
-        actual1 = Calculator.multiply(iterator, Fraction(1))
-
-        self.assertEqual(actual1, "80 iron_ore + 20 wood + 10 stone")
-
     def test_subtract(self):
-        actual1 = Calculator.subtract("124/5 wood + 160 stone + 24 leather")
+        r1 = Resource(Fraction(124/5), "wood")
+        r2 = Resource(Fraction(160), "stone")
+        r3 = Resource(Fraction(24), "leather")
 
-        self.assertEqual(actual1, "25 wood + 160 stone + 24 leather")
+        e1 = Calculator.subtract([r1, r2, r3])
+        e1 = " + ".join(map(str, e1))
+
+        self.assertEqual("25 wood + 160 stone + 24 leather", e1)
+
+        r1 = Resource(Fraction(1, 3), "wood")
+        r2 = Resource(Fraction(160), "stone")
+        r3 = Resource(Fraction(1, 3), "wood")
+
+        e1 = Calculator.subtract([r1, r2, r3])
+        e1 = " + ".join(map(str, e1))
+
+        self.assertEqual("1 wood + 160 stone", e1)
+
+    def test_find_similar(self):
+        """
+        There may be none, one or many good enough matches.
+        The dictionary omits searches that have no matches.
+        """
+        calc = self.calc
+        self.assertEqual(["anvil_bench"], calc.find_similar("anvil")["anvil"])
+        self.assertEqual(["anvil_bench"], calc.find_similar("anvil_bvve")["anvil_bvve"])
+        self.assertIn("anvil_bench", calc.find_similar("anvil_benchs")["anvil_benchs"])
+        with self.assertRaises(KeyError):
+            calc.find_similar("anvi")["anvi"]
 
     def test_sort_resources(self):
         pass # TODO
