@@ -1,6 +1,5 @@
 from fractions import Fraction
 import difflib
-import fractions
 import math
 import re
 
@@ -9,119 +8,99 @@ class Resource:
         self.amount = amount
         self.name = name
 
-    # TODO toteuta vertailu jarjestamiseen
-    def get_amount(self) -> Fraction:
-        return self.amount
-
-    def get_name(self) -> str:
-        return self.name
-
     def __str__(self) -> str:
         return f"{self.amount} {self.name}"
 
-class Equation:
-    pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
-    pattern_var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
+    @classmethod
+    def parse(cls, resource: str) -> "Resource":
+        amount, name = resource.split(" ")
+        return Resource(Fraction(amount), name)
 
-    def __init__(self, left_hand: Resource, resources: list[Resource]):
-        self.left_hand = left_hand
+class Equation:
+    def __init__(self, resources: list[Resource]):
         self.resources = resources
+
+    def __str__(self) -> str:
+        return " + ".join([str(resource) for resource in self.resources])
 
     @classmethod
     def parse(cls, equation: str) -> "Equation":
-        num = Equation.pattern_num
-        var = Equation.pattern_var
+        resources = [Resource(resource) for resource in equation.split(" + ")]
+        return Equation(resources)
 
-        # Validate an equation before processing any further.
-        pattern = re.compile(f"{num} {var} = {num} {var}( \+ {num} {var})*")
-        if not pattern.fullmatch(equation):
-            raise SyntaxError("SyntaxError: " + equation)
+    def multiply(self, fraction: Fraction) -> "Equation":
+        resources = [Resource(fraction * r.amount, r.name) for r in self.resources]
+        return Equation(resources)
 
-        iterator = iter(equation.split())
-        amount = next(iterator)
-        name = next(iterator)
+    def evaluate(self) -> "Equation":
+        variables: dict[str, Resource] = dict()
 
-        left_hand = Resource(1, name)
-        multiplier = Fraction(1, Fraction(amount))
-        resources = []
+        for resource in self.resources:
+            if resource.name not in variables.keys():
+                variables[resource.name] = resource
+            else:
+                variables[resource.name].amount += resource.amount
 
-        # Operators (=) and (+) can be discarded.
-        for _ in iterator:
-            amount = next(iterator)
-            name = next(iterator)
+        for name, resource in variables.items():
+            variables[name].amount = math.ceil(resource.amount)
 
-            resource = Resource(multiplier * Fraction(amount), name)
-            resources.append(resource)
-
-        return Equation(left_hand, resources)
-
-    @classmethod
-    def parse_list(cls, equation: str) -> list["Equation"]:
-        num = Equation.pattern_num
-        var = Equation.pattern_var
-
-        pattern = re.compile(f"{num} {var}( \+ {num} {var})*")
-        if not pattern.fullmatch(equation):
-            raise SyntaxError(f"SyntaxError: {equation}")
-
-        iterator = iter(equation.split())
-        amount = next(iterator)
-        name = next(iterator)
-
-        resource = Resource(Fraction(amount), name)
-        resources = [resource]
-
-        for _ in iterator:
-            amount = next(iterator)
-            name = next(iterator)
-
-            resource = Resource(Fraction(amount), name)
-            resources.append(resource)
-
-        return resources
-    
-    def __str__(self) -> str:
-        left_hand = str(self.left_hand)
-        resources = " + ".join(map(str, self.resources))
-        return f"{left_hand} = {resources}"
-    
-    def __iter__(self):
-        """ Palauttaa iteraattori puurakenteen lapikayntiin. """
-        raise NotImplementedError("TODO")
-
-    def __next__(self):
-        """ TODO siirra omaan luokkaan, kun valmis muuten. """
-        raise NotImplementedError("TODO")
+        resources = [variables[name] for name in variables.keys()]
+        return Equation(resources)
 
 class Calculator:
     def __init__(self):
         self.resources: dict[str, Equation] = dict()
         self.variables: list[str] = list()
+        self.validator: Validator(self)
     
-    # TODO poista ellei tarvita
     def get_keywords(self) -> list[str]:
         return list(self.resources.keys())
 
     def assign_equation(self, assignment: str) -> None:
-        equation = Equation.parse(assignment)
-        name = equation.left_hand.name
+        # Validate an assignment before processing any further.
+        self.validator.validate_syntax_assignment(assignment)
+        
+        # Separate an assignment into a Resource and an Equation.
+        left, right = equation.split(" = ")
+
+        resource = Resource.parse(left)
+        equation = Equation.parse(right)
+        equation = equation.multiply(Fraction(1, resource.amount))
 
         # Variable name can be assigned just once.
-        if name in self.resources:
-            raise ValueError(f"Name is already in use: {name}")
+        self.validator.validate_value_assignment(resource)
 
-        # Variables will be removed when re-assigned.
-        if name in self.variables:
-            self.variables.remove(name)
+        # Resource will be removed from the variables list when it's assigned.
+        self.variables = [var for var in self.variables if var != resource.name]
 
         # Add new variables into the unassigned variables list.
         for resource in equation.resources:
-            variable = resource.name
-            if variable not in self.resources:
-                if variable not in self.variables:
-                    self.variables.append(variable)
+            if resource.name not in self.resources:
+                if resource.name not in self.variables:
+                    self.variables.append(resource.name)
         
-        self.resources[name] = equation
+        self.resources[resource.name] = equation
+
+    def calculate(self, equation: str) -> list[Equation]:
+        # Validate an equation before processing any further.
+        self.validator.validate_syntax_calculation(equation)
+
+        equation = Equation.parse(equation)
+
+        # Ensure there are only pre-assigned variable names.
+        self.validator.validate_value_calculation(equation)
+
+        equations = []
+        while True:
+            equations.append(equation)
+            equation = self.replace_variables(equation)
+            equation = Equation.subtract(equation)
+            
+            # Equation did not change so it is ready.
+            if [r for r in equation if r.name in self.resources] == []:
+                break
+
+        return equations
 
     # TODO: siirra Equation-luokkaan.
     def replace_variables(self, resources: list[Resource]) -> list[Resource]:
@@ -149,41 +128,6 @@ class Calculator:
                 if found != []:
                     variables.append(part.name)
         return variables
-
-    def calculate(self, equation: str) -> list[Equation]:
-        resources = Equation.parse_list(equation)
-
-        # Ensure there are only pre-assigned variable names.
-        tmp = [str(r.name) for r in resources if r.name not in self.resources]
-        if tmp != []:
-            raise ValueError(f"ValueError: {', '.join(tmp)}")
-
-        equations = []
-        while True:
-            equations.append(str(resources))
-            resources = self.replace_variables(resources)
-            resources = Calculator.subtract(resources)
-            
-            # Equation did not change so it is ready.
-            if [r for r in resources if r.name in self.resources] == []:
-                break
-
-        return equations
-
-    @classmethod
-    def subtract(cls, equation: list[Resource]) -> list[Resource]:
-        variables: dict[str, Resource] = dict()
-
-        for resource in equation:
-            if resource.name in variables.keys():
-                variables[resource.name].amount += resource.amount
-            else:
-                variables[resource.name] = resource
-
-        for name, resource in variables.items():
-            variables[name].amount = math.ceil(resource.amount)
-
-        return [variables[name] for name in variables.keys()]
 
     @classmethod
     def sort_resources(cls, resources: list[str]) -> list[str]:
@@ -214,9 +158,34 @@ class Calculator:
                     similar_words[name] = words
         return similar_words
 
-# TODO poista kun ei tarvita
-def get_amount(resource: str) -> int:
-    return int(resource.split()[0])
+class Validator:
+    pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
+    pattern_var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
 
-def get_name(resource: str) -> str:
-    return resource.split()[-1]
+    def __init__(self, calc: Calculator):
+        self.calc = calc
+
+    def validate_syntax_assignment(self, assignment: str) -> None:
+        num = Validator.pattern_num
+        var = Validator.pattern_var
+        
+        pattern = re.compile(f"{num} {var} = {num} {var}( \+ {num} {var})*")
+        if not pattern.fullmatch(assignment):
+            raise SyntaxError("SyntaxError: " + assignment)
+
+    def validate_syntax_calculation(self, equation: str) -> None:
+        num = Validator.pattern_num
+        var = Validator.pattern_var
+        
+        pattern = re.compile(f"{num} {var}( \+ {num} {var})*")
+        if not pattern.fullmatch(equation):
+            raise SyntaxError("SyntaxError: " + equation)
+
+    def validate_value_assignment(self, resource: Resource) -> None:
+        if resource.name in self.calc.resources:
+            raise ValueError(f"Name is already in use: {resource.name}")
+
+    def validate_value_calculation(self, equation: Equation) -> None:
+        tmp = [str(r.name) for r in equation if r.name not in self.calc.resources]
+        if tmp != []:
+            raise ValueError(f"ValueError: {', '.join(tmp)}")

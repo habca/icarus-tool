@@ -77,6 +77,7 @@ class Application:
             previous = equation_list[i - 1].split(" + ")
             current = equation_list[i].split(" + ")
 
+            # TODO bottom-up: ensin luetellaan raaka-aineet, sitten rakennetaan.
             resources = [r for r in current if r not in previous]
             resources = Calculator.sort_resources(resources)
             resources = Calculator.format_resources(resources)

@@ -43,7 +43,7 @@ There is no special meaning behind providing same functionality between command 
 The command line options supported by the program are as follows.
 
 ```
--i --file=    A text file where each line contains an equation.
+-i --file=    A text file where each line represents an equation.
 -g --gnu      Apply GNU readline functionality to python's input.
 ```
 
