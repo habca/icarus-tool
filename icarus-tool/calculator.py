@@ -20,12 +20,15 @@ class Equation:
     def __init__(self, resources: list[Resource]):
         self.resources = resources
 
+    def __iter__(self) -> iter:
+        return iter(self.resources)
+
     def __str__(self) -> str:
         return " + ".join([str(resource) for resource in self.resources])
 
     @classmethod
     def parse(cls, equation: str) -> "Equation":
-        resources = [Resource(resource) for resource in equation.split(" + ")]
+        resources = [Resource.parse(r) for r in equation.split(" + ")]
         return Equation(resources)
 
     def multiply(self, fraction: Fraction) -> "Equation":
@@ -51,17 +54,14 @@ class Calculator:
     def __init__(self):
         self.resources: dict[str, Equation] = dict()
         self.variables: list[str] = list()
-        self.validator: Validator(self)
-    
-    def get_keywords(self) -> list[str]:
-        return list(self.resources.keys())
+        self.validator: Validator = Validator(self)
 
     def assign_equation(self, assignment: str) -> None:
         # Validate an assignment before processing any further.
         self.validator.validate_syntax_assignment(assignment)
         
         # Separate an assignment into a Resource and an Equation.
-        left, right = equation.split(" = ")
+        left, right = assignment.split(" = ")
 
         resource = Resource.parse(left)
         equation = Equation.parse(right)
@@ -69,6 +69,8 @@ class Calculator:
 
         # Variable name can be assigned just once.
         self.validator.validate_value_assignment(resource)
+
+        self.resources[resource.name] = equation
 
         # Resource will be removed from the variables list when it's assigned.
         self.variables = [var for var in self.variables if var != resource.name]
@@ -78,8 +80,9 @@ class Calculator:
             if resource.name not in self.resources:
                 if resource.name not in self.variables:
                     self.variables.append(resource.name)
-        
-        self.resources[resource.name] = equation
+
+    def get_keywords(self) -> list[str]:
+        return list(self.resources.keys())
 
     def calculate(self, equation: str) -> list[Equation]:
         # Validate an equation before processing any further.
@@ -90,11 +93,11 @@ class Calculator:
         # Ensure there are only pre-assigned variable names.
         self.validator.validate_value_calculation(equation)
 
-        equations = []
+        equations = [equation]
         while True:
-            equations.append(equation)
             equation = self.replace_variables(equation)
-            equation = Equation.subtract(equation)
+            equation = equation.evaluate()
+            equations.append(equation)
             
             # Equation did not change so it is ready.
             if [r for r in equation if r.name in self.resources] == []:
@@ -102,22 +105,20 @@ class Calculator:
 
         return equations
 
-    # TODO: siirra Equation-luokkaan.
-    def replace_variables(self, resources: list[Resource]) -> list[Resource]:
+    def replace_variables(self, equation: Equation) -> Equation:
         new_resources = []
-        # TODO tupleina resurssien purkaminen helpottuu.
-        for resource in resources:
-            new_resources.append(resource)
-            temp = [r for r in resources if r.name != resource.name]
+        for resource in equation:
+            temp = [r for r in equation if r.name != resource.name]
             found = self.search_variable(resource.name, temp)
-            if found == [] and resource.name in self.resources.keys():
-                expression = self.resources[resource.name].resources
-                for i, res in enumerate(expression):
-                    expression[i] = Resource(resource.amount * res.amount, res.name)
-                new_resources[-1:] = expression
-        return new_resources
+            if found == [] and resource.name in self.resources:
+                expression = self.resources[resource.name]
+                expression = expression.multiply(resource.amount)
+                new_resources += expression.resources
+            else:
+                new_resources.append(resource)
+        return Equation(new_resources)
 
-    def search_variable(self, variable: str, equation: list[Resource], not_first: bool = False) -> list[str]:
+    def search_variable(self, variable: str, equation: Equation, not_first: bool = False) -> list[str]:
         variables = []
         for part in equation:
             if part.name == variable and not_first:
@@ -131,11 +132,9 @@ class Calculator:
 
     @classmethod
     def sort_resources(cls, resources: list[str]) -> list[str]:
-        """
-        Sort resources by the amount and then by the name.
-        """
-        resources = sorted(resources, key=get_name, reverse=False)
-        resources = sorted(resources, key=get_amount, reverse=True)
+        """ Sort resources by the amount and then by the name. """
+        resources = sorted(resources, key=lambda x: x.name, reverse=False)
+        resources = sorted(resources, key=lambda x: x.amount, reverse=True)
         return resources
 
     @classmethod
@@ -186,6 +185,4 @@ class Validator:
             raise ValueError(f"Name is already in use: {resource.name}")
 
     def validate_value_calculation(self, equation: Equation) -> None:
-        tmp = [str(r.name) for r in equation if r.name not in self.calc.resources]
-        if tmp != []:
-            raise ValueError(f"ValueError: {', '.join(tmp)}")
+        pass
