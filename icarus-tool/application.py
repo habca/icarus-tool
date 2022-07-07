@@ -1,4 +1,4 @@
-from calculator import Calculator
+﻿from calculator import Calculator, Equation
 import readline
 import sys, getopt
 
@@ -34,11 +34,8 @@ class Completer:
             return None
 
 class Application:
-    def __init__(self, calculator: Calculator = None):
-        self.calculator = calculator
-
-        if self.calculator is None:
-            self.calculator = Calculator()
+    def __init__(self):
+        self.calculator = Calculator()
 
     def help(self):
         print(welcome := "Welcome to use Icarus tool")
@@ -68,37 +65,33 @@ class Application:
             return
 
         separator = "-" * (len(equation) + 2)
-        equation_list = self.calculator.calculate(equation)
-
-        if equation_list == []:
-            raise ValueError("Error occured: " + equation)
+        equations = self.calculator.calculate(equation)
         
-        for i in range(1, len(equation_list)):
-            previous = equation_list[i - 1].split(" + ")
-            current = equation_list[i].split(" + ")
+        for i in range(1, len(equations)):
+            previous = equations[i - 1]
+            current = equations[i]
 
-            # TODO bottom-up: ensin luetellaan raaka-aineet, sitten rakennetaan.
-            resources = [r for r in current if r not in previous]
-            resources = Calculator.sort_resources(resources)
-            resources = Calculator.format_resources(resources)
+            resources = [r for r in current if str(r) not in str(previous)]
+            resources = Equation(resources)
+            resources = resources.sort_resources()
+            resources = resources.format_resources()
 
             print(separator)
             for resource in resources:
-                resources = Calculator.sort_resources(resources)
-                resources = Calculator.format_resources(resources)
                 print(resource)
 
         print()
         print("TOTAL RESOURCES")
         
-        current = Calculator.sort_resources(current)
-        current = Calculator.format_resources(current)
+        current = current.sort_resources()
+        current = current.format_resources()
 
         print(separator)
         for resource in current:
             print(resource)
 
-    def quess(self, equation: str) -> None:
+    def recover(self, equation: str) -> None:
+        equation = Equation.parse(equation)
         similar_words = self.calculator.find_similar(equation)
         if similar_words != {}:
             # Line break for a readable terminal output.
@@ -117,51 +110,47 @@ class Application:
                 print(str(err))
             except ValueError as err:
                 print(str(err))
-                self.quess(equation)
+                self.recover(equation)
             except SystemExit:
                 break
 
-def main(argv: list[str]) -> None:
-    # Create data structures.
-    calculator = Calculator()
-    application = Application(calculator)
+    def init(self, argv: list[str]) -> None:
+        try:
+            # Parse command line arguments.
+            opts, args = getopt.getopt(argv[1:], "gi:", ["gnu", "file="])
 
-    try:
-        # Parse command line arguments.
-        opts, args = getopt.getopt(argv[1:], "gi:", ["gnu", "file="])
+            # Configure program based on the arguments.
+            for opt, arg in opts:
 
-        # Configure program based on the arguments.
-        for opt, arg in opts:
+                # Apply GNU readline functionality.
+                if opt in ("-g", "--gnu"):
+                    variables = self.calculator.get_keywords()
+                    Completer(variables)
 
-            # Apply GNU readline functionality.
-            if opt in ("-g", "--gnu"):
-                variables = calculator.get_keywords()
+                # Import equations from a file.
+                if opt in ("-i", "--file"):
+                    file_system = FileSystem(arg)
+                    file_system.read(self.calculator)
+            
+            if args != []:
+                # User may drag-n-drop text files over script.
+                file_system = FileSystem(args[0])
+                file_system.read(self.calculator)
+                
+                # In that case, use tab completion by default.
+                variables = self.calculator.get_keywords()
                 Completer(variables)
 
-            # Import equations from a file.
-            if opt in ("-i", "--file"):
-                file_system = FileSystem(arg)
-                file_system.read(calculator)
-        
-        if args != []:
-            # User may drag-n-drop text files over script.
-            file_system = FileSystem(args[0])
-            file_system.read(calculator)
-            
-            # In that case, use tab completion by default.
-            variables = calculator.get_keywords()
-            Completer(variables)
-
-        # Start text-based user interface.
-        application.help()
-        application.main()
-
-    except getopt.GetoptError:
-        print("Usage:", argv[0], "<inputfile>")
-    except FileNotFoundError:
-        print("No such file:", arg)
-    except KeyboardInterrupt:
-        pass
+        except getopt.GetoptError:
+            print("Usage:", argv[0], "<inputfile>")
+        except FileNotFoundError:
+            print("No such file:", arg)
+        except KeyboardInterrupt:
+            pass
 
 if __name__ == "__main__":
-    main(sys.argv)
+    # Start text-based user interface.
+    application = Application()
+    application.init(sys.argv)
+    application.help()
+    application.main()

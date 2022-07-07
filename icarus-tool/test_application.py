@@ -30,12 +30,6 @@ class FileSystemTest(unittest.TestCase):
         for variable in calc.variables:
             self.assertNotIn(variable, calc.resources)
 
-        # self.assertEqual(calc.calculate("1 crafting_bench")[-1], "60 fiber + 50 wood + 12 stone + 20 leather")
-        # self.assertEqual(calc.calculate("1 anvil_bench")[-1], "80 iron_ore + 20 wood + 10 stone")
-        # self.assertEqual(calc.calculate("2 stone_furnace")[-1], "25 wood + 160 stone + 24 leather")
-        # self.assertEqual(calc.calculate("40 iron_ingot")[-1], "80 iron_ore")
-        # self.assertEqual(calc.calculate("8 stick")[-1], "1 wood")
-
 class ApplicationTest(unittest.TestCase):
     def test_help(self):
         user_input = ["exit"]
@@ -83,6 +77,35 @@ class ApplicationTest(unittest.TestCase):
             ApplicationTest.get_output(user_input,
                 Application().main))
 
+    def test_recover(self):
+        user_input = [
+            "1 anvi",
+            "1 anvil",
+            "1 anvil_benchs + 1 anvil_bvve",
+            "exit",
+        ]
+
+        expected_output = [
+            'ValueError: anvi',
+
+            'ValueError: anvil',
+            'Did you mean?',
+            '- anvil: anvil_bench',
+            
+            'ValueError: anvil_benchs, anvil_bvve',
+            'Did you mean?',
+            '- anvil_benchs: anvil_bench, masonry_bench, textiles_bench',
+            '- anvil_bvve: anvil_bench',
+        ]
+
+        application = Application()
+        application.init(["./application.py", "-i", "tech_tree.txt", "-g"])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
+
     @classmethod
     def get_output(cls, user_input: list, callback: callable):
         with unittest.mock.patch("builtins.print") as mock_print:
@@ -95,8 +118,6 @@ class ApplicationTest(unittest.TestCase):
                 for mock_call in mock_print.mock_calls:
                     actual += list(map(str, mock_call.args))
                 return actual
-
-# TODO testaa paaohjelmasta komentorivin parametrit
 
 if __name__ == "__main__":
     unittest.main()

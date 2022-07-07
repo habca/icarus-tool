@@ -1,7 +1,7 @@
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-An unit testing framework `unittest` and Python linter `mypy` proved to be very useful in the developing process.
+An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process.
 
 ### Windows
 
@@ -63,53 +63,48 @@ amount name [+ amount name]
 GNU readline provides a `TAB` completion, `^R` reverse search, `↑↓` history search and so on.
 
 ```
-> 1 bio
+> 1 biofuel_
 biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
-> 1 biofuel_extractor + 1 bio
+> 1 biofuel_extractor + 1 biofuel_
 biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
 > 1 biofuel_extractor + 1 biofuel_generator
 -------------------------------------------
-20 steel_ingot
+21 steel_ingot
 20 steel_screw
+17 refined_gold
 15 iron_ingot
 12 electronics
 10 copper_nail
  8 copper_ingot
- 5 refined_gold
  2 glass
 -------------------------------------------
-44 copper_ingot
-30 iron_ore
-24 epoxy
-24 organic_resin
-21 steel_ingot
-17 refined_gold
- 2 silica_ore
+156 iron_ore
+ 45 copper_ingot
+ 24 epoxy
+ 24 organic_resin
+  2 silica_ore
 -------------------------------------------
 96 tree_sap
-88 copper_ore
+90 copper_ore
+63 wood
 48 sulfur
 34 gold_ore
 24 oxite
-24 wood
 21 steel_bloom
 -------------------------------------------
 384 stick
-156 iron_ore
  21 coal_ore
 -------------------------------------------
-63 wood
 
 TOTAL RESOURCES
 -------------------------------------------
 156 iron_ore
- 88 copper_ore
+ 90 copper_ore
  63 wood
  48 sulfur
  34 gold_ore
  24 oxite
  21 coal_ore
- 10 copper_nail
   2 silica_ore
 ```
 
@@ -123,3 +118,9 @@ Did you mean?
 - biofuelextractor: biofuel_extractor, biofuel_generator, electric_extractor
 - biofuel_gen: biofuel_can, biofuel_generator
 ```
+
+## Developers
+
+### Visual Studio Code
+
+To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`.

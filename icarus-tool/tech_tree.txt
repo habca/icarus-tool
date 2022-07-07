@@ -366,6 +366,7 @@
 1 fill_biofuel_can = 100 wood + 100 tree_sap
 1 glass = 1 silica_ore
 10 iron_nail = 1 iron_ingot
+10 copper_nail = 1 copper_ingot
 1 iron_ingot = 2 iron_ore
 1 steel_ingot = 1 steel_bloom
 1 aluminium_ingot = 1 aluminium_ore
@@ -379,4 +380,4 @@
 1 titanium_ingot = 5 titanium_ore
 1 rope = 12 fiber
 
-# TODO korvaa alaviivat välilyönneillä
+# TODO korvaa alaviivat valilyonneilla

@@ -8,6 +8,9 @@ class Resource:
         self.amount = amount
         self.name = name
 
+    def __eq__(self, other: "Resource") -> bool:
+        return (self.amount, self.name) == (other.amount, other.name)
+
     def __str__(self) -> str:
         return f"{self.amount} {self.name}"
 
@@ -19,6 +22,9 @@ class Resource:
 class Equation:
     def __init__(self, resources: list[Resource]):
         self.resources = resources
+
+    def __eq__(self, other: "Equation") -> bool:
+        return self.resources == other.resources
 
     def __iter__(self) -> iter:
         return iter(self.resources)
@@ -49,6 +55,25 @@ class Equation:
 
         resources = [variables[name] for name in variables.keys()]
         return Equation(resources)
+
+    def sort_resources(self) -> "Equation":
+        """ Sort resources by the amount and then by the name. """
+        resources = self.resources
+        resources = sorted(resources, key=lambda x: x.name, reverse=False)
+        resources = sorted(resources, key=lambda x: x.amount, reverse=True)
+        return Equation(resources)
+
+    def format_resources(self) -> list[str]:
+        """ Returns a sorted list of resources as a formated strings. """
+        if self.resources == []:
+            return []
+
+        margin = max([len(str(r.amount)) for r in self.resources])
+        
+        def format_resource(resource: Resource) -> str:
+            return f"{resource.amount:{margin}d} {resource.name}"
+
+        return [format_resource(r) for r in self.sort_resources()]
 
 class Calculator:
     def __init__(self):
@@ -130,31 +155,13 @@ class Calculator:
                     variables.append(part.name)
         return variables
 
-    @classmethod
-    def sort_resources(cls, resources: list[str]) -> list[str]:
-        """ Sort resources by the amount and then by the name. """
-        resources = sorted(resources, key=lambda x: x.name, reverse=False)
-        resources = sorted(resources, key=lambda x: x.amount, reverse=True)
-        return resources
-
-    @classmethod
-    def format_resources(cls, resources: list[str]) -> int:
-        margin = max([len(str(get_amount(res))) for res in resources])
-        resource_list = []
-        for resource in resources:
-            amount, name = get_amount(resource), get_name(resource)
-            resource_text = f"{amount:{margin}d} {name}"
-            resource_list.append(resource_text)
-        return resource_list
-
-    def find_similar(self, equation: str) -> dict[str]:
+    def find_similar(self, equation: Equation) -> dict[str]:
+        word_list = self.get_keywords()
         similar_words = dict()
-        pattern = re.compile(Calculator.pattern_var)
-        for name in pattern.findall(equation):
-            if name not in self.variables:
-                words = difflib.get_close_matches(name, self.get_keywords())
-                if words != []:
-                    similar_words[name] = words
+        for resource in equation:
+            words = difflib.get_close_matches(resource.name, word_list)
+            if words != [] and resource.name not in self.resources:
+                similar_words[resource.name] = words
         return similar_words
 
 class Validator:
@@ -185,4 +192,11 @@ class Validator:
             raise ValueError(f"Name is already in use: {resource.name}")
 
     def validate_value_calculation(self, equation: Equation) -> None:
-        pass
+        errors: list[str] = []
+        for resource in equation:
+            if resource.name not in self.calc.resources:
+                if resource.name not in self.calc.variables:
+                    errors.append(resource.name) 
+        if errors != []:
+            error: str = ", ".join(errors)
+            raise ValueError("ValueError: " + error)
