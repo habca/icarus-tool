@@ -1,5 +1,4 @@
 ﻿from calculator import Calculator, Equation
-import readline
 import sys, getopt
 
 class FileSystem:
@@ -23,6 +22,7 @@ class FileSystem:
 class Completer:
     def __init__(self, keywords: list[str]):
         self.keywords = sorted(keywords)
+        import readline
         readline.parse_and_bind("tab: complete")
         readline.set_completer(self.auto_complete)
 
@@ -113,13 +113,22 @@ class Application:
                 self.recover(equation)
             except SystemExit:
                 break
+            except KeyboardInterrupt:
+                break
 
     def init(self, argv: list[str]) -> None:
         try:
             # Parse command line arguments.
-            opts, args = getopt.getopt(argv[1:], "gi:", ["gnu", "file="])
+            opts, args = getopt.getopt(argv[1:], "g", ["gnu"])
 
-            # Configure program based on the arguments.
+            # Import equations from a file.
+            if len(args) == 1:
+                file_system = FileSystem(args[0])
+                file_system.read(self.calculator)
+            else:
+                raise ArgumentError
+
+            # Configure program based on options.
             for opt, arg in opts:
 
                 # Apply GNU readline functionality.
@@ -127,26 +136,17 @@ class Application:
                     variables = self.calculator.get_keywords()
                     Completer(variables)
 
-                # Import equations from a file.
-                if opt in ("-i", "--file"):
-                    file_system = FileSystem(arg)
-                    file_system.read(self.calculator)
-            
-            if args != []:
-                # User may drag-n-drop text files over script.
-                file_system = FileSystem(args[0])
-                file_system.read(self.calculator)
-                
-                # In that case, use tab completion by default.
-                variables = self.calculator.get_keywords()
-                Completer(variables)
+        except getopt.GetoptError as err:
+            print(str(err))
+        except FileNotFoundError as err:
+            print(str(err).replace("[Errno 2] ", ""))
+        except ArgumentError:
+            print("Usage:", argv[0], "-g", "<inputfile>")
 
-        except getopt.GetoptError:
-            print("Usage:", argv[0], "<inputfile>")
-        except FileNotFoundError:
-            print("No such file:", arg)
-        except KeyboardInterrupt:
-            pass
+class ArgumentError(Exception):
+    """ Custom error type to validate an argument string. """
+    def __init__(self):
+        super().__init__()
 
 if __name__ == "__main__":
     # Start text-based user interface.

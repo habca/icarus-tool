@@ -13,11 +13,13 @@ python -m pip install mypy
 
 python -m unittest
 python -m mypy application.py
-python application.py <inputfile>
+python application.py -g <inputfile>
 deactivate
 ```
 
 ### Linux
+
+The readline package is most likely already installed as a dependency of Bash. Much like python should be pre-installed with the distribution. A creation of virtual environment is not necessary at all but here is how.
 
 ```
 python -m venv .venv
@@ -27,24 +29,20 @@ python -m pip install mypy
 
 python -m unittest
 python -m mypy application.py
-python application.py <inputfile>
+python application.py -g <inputfile>
 deactivate
 ```
 
 ## Usage
 
-There is no special meaning behind providing same functionality between command line options/arguments.
-
 ```
-.\application.py <inputfile>
-.\application.py -i <inputfile> -g
+python application.py -g data/tech_tree.txt
 ```
 
 The command line options supported by the program are as follows.
 
 ```
--i --file=    A text file where each line represents an equation.
--g --gnu      Apply GNU readline functionality to python's input.
+-g --gnu       Apply GNU readline functionality to python's input.
 ```
 
 The manual will be displayed and program waits for a keyboard input.
@@ -123,4 +121,4 @@ Did you mean?
 
 ### Visual Studio Code
 
-To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`.
+To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in editor.

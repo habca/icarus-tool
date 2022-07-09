@@ -5,7 +5,7 @@ import unittest
 import unittest.mock
 
 class FileSystemTest(unittest.TestCase):
-    filename = "tech_tree.txt"
+    filename = "data/tech_tree.txt"
 
     def test_file(self):
         """ Reading a file should not raise any errors. """
@@ -99,25 +99,58 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         application = Application()
-        application.init(["./application.py", "-i", "tech_tree.txt", "-g"])
+        application.init(["./application.py", "-g", FileSystemTest.filename])
 
         actual_output = ApplicationTest.get_output(user_input, application.main)
 
         self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
+    def test_argv(self):
+        user_input = [
+            "./application.py",
+            "./application.py -i -g",
+            "./application.py -g -g",
+            f"./application.py {FileSystemTest.filename} -i -g",
+            f"./application.py {FileSystemTest.filename} -g -g",
+            f"./application.py -i -g non_existent_file",
+            f"./application.py -g -g non_existent_file",
+        ]
+
+        expected_output = [
+            "Usage: ./application.py -g <inputfile>",
+            "option -i not recognized",
+            "Usage: ./application.py -g <inputfile>",
+            "Usage: ./application.py -g <inputfile>",
+            "Usage: ./application.py -g <inputfile>",
+            'option -i not recognized',
+            "No such file or directory: 'non_existent_file'",
+        ]
+
+        def run_test_argv() -> None:
+            for error in user_input:
+                application = Application()
+                application.init(error.split())
+
+        self.assertEqual(expected_output,
+            ApplicationTest.get_output(user_input,
+                run_test_argv))
+
     @classmethod
-    def get_output(cls, user_input: list, callback: callable):
+    def get_output(cls, user_input: list[str], callback: callable):
         with unittest.mock.patch("builtins.print") as mock_print:
             with unittest.mock.patch("builtins.input") as mock_input:
                 mock_input.side_effect = user_input
  
                 callback()
  
-                actual = []
-                for mock_call in mock_print.mock_calls:
-                    actual += list(map(str, mock_call.args))
-                return actual
+                def argument_str(mock_call_args: tuple[str]) -> str:
+                    """ Converts function arguments into an argument string. """
+                    return " ".join(list(map(str, mock_call_args)))
+
+                args = [argument_str(mock_call.args) for mock_call in mock_print.mock_calls]
+                args = [arg for arg in args if arg != ""]
+                return args
 
 if __name__ == "__main__":
     unittest.main()

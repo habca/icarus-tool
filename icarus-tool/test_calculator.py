@@ -1,6 +1,7 @@
 from fractions import Fraction
 from application import FileSystem
 from calculator import Calculator, Equation, Resource
+from test_application import FileSystemTest
 
 import unittest
 
@@ -139,7 +140,7 @@ class CalculatorTest(unittest.TestCase):
     def setUp(self) -> None:
         """ Create a calculator before any test method. """
         self.calc = Calculator()
-        file = FileSystem("tech_tree.txt")
+        file = FileSystem(FileSystemTest.filename)
         file.read(self.calc)
 
     def test_get_keywords(self):
@@ -151,7 +152,7 @@ class CalculatorTest(unittest.TestCase):
         calc.assign_equation("1 wood_spear = 12 fiber + 18 stick")
         calc.assign_equation("10 stick = 1 wood")
 
-        self.assertEquals(["wood_spear", "stick"], calc.get_keywords())
+        self.assertEqual(["wood_spear", "stick"], calc.get_keywords())
 
     def test_assign_equation_1(self):
         """ An equation should be stored in a dictionary as follows. """
@@ -227,9 +228,9 @@ class CalculatorTest(unittest.TestCase):
         r2 = Resource(Fraction(16), "steel_screw")
         r3 = Resource(Fraction(10), "stick")
 
-        e1 = calc.replace_variables(Equation([r1]))
-        e2 = calc.replace_variables(Equation([r2]))
-        e3 = calc.replace_variables(Equation([r3]))
+        e1 = calc.substitute_variables(Equation([r1]))
+        e2 = calc.substitute_variables(Equation([r2]))
+        e3 = calc.substitute_variables(Equation([r3]))
 
         self.assertEqual("24 wood + 16 leather + 80 titanium_ingot + 8 epoxy + 32 steel_screw", str(e1))
         self.assertEqual("4/25 steel_ingot", str(e2))
@@ -345,10 +346,7 @@ class CalculatorTest(unittest.TestCase):
             calc.calculate(str(anvil_bench2))[-1])
 
     def test_find_similar(self):
-        """
-        There may be none, one or many good enough matches.
-        The dictionary omits searches that have no matches.
-        """
+        """ There may be none, one or many good enough matches. """
         calc = self.calc
 
         e1 = Equation([Resource(1, "anvil")])
@@ -359,8 +357,14 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(["anvil_bench"], calc.find_similar(e1)["anvil"])
         self.assertEqual(["anvil_bench"], calc.find_similar(e2)["anvil_bvve"])
         self.assertIn("anvil_bench", calc.find_similar(e3)["anvil_benchs"])
+
+        # The dictionary omits searches that have no matches.
         with self.assertRaises(KeyError):
             calc.find_similar(e4)["anvi"]
+        
+        # The dictionary omits exact matches.
+        with self.assertRaises(KeyError):
+            calc.find_similar(e1)["anvil_bench"]
 
 if __name__ == "__main__":
     unittest.main()

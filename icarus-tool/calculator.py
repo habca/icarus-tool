@@ -120,7 +120,7 @@ class Calculator:
 
         equations = [equation]
         while True:
-            equation = self.replace_variables(equation)
+            equation = self.substitute_variables(equation)
             equation = equation.evaluate()
             equations.append(equation)
             
@@ -130,7 +130,7 @@ class Calculator:
 
         return equations
 
-    def replace_variables(self, equation: Equation) -> Equation:
+    def substitute_variables(self, equation: Equation) -> Equation:
         new_resources = []
         for resource in equation:
             temp = [r for r in equation if r.name != resource.name]

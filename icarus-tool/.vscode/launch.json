@@ -8,10 +8,10 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "application.py",
             "args": [
-                "-i", "tech_tree.txt",
-                "-g"
+                "-g",
+                "data/tech_tree.txt",
             ],
             "console": "integratedTerminal",
             "justMyCode": true
