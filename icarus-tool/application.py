@@ -1,4 +1,5 @@
-﻿from calculator import Calculator, Equation
+﻿from lib2to3.pgen2.token import EQUAL
+from calculator import Calculator, Equation, Resource
 import sys, getopt
 
 class FileSystem:
@@ -71,14 +72,14 @@ class Application:
             previous = equations[i - 1]
             current = equations[i]
 
-            resources = [r for r in current if str(r) not in str(previous)]
-            resources = Equation(resources)
+            resource_list: list[Resource] = [r for r in current if str(r) not in str(previous)]
+            resources = Equation(resource_list)
             resources = resources.sort_resources()
-            resources = resources.format_resources()
+            resource_names: list[str] = resources.format_resources()
 
             print(separator)
-            for resource in resources:
-                print(resource)
+            for resource_name in resource_names:
+                print(resource_name)
 
         print()
         print("TOTAL RESOURCES")
@@ -91,8 +92,8 @@ class Application:
             print(resource)
 
     def recover(self, equation: str) -> None:
-        equation = Equation.parse(equation)
-        similar_words = self.calculator.find_similar(equation)
+        resources = Equation.parse(equation)
+        similar_words = self.calculator.find_similar(resources)
         if similar_words != {}:
             # Line break for a readable terminal output.
             print()

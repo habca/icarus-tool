@@ -1,3 +1,4 @@
+from typing import Any, Callable
 from application import Application, FileSystem
 from calculator import Calculator
 
@@ -113,8 +114,8 @@ class ApplicationTest(unittest.TestCase):
             "./application.py -g -g",
             f"./application.py {FileSystemTest.filename} -i -g",
             f"./application.py {FileSystemTest.filename} -g -g",
-            f"./application.py -i -g non_existent_file",
-            f"./application.py -g -g non_existent_file",
+            "./application.py -i -g non_existent_file",
+            "./application.py -g -g non_existent_file",
         ]
 
         expected_output = [
@@ -137,14 +138,14 @@ class ApplicationTest(unittest.TestCase):
                 run_test_argv))
 
     @classmethod
-    def get_output(cls, user_input: list[str], callback: callable):
+    def get_output(cls, user_input: list[str], callback: Callable):
         with unittest.mock.patch("builtins.print") as mock_print:
             with unittest.mock.patch("builtins.input") as mock_input:
                 mock_input.side_effect = user_input
  
                 callback()
  
-                def argument_str(mock_call_args: tuple[str]) -> str:
+                def argument_str(mock_call_args: tuple[Any, ...]) -> str:
                     """ Converts function arguments into an argument string. """
                     return " ".join(list(map(str, mock_call_args)))
 

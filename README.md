@@ -42,7 +42,7 @@ python application.py -g data/tech_tree.txt
 The command line options supported by the program are as follows.
 
 ```
--g --gnu       Apply GNU readline functionality to python's input.
+-g --gnu    Apply GNU readline functionality to python's input.
 ```
 
 The manual will be displayed and program waits for a keyboard input.
