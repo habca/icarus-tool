@@ -5,6 +5,7 @@ import re
 from typing import Iterator
 from unittest import result
 
+
 class Resource:
     def __init__(self, amount: Fraction, name: str):
         self.amount = amount
@@ -23,6 +24,7 @@ class Resource:
     def parse(cls, resource: str) -> "Resource":
         amount, name = resource.split(" ")
         return Resource(Fraction(amount), name)
+
 
 class Equation:
     def __init__(self, resources: list[Resource]):
@@ -66,24 +68,25 @@ class Equation:
         return Equation(resources)
 
     def sort_resources(self) -> "Equation":
-        """ Sort resources by the amount and then by the name. """
+        """Sort resources by the amount and then by the name."""
         resources = self.resources
         resources = sorted(resources, key=lambda x: x.name, reverse=False)
         resources = sorted(resources, key=lambda x: x.amount, reverse=True)
         return Equation(resources)
 
     def format_resources(self) -> list[str]:
-        """ Returns a sorted list of resources as a formated strings. """
+        """Returns a sorted list of resources as a formated strings."""
         if self.resources == []:
             return []
 
         margin = max([len(str(r.amount)) for r in self.resources])
-        
+
         def format_resource(resource: Resource) -> str:
             amount: int = int(resource.amount)
             return f"{amount:{margin}d} {resource.name}"
 
         return [format_resource(r) for r in self.sort_resources()]
+
 
 class Calculator:
     def __init__(self):
@@ -94,7 +97,7 @@ class Calculator:
     def assign_equation(self, assignment: str) -> None:
         # Validate an assignment before processing any further.
         self.validator.validate_syntax_assignment(assignment)
-        
+
         # Separate an assignment into a Resource and an Equation.
         left, right = assignment.split(" = ")
 
@@ -133,7 +136,7 @@ class Calculator:
             equation = self.substitute_variables(equation)
             equation = equation.evaluate()
             equations.append(equation)
-            
+
             # Equation did not change so it is ready.
             if [r for r in equation if r.name in self.resources] == []:
                 break
@@ -153,14 +156,18 @@ class Calculator:
                 new_resources.append(resource)
         return Equation(new_resources)
 
-    def search_variable(self, variable: str, equation: Equation, not_first: bool = False) -> list[str]:
+    def search_variable(
+        self, variable: str, equation: Equation, not_first: bool = False
+    ) -> list[str]:
         variables = []
         for part in equation:
             if part.name == variable and not_first:
                 variables.append(part.name)
             if part.name in self.resources.keys():
                 expression = self.resources[part.name].resources
-                found: list[str] = self.search_variable(variable, Equation(expression), True)
+                found: list[str] = self.search_variable(
+                    variable, Equation(expression), True
+                )
                 if found != []:
                     variables.append(part.name)
         return variables
@@ -174,6 +181,7 @@ class Calculator:
                 similar_words[resource.name] = words
         return similar_words
 
+
 class Validator:
     pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
     pattern_var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
@@ -184,7 +192,7 @@ class Validator:
     def validate_syntax_assignment(self, assignment: str) -> None:
         num = Validator.pattern_num
         var = Validator.pattern_var
-        
+
         pattern = re.compile(f"{num} {var} = {num} {var}( \+ {num} {var})*")
         if not pattern.fullmatch(assignment):
             raise SyntaxError("SyntaxError: " + assignment)
@@ -192,7 +200,7 @@ class Validator:
     def validate_syntax_calculation(self, equation: str) -> None:
         num = Validator.pattern_num
         var = Validator.pattern_var
-        
+
         pattern = re.compile(f"{num} {var}( \+ {num} {var})*")
         if not pattern.fullmatch(equation):
             raise SyntaxError("SyntaxError: " + equation)
@@ -206,7 +214,7 @@ class Validator:
         for resource in equation:
             if resource.name not in self.calc.resources:
                 if resource.name not in self.calc.variables:
-                    errors.append(resource.name) 
+                    errors.append(resource.name)
         if errors != []:
             error: str = ", ".join(errors)
             raise ValueError("ValueError: " + error)

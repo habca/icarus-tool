@@ -1,7 +1,7 @@
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process.
+An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` unifies all styling decisions.
 
 ### Windows
 
@@ -10,9 +10,11 @@ py -m venv .venv
 .venv\Scripts\activate
 python -m pip install pyreadline
 python -m pip install mypy
+python -m pip install black
 
 python -m unittest
-python -m mypy application.py
+python -m mypy *.py
+python -m black *.py
 python application.py -g <inputfile>
 deactivate
 ```
@@ -26,9 +28,11 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install readline
 python -m pip install mypy
+python -m pip install black
 
 python -m unittest
-python -m mypy application.py
+python -m mypy *.py
+python -m black *.py
 python application.py -g <inputfile>
 deactivate
 ```
@@ -122,3 +126,5 @@ Did you mean?
 ### Visual Studio Code
 
 To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in editor.
+
+Enable from the settings `Editor: Format On Save`.

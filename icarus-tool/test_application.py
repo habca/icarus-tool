@@ -5,11 +5,12 @@ from calculator import Calculator
 import unittest
 import unittest.mock
 
+
 class FileSystemTest(unittest.TestCase):
     filename = "data/tech_tree.txt"
 
     def test_file(self):
-        """ Reading a file should not raise any errors. """
+        """Reading a file should not raise any errors."""
 
         calc = Calculator()
         with open(FileSystemTest.filename) as tiedosto:
@@ -17,7 +18,7 @@ class FileSystemTest(unittest.TestCase):
                 line = line.replace("\n", "")
                 if line != "" and not line.startswith("#"):
                     calc.assign_equation(line)
-        
+
     def test_read(self):
         calc = Calculator()
         tiedosto = FileSystem(FileSystemTest.filename)
@@ -31,6 +32,7 @@ class FileSystemTest(unittest.TestCase):
         for variable in calc.variables:
             self.assertNotIn(variable, calc.resources)
 
+
 class ApplicationTest(unittest.TestCase):
     def test_help(self):
         user_input = ["exit"]
@@ -42,9 +44,9 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         self.maxDiff = None
-        self.assertEqual(expected_output, 
-            ApplicationTest.get_output(user_input,
-                Application().help))
+        self.assertEqual(
+            expected_output, ApplicationTest.get_output(user_input, Application().help)
+        )
 
     def test_main(self):
         user_input = [
@@ -53,30 +55,28 @@ class ApplicationTest(unittest.TestCase):
             "1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
             "1 iron_ingot = 2 iron_ore",
             "10 stick = 1 wood",
-
             "1 crafting_bench",
             "exit",
         ]
 
         expected_output = [
-            '------------------',
-            '60 fiber',
-            '50 wood',
-            '20 leather',
-            '12 stone',
-
-            'TOTAL RESOURCES',
-            '------------------',
-            '60 fiber',
-            '50 wood',
-            '20 leather',
-            '12 stone',
+            "------------------",
+            "60 fiber",
+            "50 wood",
+            "20 leather",
+            "12 stone",
+            "TOTAL RESOURCES",
+            "------------------",
+            "60 fiber",
+            "50 wood",
+            "20 leather",
+            "12 stone",
         ]
 
         self.maxDiff = None
-        self.assertEqual(expected_output, 
-            ApplicationTest.get_output(user_input,
-                Application().main))
+        self.assertEqual(
+            expected_output, ApplicationTest.get_output(user_input, Application().main)
+        )
 
     def test_recover(self):
         user_input = [
@@ -87,16 +87,14 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = [
-            'ValueError: anvi',
-
-            'ValueError: anvil',
-            'Did you mean?',
-            '- anvil: anvil_bench',
-            
-            'ValueError: anvil_benchs, anvil_bvve',
-            'Did you mean?',
-            '- anvil_benchs: anvil_bench, masonry_bench, textiles_bench',
-            '- anvil_bvve: anvil_bench',
+            "ValueError: anvi",
+            "ValueError: anvil",
+            "Did you mean?",
+            "- anvil: anvil_bench",
+            "ValueError: anvil_benchs, anvil_bvve",
+            "Did you mean?",
+            "- anvil_benchs: anvil_bench, masonry_bench, textiles_bench",
+            "- anvil_bvve: anvil_bench",
         ]
 
         application = Application()
@@ -124,7 +122,7 @@ class ApplicationTest(unittest.TestCase):
             "Usage: ./application.py -g <inputfile>",
             "Usage: ./application.py -g <inputfile>",
             "Usage: ./application.py -g <inputfile>",
-            'option -i not recognized',
+            "option -i not recognized",
             "No such file or directory: 'non_existent_file'",
         ]
 
@@ -133,25 +131,28 @@ class ApplicationTest(unittest.TestCase):
                 application = Application()
                 application.init(error.split())
 
-        self.assertEqual(expected_output,
-            ApplicationTest.get_output(user_input,
-                run_test_argv))
+        self.assertEqual(
+            expected_output, ApplicationTest.get_output(user_input, run_test_argv)
+        )
 
     @classmethod
     def get_output(cls, user_input: list[str], callback: Callable):
         with unittest.mock.patch("builtins.print") as mock_print:
             with unittest.mock.patch("builtins.input") as mock_input:
                 mock_input.side_effect = user_input
- 
+
                 callback()
- 
+
                 def argument_str(mock_call_args: tuple[Any, ...]) -> str:
-                    """ Converts function arguments into an argument string. """
+                    """Converts function arguments into an argument string."""
                     return " ".join(list(map(str, mock_call_args)))
 
-                args = [argument_str(mock_call.args) for mock_call in mock_print.mock_calls]
+                args = [
+                    argument_str(mock_call.args) for mock_call in mock_print.mock_calls
+                ]
                 args = [arg for arg in args if arg != ""]
                 return args
+
 
 if __name__ == "__main__":
     unittest.main()

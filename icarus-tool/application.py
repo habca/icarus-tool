@@ -2,8 +2,10 @@
 from calculator import Calculator, Equation, Resource
 import sys, getopt
 
+
 class FileSystem:
-    """ Read equations from file rather than user input. """
+    """Read equations from file rather than user input."""
+
     def __init__(self, filename: str):
         self.filename = filename
 
@@ -19,11 +21,13 @@ class FileSystem:
                 # Skip comments and empty lines.
                 if not (line == "" or line.startswith("#")):
                     calculator.assign_equation(line)
-        
+
+
 class Completer:
     def __init__(self, keywords: list[str]):
         self.keywords = sorted(keywords)
         import readline
+
         readline.parse_and_bind("tab: complete")
         readline.set_completer(self.auto_complete)
 
@@ -33,6 +37,7 @@ class Completer:
             return options[state]
         else:
             return None
+
 
 class Application:
     def __init__(self):
@@ -45,7 +50,7 @@ class Application:
         print("amount name [+ amount name]")
 
     def ask_input(self) -> str:
-        """ Throws SyntaxError, ValueError or SystemExit! """
+        """Throws SyntaxError, ValueError or SystemExit!"""
 
         # Line break for a readable terminal output.
         print()
@@ -67,12 +72,14 @@ class Application:
 
         separator = "-" * (len(equation) + 2)
         equations = self.calculator.calculate(equation)
-        
+
         for i in range(1, len(equations)):
             previous = equations[i - 1]
             current = equations[i]
 
-            resource_list: list[Resource] = [r for r in current if str(r) not in str(previous)]
+            resource_list: list[Resource] = [
+                r for r in current if str(r) not in str(previous)
+            ]
             resources = Equation(resource_list)
             resources = resources.sort_resources()
             resource_names: list[str] = resources.format_resources()
@@ -83,7 +90,7 @@ class Application:
 
         print()
         print("TOTAL RESOURCES")
-        
+
         current = current.sort_resources()
         current = current.format_resources()
 
@@ -144,10 +151,13 @@ class Application:
         except ArgumentError:
             print("Usage:", argv[0], "-g", "<inputfile>")
 
+
 class ArgumentError(Exception):
-    """ Custom error type to validate an argument string. """
+    """Custom error type to validate an argument string."""
+
     def __init__(self):
         super().__init__()
+
 
 if __name__ == "__main__":
     # Start text-based user interface.
