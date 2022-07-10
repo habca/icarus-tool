@@ -12,9 +12,9 @@
     <Name>icarus-tool</Name>
     <RootNamespace>icarus-tool</RootNamespace>
     <TestFramework>unittest</TestFramework>
-    <InterpreterId>MSBuild|.venv|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|.wenv|$(MSBuildProjectFullPath)</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i tech_tree.txt -g</CommandLineArguments>
+    <CommandLineArguments>-g data/tech_tree.txt</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -26,7 +26,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="tech_tree.txt" />
+    <Content Include="data\tech_tree.txt" />
+    <Content Include="data\TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="application.py" />
@@ -35,15 +36,18 @@
     <Compile Include="test_calculator.py" />
   </ItemGroup>
   <ItemGroup>
-    <Interpreter Include=".venv\">
-      <Id>.venv</Id>
+    <Interpreter Include=".wenv\">
+      <Id>.wenv</Id>
       <Version>3.9</Version>
-      <Description>.venv (Python 3.9 (64-bit))</Description>
+      <Description>.wenv (Python 3.9 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X64</Architecture>
     </Interpreter>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

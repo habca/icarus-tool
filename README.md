@@ -1,7 +1,7 @@
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` unifies all styling decisions.
+An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions much easier.
 
 ### Windows
 
