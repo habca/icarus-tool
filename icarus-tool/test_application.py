@@ -26,6 +26,7 @@ class FileSystemTest(unittest.TestCase):
 
         self.assertTrue(len(calc.resources) > 0)
         self.assertTrue(len(calc.variables) > 0)
+        self.assertEqual(len(calc.stations), len(calc.resources))
 
         for resource in calc.resources:
             self.assertNotIn(resource, calc.variables)
@@ -50,11 +51,11 @@ class ApplicationTest(unittest.TestCase):
 
     def test_main(self):
         user_input = [
-            "1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather",
-            "1 anvil_bench = 40 iron_ingot + 20 wood + 10 stone",
-            "1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
-            "1 iron_ingot = 2 iron_ore",
-            "10 stick = 1 wood",
+            "character : 1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather",
+            "crafting_bench : 1 anvil_bench = 40 iron_ingot + 20 wood + 10 stone",
+            "crafting_bench : 1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
+            "stone_furnace : 1 iron_ingot = 2 iron_ore",
+            "character : 10 stick = 1 wood",
             "1 crafting_bench",
             "exit",
         ]
@@ -120,8 +121,8 @@ class ApplicationTest(unittest.TestCase):
             "Usage: ./application.py -g <inputfile>",
             "option -i not recognized",
             "Usage: ./application.py -g <inputfile>",
-            "Usage: ./application.py -g <inputfile>",
-            "Usage: ./application.py -g <inputfile>",
+            "No such file or directory: '-i'",
+            "No such file or directory: '-g'",
             "option -i not recognized",
             "No such file or directory: 'non_existent_file'",
         ]

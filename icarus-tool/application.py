@@ -1,5 +1,4 @@
-﻿from lib2to3.pgen2.token import EQUAL
-from calculator import Calculator, Equation, Resource
+﻿from calculator import Calculator, Equation, Resource
 import sys, getopt
 
 
@@ -129,12 +128,13 @@ class Application:
             # Parse command line arguments.
             opts, args = getopt.getopt(argv[1:], "g", ["gnu"])
 
-            # Import equations from a file.
-            if len(args) == 1:
-                file_system = FileSystem(args[0])
-                file_system.read(self.calculator)
-            else:
+            if args == []:
                 raise ArgumentError
+
+            # Import equations from files.
+            for argument in args:
+                file_system = FileSystem(argument)
+                file_system.read(self.calculator)
 
             # Configure program based on options.
             for opt, arg in opts:

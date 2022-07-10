@@ -152,8 +152,8 @@ class CalculatorTest(unittest.TestCase):
 
         self.assertEqual([], calc.get_keywords())
 
-        calc.assign_equation("1 wood_spear = 12 fiber + 18 stick")
-        calc.assign_equation("10 stick = 1 wood")
+        calc.assign_equation("character : 1 wood_spear = 12 fiber + 18 stick")
+        calc.assign_equation("character : 10 stick = 1 wood")
 
         self.assertEqual(["wood_spear", "stick"], calc.get_keywords())
 
@@ -161,9 +161,9 @@ class CalculatorTest(unittest.TestCase):
         """An equation should be stored in a dictionary as follows."""
         calc = Calculator()
 
-        calc.assign_equation("1 wood_spear = 12 fiber + 18 stick")
-        calc.assign_equation("10 stick = 1 wood")
-        calc.assign_equation("1 steel_screw = 1/100 steel_ingot")
+        calc.assign_equation("character : 1 wood_spear = 12 fiber + 18 stick")
+        calc.assign_equation("character : 10 stick = 1 wood")
+        calc.assign_equation("machining_bench : 1 steel_screw = 1/100 steel_ingot")
 
         e1 = calc.resources["wood_spear"]
         e2 = calc.resources["stick"]
@@ -180,11 +180,11 @@ class CalculatorTest(unittest.TestCase):
         """
         calc = Calculator()
 
-        calc.assign_equation("1 rope = 12 fiber")
+        calc.assign_equation("crafting_bench : 1 rope = 12 fiber")
         with self.assertRaises(ValueError) as err1:
-            calc.assign_equation("1 rope = 12 fiber")
+            calc.assign_equation("crafting_bench : 1 rope = 12 fiber")
         with self.assertRaises(ValueError) as err2:
-            calc.assign_equation("1 rope = 5 leather")
+            calc.assign_equation("character : 1 rope = 5 leather")
 
         self.assertEqual("Name is already in use: rope", str(err1.exception))
         self.assertEqual("Name is already in use: rope", str(err2.exception))
@@ -207,15 +207,17 @@ class CalculatorTest(unittest.TestCase):
         calc = Calculator()
 
         error_input = [
-            "1 lightning_rod = 10 copper ingot",
-            "1 lightning rod = 10 copper_ingot",
-            "lightning_rod = 10 copper_ingot",
-            "1 lightning_rod = copper_ingot",
-            "1 1 lightning_rod = 10 copper_ingot",
-            "1 lightning_rod = 10 10 copper_ingot",
-            "1 lightning_rod = 10 copper_ingot +",
-            "1 lightning_rod = + 10 copper_ingot",
-            "1 lightning_rod 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod = 10 copper ingot",
+            "crafting_bench : 1 lightning rod = 10 copper_ingot",
+            "crafting_bench : lightning_rod = 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod = copper_ingot",
+            "crafting_bench : 1 1 lightning_rod = 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod = 10 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod = 10 copper_ingot +",
+            "crafting_bench : 1 lightning_rod = + 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod 10 copper_ingot",
+            "crafting_bench : 1 lightning_rod + 10 copper_ingot",
+            "1 lightning_rod = 10 copper_ingot",
             "1 lightning_rod + 10 copper_ingot",
         ]
 
@@ -243,14 +245,7 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual("1 wood", str(e3))
 
     def test_search_variable(self):
-        calc = Calculator()
-
-        calc.assign_equation(
-            "1 hunting_rifle = 12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
-        )
-        calc.assign_equation("100 steel_screw = 1 steel_ingot")
-        calc.assign_equation("1 steel_ingot = 1 steel_bloom")
-        calc.assign_equation("1 steel_bloom = 6 iron_ore + 1 coal_ore")
+        calc = self.calc
 
         l1 = calc.resources["hunting_rifle"]
         l2 = calc.resources["steel_ingot"]

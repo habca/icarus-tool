@@ -92,11 +92,15 @@ class Calculator:
     def __init__(self):
         self.resources: dict[str, Equation] = dict()
         self.variables: list[str] = list()
+        self.stations: dict[str, str] = dict()
         self.validator: Validator = Validator(self)
 
     def assign_equation(self, assignment: str) -> None:
         # Validate an assignment before processing any further.
         self.validator.validate_syntax_assignment(assignment)
+
+        # Every craftable resource should have a crafting station.
+        station, assignment = assignment.split(" : ")
 
         # Separate an assignment into a Resource and an Equation.
         left, right = assignment.split(" = ")
@@ -109,6 +113,7 @@ class Calculator:
         self.validator.validate_value_assignment(resource)
 
         self.resources[resource.name] = equation
+        self.stations[resource.name] = station
 
         # Resource will be removed from the variables list when it's assigned.
         self.variables = [var for var in self.variables if var != resource.name]
@@ -193,7 +198,7 @@ class Validator:
         num = Validator.pattern_num
         var = Validator.pattern_var
 
-        pattern = re.compile(f"{num} {var} = {num} {var}( \+ {num} {var})*")
+        pattern = re.compile(f"{var} : {num} {var} = {num} {var}( \+ {num} {var})*")
         if not pattern.fullmatch(assignment):
             raise SyntaxError("SyntaxError: " + assignment)
 
