@@ -420,6 +420,43 @@ class CalculatorTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             calc.find_similar(e1)["anvil_bench"]
 
+    def test_group_by_station(self):
+        calc = self.calc
+
+        r1 = Resource(Fraction(20), "steel_ingot")
+        r2 = Resource(Fraction(20), "steel_screw")
+
+        e1 = Equation([r1, r2])
+        e2 = Equation([])
+
+        groups, total = calc.group_by_station(e1, dict(), e2)
+
+        r3 = Resource(Fraction(21), "steel_ingot")
+        r4 = Resource(Fraction(21), "steel_bloom")
+
+        r5 = Resource(Fraction(126), "iron_ore")
+        r6 = Resource(Fraction(21), "coal_ore")
+
+        self.assertEqual(Equation([r2]), groups["machining_bench"])
+        self.assertEqual(Equation([r3]), groups["concrete_furnace"])
+        self.assertEqual(Equation([r4]), groups["mortar_and_pestle"])
+        self.assertEqual(Equation([r5, r6]), total)
+
+    def test_resources_per_station(self):
+        calc = self.calc
+
+        e1 = Equation([Resource(Fraction(1), "biofuel_generator")])
+
+        r1 = Resource(Fraction(20), "steel_ingot")
+        r2 = Resource(Fraction(8), "copper_ingot")
+        r3 = Resource(Fraction(12), "electronics")
+        r4 = Resource(Fraction(20), "steel_screw")
+        r5 = Resource(Fraction(2), "glass")
+
+        expected = Equation([r1, r2, r3, r4, r5])
+
+        self.assertEqual(expected, calc.resources_per_station(e1))
+
 
 if __name__ == "__main__":
     unittest.main()

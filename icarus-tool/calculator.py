@@ -3,7 +3,6 @@ import difflib
 import math
 import re
 from typing import Iterator
-from unittest import result
 
 
 class Resource:
@@ -147,6 +146,43 @@ class Calculator:
                 break
 
         return equations
+
+    def group_by_station(
+        self, equation: Equation, groups: dict[str, Equation], total: Equation
+    ) -> tuple[dict[str, Equation], Equation]:
+        """
+        Substitutes resources in an equation and groups those
+        resources by their respective crafting stations.
+        Populates a dictionary representing crafting stations.
+        """
+        for resource in equation:
+            if resource.name not in self.stations:
+                total.resources.append(resource)
+                continue
+
+            station: str = self.stations[resource.name]
+            if station not in groups.keys():
+                groups[station] = Equation([])
+
+            resources: Equation = groups[station]
+            resources.resources.append(resource)
+            groups[station] = resources.evaluate()
+
+            if resource.name in self.resources.keys():
+                substituted: Equation = self.resources[resource.name]
+                substituted = substituted.multiply(resource.amount)
+                substituted = substituted.evaluate()
+                groups, total = self.group_by_station(substituted, groups, total)
+
+        return groups, total.evaluate()
+
+    def resources_per_station(self, equation: Equation) -> Equation:
+        crafting_cost = Equation([])
+        for resource in equation:
+            for new_resource in self.resources[resource.name]:
+                new_resource.amount *= resource.amount
+                crafting_cost.resources.append(new_resource)
+        return crafting_cost.evaluate()
 
     def substitute_variables(self, equation: Equation) -> Equation:
         new_resources = []

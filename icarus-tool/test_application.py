@@ -32,6 +32,7 @@ class FileSystemTest(unittest.TestCase):
             self.assertNotIn(resource, calc.variables)
         for variable in calc.variables:
             self.assertNotIn(variable, calc.resources)
+            self.assertNotIn(variable, calc.stations)
 
 
 class ApplicationTest(unittest.TestCase):
