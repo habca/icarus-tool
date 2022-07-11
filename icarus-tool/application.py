@@ -72,7 +72,7 @@ class Application:
         separator = "-" * (len(equation) + 2)
         equations = self.calculator.calculate(equation)
 
-        for i in range(1, len(equations)):
+        for i in range(len(equations)):
             previous = equations[i - 1]
             current = equations[i]
 
@@ -87,6 +87,7 @@ class Application:
             for resource_name in resource_names:
                 print(resource_name)
 
+        """
         print()
         print("TOTAL RESOURCES")
 
@@ -96,6 +97,7 @@ class Application:
         print(separator)
         for resource in current:
             print(resource)
+        """
 
     def recover(self, equation: str) -> None:
         resources = Equation.parse(equation)

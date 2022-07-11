@@ -1,4 +1,5 @@
 from fractions import Fraction
+from telnetlib import EXOPL
 from application import FileSystem
 from calculator import Calculator, Equation, Resource
 from test_application import FileSystemTest
@@ -456,6 +457,24 @@ class CalculatorTest(unittest.TestCase):
         expected = Equation([r1, r2, r3, r4, r5])
 
         self.assertEqual(expected, calc.resources_per_station(e1))
+
+    def test_order_by_station(self):
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
+        groups, _ = calc.group_by_station(e1, dict(), Equation([]))
+
+        expected = [
+            "fabricator",
+            "machining_bench",
+            "concrete_furnace",
+            "mortar_and_pestle",
+            "character",
+            "anvil_bench",
+            "stone_furnace",
+        ]
+
+        self.assertEqual(expected, calc.order_by_station(groups))
 
 
 if __name__ == "__main__":

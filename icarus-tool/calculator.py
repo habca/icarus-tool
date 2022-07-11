@@ -41,6 +41,15 @@ class Equation:
     def __str__(self) -> str:
         return " + ".join([str(resource) for resource in self.resources])
 
+    def __repr__(self) -> str:
+        # AssertionError: <calculator.Equation object at 0x7f685b1b3ee0> != <calculator.Equation object at 0x7f685b1cb1c0>
+        # AssertionError: 60 fiber + 50 wood + 12 stone + 20 leather != 1 crafting_bench
+        return str(self)
+
+    def filter(self, resource: Resource) -> "Equation":
+        resources = [r for r in self.resources if r != resource]
+        return Equation(resources)
+
     @classmethod
     def parse(cls, equation: str) -> "Equation":
         resources = [Resource.parse(r) for r in equation.split(" + ")]
@@ -135,6 +144,7 @@ class Calculator:
         # Ensure there are only pre-assigned variable names.
         self.validator.validate_value_calculation(equation)
 
+        """
         equations = [equation]
         while True:
             equation = self.substitute_variables(equation)
@@ -144,45 +154,15 @@ class Calculator:
             # Equation did not change so it is ready.
             if [r for r in equation if r.name in self.resources] == []:
                 break
+        """
+
+        # TODO sekava funktiokutsu
+        grouped_resources, variables = self.group_by_station(equation, {}, Equation([]))
+        ordered_stations = self.order_by_station(grouped_resources)
+        equations = [grouped_resources[station] for station in ordered_stations]
+        equations.append(variables)
 
         return equations
-
-    def group_by_station(
-        self, equation: Equation, groups: dict[str, Equation], total: Equation
-    ) -> tuple[dict[str, Equation], Equation]:
-        """
-        Substitutes resources in an equation and groups those
-        resources by their respective crafting stations.
-        Populates a dictionary representing crafting stations.
-        """
-        for resource in equation:
-            if resource.name not in self.stations:
-                total.resources.append(resource)
-                continue
-
-            station: str = self.stations[resource.name]
-            if station not in groups.keys():
-                groups[station] = Equation([])
-
-            resources: Equation = groups[station]
-            resources.resources.append(resource)
-            groups[station] = resources.evaluate()
-
-            if resource.name in self.resources.keys():
-                substituted: Equation = self.resources[resource.name]
-                substituted = substituted.multiply(resource.amount)
-                substituted = substituted.evaluate()
-                groups, total = self.group_by_station(substituted, groups, total)
-
-        return groups, total.evaluate()
-
-    def resources_per_station(self, equation: Equation) -> Equation:
-        crafting_cost = Equation([])
-        for resource in equation:
-            for new_resource in self.resources[resource.name]:
-                new_resource.amount *= resource.amount
-                crafting_cost.resources.append(new_resource)
-        return crafting_cost.evaluate()
 
     def substitute_variables(self, equation: Equation) -> Equation:
         new_resources = []
@@ -221,6 +201,65 @@ class Calculator:
             if words != [] and resource.name not in self.resources:
                 similar_words[resource.name] = words
         return similar_words
+
+    def group_by_station(
+        self, equation: Equation, groups: dict[str, Equation], total: Equation
+    ) -> tuple[dict[str, Equation], Equation]:
+        """Groups resources based on which station they are crafted in."""
+        for resource in equation:
+            if resource.name in self.variables:
+                total.resources.append(resource)
+                continue
+
+            station = self.stations[resource.name]
+            if station not in groups.keys():
+                groups[station] = Equation([])
+
+            groups[station].resources.append(resource)
+            groups[station] = groups[station].evaluate()
+
+            if resource.name in self.resources.keys():
+                substituted = self.resources[resource.name]
+                substituted = substituted.multiply(resource.amount)
+                substituted = substituted.evaluate()
+                groups, total = self.group_by_station(substituted, groups, total)
+
+        # TODO tuplen kanssa ongelmia
+        return groups, total.evaluate()
+
+    def order_by_station(self, groups: dict[str, Equation]) -> list[str]:
+        """Regroup resources based on which order they are crafted in."""
+        new_groups: list[str] = []
+        available_stations = list(groups.keys())
+        while len(new_groups) < len(groups):
+            for station in available_stations:
+                equation: Equation = groups[station]
+                equation = self.resources_per_station(equation)
+
+                available = available_stations[:]
+                available.remove(station)
+
+                # TODO lippumuuttuja huono
+                lippu = True
+                for temp in available:
+                    for resource in groups[temp]:
+                        found = self.search_variable(resource.name, equation, True)
+                        if found != []:
+                            lippu = False
+
+                if lippu:
+                    new_groups.append(station)
+                    available_stations.remove(station)
+
+        return list(reversed(new_groups))
+
+    def resources_per_station(self, equation: Equation) -> Equation:
+        crafting_cost = Equation([])
+        for resource in equation:
+            for new_resource in self.resources[resource.name]:
+                new_resource.amount *= resource.amount
+                crafting_cost.resources.append(new_resource)
+        return crafting_cost.evaluate()
 
 
 class Validator:
