@@ -63,11 +63,7 @@ class ApplicationTest(unittest.TestCase):
 
         expected_output = [
             "------------------",
-            "60 fiber",
-            "50 wood",
-            "20 leather",
-            "12 stone",
-            "TOTAL RESOURCES",
+            "1 crafting_bench",
             "------------------",
             "60 fiber",
             "50 wood",

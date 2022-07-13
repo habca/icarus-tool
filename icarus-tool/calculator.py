@@ -19,6 +19,9 @@ class Resource:
     def __str__(self) -> str:
         return f"{self.amount} {self.name}"
 
+    def __repr__(self) -> str:
+        return str(self)
+
     @classmethod
     def parse(cls, resource: str) -> "Resource":
         amount, name = resource.split(" ")
@@ -48,6 +51,12 @@ class Equation:
 
     def filter(self, resource: Resource) -> "Equation":
         resources = [r for r in self.resources if r != resource]
+        return Equation(resources)
+
+    def make_copy(self) -> "Equation":
+        resources = []
+        for resource in self.resources:
+            resources.append(Resource(resource.amount, resource.name))
         return Equation(resources)
 
     @classmethod
@@ -156,13 +165,62 @@ class Calculator:
                 break
         """
 
+        equations = []
+        while True:
+            suodatettu = self.suodata(equation)
+            equations.append(suodatettu)
+
+            # Equation did not change so it is ready.
+            valmis = [r for r in equation if r.name in self.resources]
+            if valmis == []:
+                break
+
+            equation = self.korvaa(equation, suodatettu)
+            equation = equation.evaluate()
+
+        return equations
+
+    def suodata(self, equation: Equation) -> Equation:
+        """
+        Returns equation with only highest tier resources in it.
+        Example: 1 biofuel_extractor + 1 biofuel_generator -> 1 biofuel_generator
+        """
         # TODO sekava funktiokutsu
         grouped_resources, variables = self.group_by_station(equation, {}, Equation([]))
         ordered_stations = self.order_by_station(grouped_resources)
-        equations = [grouped_resources[station] for station in ordered_stations]
-        equations.append(variables)
 
-        return equations
+        # Resources can't be filtered based on crafting stations.
+        if ordered_stations == []:
+            return equation
+
+        current_station = ordered_stations.pop(0)
+
+        new_resources = []
+        for resource in equation:
+            temp: list[Resource] = [r for r in equation if r.name != resource.name]
+            found: list[str] = self.search_variable(resource.name, Equation(temp))
+            if found == [] and resource.name in self.resources:
+                station = self.stations[resource.name]
+                if station == current_station:
+                    new_resources.append(resource)
+
+        return Equation(new_resources)
+
+    def korvaa(self, equation: Equation, target: Equation):
+        new_resources = []
+        for resource in equation:
+            if resource.name in self.resources:
+                if resource in target.resources:
+                    substituted = self.resources[resource.name]
+                    substituted = substituted.make_copy()
+                    substituted = substituted.multiply(resource.amount)
+                    for new_resource in substituted:
+                        new_resources.append(new_resource)
+                else:
+                    new_resources.append(resource)
+            else:
+                new_resources.append(resource)
+        return Equation(new_resources)
 
     def substitute_variables(self, equation: Equation) -> Equation:
         new_resources = []
@@ -171,6 +229,7 @@ class Calculator:
             found: list[str] = self.search_variable(resource.name, Equation(temp))
             if found == [] and resource.name in self.resources:
                 expression = self.resources[resource.name]
+                expression = expression.make_copy()
                 expression = expression.multiply(resource.amount)
                 new_resources += expression.resources
             else:
@@ -185,10 +244,9 @@ class Calculator:
             if part.name == variable and not_first:
                 variables.append(part.name)
             if part.name in self.resources.keys():
-                expression = self.resources[part.name].resources
-                found: list[str] = self.search_variable(
-                    variable, Equation(expression), True
-                )
+                expression = self.resources[part.name]
+                expression = expression.make_copy()
+                found: list[str] = self.search_variable(variable, expression, True)
                 if found != []:
                     variables.append(part.name)
         return variables
@@ -206,6 +264,7 @@ class Calculator:
         self, equation: Equation, groups: dict[str, Equation], total: Equation
     ) -> tuple[dict[str, Equation], Equation]:
         """Groups resources based on which station they are crafted in."""
+        equation = equation.make_copy()
         for resource in equation:
             if resource.name in self.variables:
                 total.resources.append(resource)
@@ -220,6 +279,7 @@ class Calculator:
 
             if resource.name in self.resources.keys():
                 substituted = self.resources[resource.name]
+                substituted = substituted.make_copy()
                 substituted = substituted.multiply(resource.amount)
                 substituted = substituted.evaluate()
                 groups, total = self.group_by_station(substituted, groups, total)
@@ -256,7 +316,7 @@ class Calculator:
     def resources_per_station(self, equation: Equation) -> Equation:
         crafting_cost = Equation([])
         for resource in equation:
-            for new_resource in self.resources[resource.name]:
+            for new_resource in self.resources[resource.name].make_copy():
                 new_resource.amount *= resource.amount
                 crafting_cost.resources.append(new_resource)
         return crafting_cost.evaluate()

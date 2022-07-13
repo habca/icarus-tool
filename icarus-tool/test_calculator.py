@@ -1,5 +1,4 @@
 from fractions import Fraction
-from telnetlib import EXOPL
 from application import FileSystem
 from calculator import Calculator, Equation, Resource
 from test_application import FileSystemTest
@@ -475,6 +474,55 @@ class CalculatorTest(unittest.TestCase):
         ]
 
         self.assertEqual(expected, calc.order_by_station(groups))
+
+    def test_suodata(self):
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
+        e2 = Equation.parse("1 iron_ore + 1 wood")
+
+        r1 = Resource(Fraction(1), "biofuel_generator")
+
+        self.assertEqual(str(r1), str(calc.suodata(e1)))
+        self.assertEqual(e2, calc.suodata(e2))
+
+    def test_suodata_does_not_change_parameter(self):
+        calc = self.calc
+
+        mjono = "1 anvil_bench + 1 anvil_bench"
+        e1 = Equation.parse(mjono)
+
+        suodatettu = calc.suodata(e1)
+
+        self.assertEqual(mjono, str(e1))
+
+    def test_korvaa(self):
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
+        e2 = Equation.parse("1 biofuel_generator")
+        e3 = Equation.parse(
+            "1 biofuel_extractor + 20 steel_ingot + 8 copper_ingot + 12 electronics + 20 steel_screw + 2 glass"
+        )
+
+        self.assertEqual(e3, calc.korvaa(e1, e2))
+
+        e1 = Equation.parse("1 biofuel_extractor + 2 biofuel_generator")
+        e2 = Equation.parse("2 biofuel_generator")
+        e3 = Equation.parse(
+            "1 biofuel_extractor + 40 steel_ingot + 16 copper_ingot + 24 electronics + 40 steel_screw + 4 glass"
+        )
+
+        self.assertEqual(e3, calc.korvaa(e1, e2))
+
+    def test_korvaa_2(self):
+        calc = self.calc
+
+        e1 = Equation.parse("40 iron_ingot + 20 wood + 10 stone")
+        e2 = Equation.parse("40 iron_ingot")
+        e3 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
+
+        self.assertEqual(e3, calc.korvaa(e1, e2))
 
 
 if __name__ == "__main__":
