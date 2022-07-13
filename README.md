@@ -1,7 +1,7 @@
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-An unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions much easier.
+A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions much easier.
 
 ### Windows
 
@@ -21,7 +21,7 @@ deactivate
 
 ### Linux
 
-The readline package is most likely already installed as a dependency of Bash. Much like python should be pre-installed with the distribution. A creation of virtual environment is not necessary at all but here is how.
+The `readline` package is most likely already installed as a dependency of Bash. Much like python should be pre-installed with the distribution. A creation of virtual environment is not necessary at all but here is how.
 
 ```
 python -m venv .venv
@@ -70,36 +70,80 @@ biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
 > 1 biofuel_extractor + 1 biofuel_
 biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
 > 1 biofuel_extractor + 1 biofuel_generator
+===========================================
+FABRICATOR
+===========================================
+1 biofuel_generator
 -------------------------------------------
-21 steel_ingot
+20 steel_ingot
 20 steel_screw
-17 refined_gold
-15 iron_ingot
 12 electronics
-10 copper_nail
  8 copper_ingot
  2 glass
+===========================================
+MACHINING BENCH
+===========================================
+20 steel_screw
+12 electronics
+ 1 biofuel_extractor
 -------------------------------------------
-156 iron_ore
- 45 copper_ingot
- 24 epoxy
- 24 organic_resin
-  2 silica_ore
+36 copper_ingot
+24 epoxy
+24 organic_resin
+17 refined_gold
+15 iron_ingot
+10 copper_nail
+ 1 steel_ingot
+===========================================
+CONCRETE FURNACE
+===========================================
+21 steel_ingot
+17 refined_gold
+ 2 glass
 -------------------------------------------
-96 tree_sap
-90 copper_ore
-63 wood
-48 sulfur
 34 gold_ore
-24 oxite
+21 steel_bloom
+ 2 silica_ore
+===========================================
+MORTAR AND PESTLE
+===========================================
+24 epoxy
+24 organic_resin
 21 steel_bloom
 -------------------------------------------
-384 stick
+126 iron_ore
+ 96 tree_sap
+ 48 sulfur
+ 24 oxite
+ 24 wood
  21 coal_ore
+===========================================
+96 tree_sap
 -------------------------------------------
-
+384 stick
+===========================================
+ANVIL BENCH
+===========================================
+10 copper_nail
+-------------------------------------------
+1 copper_ingot
+===========================================
+CHARACTER
+===========================================
+384 stick
+-------------------------------------------
+39 wood
+===========================================
+STONE FURNACE
+===========================================
+45 copper_ingot
+15 iron_ingot
+-------------------------------------------
+90 copper_ore
+30 iron_ore
+===========================================
 TOTAL RESOURCES
--------------------------------------------
+===========================================
 156 iron_ore
  90 copper_ore
  63 wood
@@ -125,6 +169,6 @@ Did you mean?
 
 ### Visual Studio Code
 
-To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in editor.
+To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in the editor.
 
 Enable from the settings `Editor: Format On Save`.

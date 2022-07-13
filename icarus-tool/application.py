@@ -1,4 +1,5 @@
-﻿from calculator import Calculator, Equation, Resource
+﻿import resource
+from calculator import Calculator, Equation, Resource
 import sys, getopt
 
 
@@ -72,20 +73,33 @@ class Application:
         separator = "-" * (len(equation) + 2)
         equations = self.calculator.calculate(equation)
 
+        previous_station = None
         for i in range(len(equations)):
-            previous = equations[i - 1]
-            current = equations[i]
-
-            resource_list: list[Resource] = [
-                r for r in current if str(r) not in str(previous)
-            ]
-            resources = Equation(resource_list)
+            resources = equations[i]
             resources = resources.sort_resources()
-            resource_names: list[str] = resources.format_resources()
+            resource_names = resources.format_resources()
 
-            print(separator)
+            current_station = self.calculator.get_station(resources)
+            if current_station != previous_station:
+                previous_station = current_station
+
+                print(separator.replace("-", "="))
+                print(current_station.replace("_", " ").upper())
+                print(separator.replace("-", "="))
+            else:
+                print(separator.replace("-", "="))
+
             for resource_name in resource_names:
                 print(resource_name)
+
+            resources = self.calculator.resources_per_station(equations[i])
+            resources = resources.sort_resources()
+            resource_names = resources.format_resources()
+
+            if equations[i] != equations[-1]:
+                print(separator)
+                for resource_name in resource_names:
+                    print(resource_name)
 
         """
         print()

@@ -314,12 +314,24 @@ class Calculator:
         return list(reversed(new_groups))
 
     def resources_per_station(self, equation: Equation) -> Equation:
-        crafting_cost = Equation([])
+        crafting_cost = []
         for resource in equation:
-            for new_resource in self.resources[resource.name].make_copy():
-                new_resource.amount *= resource.amount
-                crafting_cost.resources.append(new_resource)
-        return crafting_cost.evaluate()
+            if resource.name in self.resources:
+                for new_resource in self.resources[resource.name].make_copy():
+                    new_resource.amount *= resource.amount
+                    crafting_cost.append(new_resource)
+            else:
+                crafting_cost.append(resource)
+        return Equation(crafting_cost).evaluate()
+
+    def get_station(self, equation: Equation) -> str:
+        equation = equation.make_copy()
+        if equation.resources == []:
+            raise ValueError("Equation was empty")
+        first_resource = equation.resources[0]
+        if first_resource.name not in self.stations:
+            return "total_resources"
+        return self.stations[first_resource.name]
 
 
 class Validator:

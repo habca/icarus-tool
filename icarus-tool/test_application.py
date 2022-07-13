@@ -1,3 +1,4 @@
+from asyncore import read
 from typing import Any, Callable
 from application import Application, FileSystem
 from calculator import Calculator
@@ -36,6 +37,8 @@ class FileSystemTest(unittest.TestCase):
 
 
 class ApplicationTest(unittest.TestCase):
+    filename = "data/output.txt"
+
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
@@ -62,9 +65,18 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = [
-            "------------------",
+            "==================",
+            "CHARACTER",
+            "==================",
             "1 crafting_bench",
             "------------------",
+            "60 fiber",
+            "50 wood",
+            "20 leather",
+            "12 stone",
+            "==================",
+            "TOTAL RESOURCES",
+            "==================",
             "60 fiber",
             "50 wood",
             "20 leather",
@@ -74,6 +86,25 @@ class ApplicationTest(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(
             expected_output, ApplicationTest.get_output(user_input, Application().main)
+        )
+
+    def test_main_from_output_file(self):
+        user_input = [
+            "1 biofuel_extractor + 1 biofuel_generator",
+            "exit",
+        ]
+
+        with open(ApplicationTest.filename) as reader:
+            data = reader.read()
+        expected_output = data.splitlines()
+        expected_output[:1] = []  # Remove first line.
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        self.maxDiff = None
+        self.assertEqual(
+            expected_output, ApplicationTest.get_output(user_input, application.main)
         )
 
     def test_recover(self):

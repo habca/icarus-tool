@@ -442,7 +442,7 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(Equation([r4]), groups["mortar_and_pestle"])
         self.assertEqual(Equation([r5, r6]), total)
 
-    def test_resources_per_station(self):
+    def test_resources_per_station_1(self):
         calc = self.calc
 
         e1 = Equation([Resource(Fraction(1), "biofuel_generator")])
@@ -456,6 +456,20 @@ class CalculatorTest(unittest.TestCase):
         expected = Equation([r1, r2, r3, r4, r5])
 
         self.assertEqual(expected, calc.resources_per_station(e1))
+
+    def test_resources_per_station_2(self):
+        """
+        Return the original equation since the
+        raw materials belong to the same group.
+        """
+        calc = self.calc
+
+        r1 = Resource(Fraction(40), "iron_ore")
+        r2 = Resource(Fraction(245), "fiber")
+
+        e1 = Equation([r1, r2])
+
+        self.assertEqual(e1, calc.resources_per_station(e1))
 
     def test_order_by_station(self):
         calc = self.calc
@@ -523,6 +537,19 @@ class CalculatorTest(unittest.TestCase):
         e3 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
 
         self.assertEqual(e3, calc.korvaa(e1, e2))
+
+    def test_get_station(self):
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_generator")
+        e2 = Equation.parse("1 iron_ore")
+        e3 = Equation([])
+
+        self.assertEqual("fabricator", calc.get_station(e1))
+        self.assertEqual("total_resources", calc.get_station(e2))
+        with self.assertRaises(ValueError) as err:
+            calc.get_station(e3)
+        self.assertEqual("Equation was empty", str(err.exception))
 
 
 if __name__ == "__main__":
