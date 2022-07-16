@@ -43,7 +43,6 @@ class ApplicationTest(unittest.TestCase):
         expected_output = [
             "Welcome to use Icarus tool",
             "--------------------------",
-            "amount name = amount name [+ amount name]",
             "amount name [+ amount name]",
         ]
 
@@ -54,11 +53,6 @@ class ApplicationTest(unittest.TestCase):
 
     def test_main(self):
         user_input = [
-            "character : 1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather",
-            "crafting_bench : 1 anvil_bench = 40 iron_ingot + 20 wood + 10 stone",
-            "crafting_bench : 1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
-            "stone_furnace : 1 iron_ingot = 2 iron_ore",
-            "character : 10 stick = 1 wood",
             "1 crafting_bench",
             "exit",
         ]
@@ -82,9 +76,21 @@ class ApplicationTest(unittest.TestCase):
             "12 stone",
         ]
 
+        lines = [
+            "character : 1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather",
+            "crafting_bench : 1 anvil_bench = 40 iron_ingot + 20 wood + 10 stone",
+            "crafting_bench : 1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
+            "stone_furnace : 1 iron_ingot = 2 iron_ore",
+            "character : 10 stick = 1 wood",
+        ]
+
+        application = Application()
+        for line in lines:
+            application.calculator.assign_equation(line)
+
         self.maxDiff = None
         self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, Application().main)
+            expected_output, ApplicationTest.get_output(user_input, application.main)
         )
 
     def test_application_biofuel_extractor_biofuel_generator(self):

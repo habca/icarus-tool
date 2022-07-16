@@ -43,9 +43,9 @@ class Application:
         self.calculator = Calculator()
 
     def help(self):
+        print()  # Empty line to make welcome text readable.
         print(welcome := "Welcome to use Icarus tool")
         print("-" * len(welcome))
-        print("amount name = amount name [+ amount name]")
         print("amount name [+ amount name]")
 
     def ask_input(self) -> str:
@@ -65,10 +65,6 @@ class Application:
         return equation
 
     def calculate(self, equation: str) -> None:
-        if "=" in equation:
-            self.calculator.assign_equation(equation)
-            return
-
         separator = "-" * (len(equation) + 2)
         equations = self.calculator.calculate(equation)
 
@@ -99,18 +95,6 @@ class Application:
                 print(separator)
                 for resource_name in resource_names:
                     print(resource_name)
-
-        """
-        print()
-        print("TOTAL RESOURCES")
-
-        current = current.sort_resources()
-        current = current.format_resources()
-
-        print(separator)
-        for resource in current:
-            print(resource)
-        """
 
     def recover(self, equation: str) -> None:
         resources = Equation.parse(equation)
