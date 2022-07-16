@@ -185,8 +185,7 @@ class Calculator:
         Returns equation with only highest tier resources in it.
         Example: 1 biofuel_extractor + 1 biofuel_generator -> 1 biofuel_generator
         """
-        # TODO sekava funktiokutsu
-        grouped_resources, variables = self.group_by_station(equation, {}, Equation([]))
+        grouped_resources = self.group_by_station(equation)
         ordered_stations = self.order_by_station(grouped_resources)
 
         # Resources can't be filtered based on crafting stations.
@@ -261,13 +260,16 @@ class Calculator:
         return similar_words
 
     def group_by_station(
-        self, equation: Equation, groups: dict[str, Equation], total: Equation
-    ) -> tuple[dict[str, Equation], Equation]:
+        self, equation: Equation, groups: dict[str, Equation] = None
+    ) -> dict[str, Equation]:
         """Groups resources based on which station they are crafted in."""
         equation = equation.make_copy()
+
+        if groups is None:
+            groups = dict()
+
         for resource in equation:
             if resource.name in self.variables:
-                total.resources.append(resource)
                 continue
 
             station = self.stations[resource.name]
@@ -282,10 +284,9 @@ class Calculator:
                 substituted = substituted.make_copy()
                 substituted = substituted.multiply(resource.amount)
                 substituted = substituted.evaluate()
-                groups, total = self.group_by_station(substituted, groups, total)
+                groups = self.group_by_station(substituted, groups)
 
-        # TODO tuplen kanssa ongelmia
-        return groups, total.evaluate()
+        return groups
 
     def order_by_station(self, groups: dict[str, Equation]) -> list[str]:
         """Regroup resources based on which order they are crafted in."""
@@ -304,7 +305,8 @@ class Calculator:
                 for temp in available:
                     for resource in groups[temp]:
                         found = self.search_variable(resource.name, equation, True)
-                        if found != []:
+                        # TODO kovakoodattu vakio huono
+                        if found != [] and found != ["aluminium_ingot"]:
                             lippu = False
 
                 if lippu:

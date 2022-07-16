@@ -271,7 +271,7 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(e4, calc.calculate("40 iron_ingot")[-1])
         self.assertEqual(e5, calc.calculate("8 stick")[-1])
 
-    def test_calculate_2(self):
+    def test_calculate_electric_extractor(self):
         """Crafting cost of an electric extractor."""
         calc = self.calc
 
@@ -326,7 +326,7 @@ class CalculatorTest(unittest.TestCase):
             calc.calculate("3 electric_extractor")[-1], electric_extractor2
         )
 
-    def test_calculate_3(self):
+    def test_calculate_hunting_rifle(self):
         """Crafting cost of a hunting rifle."""
         calc = self.calc
 
@@ -427,20 +427,15 @@ class CalculatorTest(unittest.TestCase):
         r2 = Resource(Fraction(20), "steel_screw")
 
         e1 = Equation([r1, r2])
-        e2 = Equation([])
 
-        groups, total = calc.group_by_station(e1, dict(), e2)
+        groups = calc.group_by_station(e1)
 
         r3 = Resource(Fraction(21), "steel_ingot")
         r4 = Resource(Fraction(21), "steel_bloom")
 
-        r5 = Resource(Fraction(126), "iron_ore")
-        r6 = Resource(Fraction(21), "coal_ore")
-
         self.assertEqual(Equation([r2]), groups["machining_bench"])
         self.assertEqual(Equation([r3]), groups["concrete_furnace"])
         self.assertEqual(Equation([r4]), groups["mortar_and_pestle"])
-        self.assertEqual(Equation([r5, r6]), total)
 
     def test_resources_per_station_1(self):
         calc = self.calc
@@ -475,7 +470,7 @@ class CalculatorTest(unittest.TestCase):
         calc = self.calc
 
         e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
-        groups, _ = calc.group_by_station(e1, dict(), Equation([]))
+        groups = calc.group_by_station(e1)
 
         expected = [
             "fabricator",
@@ -488,6 +483,28 @@ class CalculatorTest(unittest.TestCase):
         ]
 
         self.assertEqual(expected, calc.order_by_station(groups))
+
+    def test_order_by_station_revisit_workbench(self):
+        """
+        Some resources require more than one visit to the workbench.
+
+        Problem:
+        - concrete_furnace: carbon_fiber
+        - mortar_and_pestle: carbon_paste
+        - concrete_furnace: aluminium_ingot
+        """
+        calc = self.calc
+
+        r1 = Resource(Fraction(8), "carbon_fiber")
+        r2 = Resource(Fraction(1), "steel_ingot")
+        e1 = Equation([r1, r2])
+
+        grouped = calc.group_by_station(e1)
+        ordered = calc.order_by_station(grouped)
+
+        expected = ["concrete_furnace", "mortar_and_pestle", "character"]
+
+        self.assertEqual(expected, ordered)
 
     def test_suodata(self):
         calc = self.calc
@@ -506,7 +523,7 @@ class CalculatorTest(unittest.TestCase):
         mjono = "1 anvil_bench + 1 anvil_bench"
         e1 = Equation.parse(mjono)
 
-        suodatettu = calc.suodata(e1)
+        calc.suodata(e1)
 
         self.assertEqual(mjono, str(e1))
 

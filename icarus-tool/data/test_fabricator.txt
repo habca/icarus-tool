@@ -1,0 +1,93 @@
+> 1 fabricator
+==============
+MACHINING BENCH
+==============
+1 fabricator
+--------------
+40 aluminium_ingot
+30 concrete_mix
+30 electronics
+30 steel_screw
+ 8 carbon_fiber
+==============
+30 electronics
+30 steel_screw
+--------------
+90 copper_ingot
+60 epoxy
+60 organic_resin
+30 refined_gold
+ 1 steel_ingot
+==============
+CEMENT MIXER
+==============
+30 concrete_mix
+--------------
+240 stone
+120 silica_ore
+ 30 tree_sap
+==============
+CONCRETE FURNACE
+==============
+30 refined_gold
+ 8 carbon_fiber
+ 1 steel_ingot
+--------------
+60 gold_ore
+ 8 carbon_paste
+ 1 steel_bloom
+==============
+MORTAR AND PESTLE
+==============
+8 carbon_paste
+1 steel_bloom
+--------------
+32 organic_resin
+16 epoxy
+ 8 aluminium_ingot
+ 8 silica_ore
+ 6 iron_ore
+ 1 coal_ore
+==============
+92 organic_resin
+76 epoxy
+--------------
+304 tree_sap
+152 sulfur
+ 92 oxite
+ 92 wood
+==============
+334 tree_sap
+--------------
+1336 stick
+==============
+STONE FURNACE
+==============
+90 copper_ingot
+--------------
+180 copper_ore
+==============
+CHARACTER
+==============
+1336 stick
+--------------
+134 wood
+==============
+CONCRETE FURNACE
+==============
+48 aluminium_ingot
+--------------
+48 aluminium_ore
+==============
+TOTAL RESOURCES
+==============
+240 stone
+226 wood
+180 copper_ore
+152 sulfur
+128 silica_ore
+ 92 oxite
+ 60 gold_ore
+ 48 aluminium_ore
+  6 iron_ore
+  1 coal_ore

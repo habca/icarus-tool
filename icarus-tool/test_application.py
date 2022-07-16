@@ -1,4 +1,3 @@
-from asyncore import read
 from typing import Any, Callable
 from application import Application, FileSystem
 from calculator import Calculator
@@ -88,24 +87,57 @@ class ApplicationTest(unittest.TestCase):
             expected_output, ApplicationTest.get_output(user_input, Application().main)
         )
 
-    def test_main_from_output_file(self):
+    def test_application_biofuel_extractor_biofuel_generator(self):
         user_input = [
             "1 biofuel_extractor + 1 biofuel_generator",
             "exit",
         ]
 
-        with open(ApplicationTest.filename) as reader:
-            data = reader.read()
-        expected_output = data.splitlines()
-        expected_output[:1] = []  # Remove first line.
+        expected_output = ApplicationTest.read_testfile(
+            "data/test_biofuel_extractor_biofuel_generator.txt"
+        )
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
 
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
         self.maxDiff = None
-        self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, application.main)
+        self.assertEqual(expected_output, actual_output)
+
+    def test_application_fabricator(self):
+        user_input = [
+            "1 fabricator",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile("data/test_fabricator.txt")
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
+
+    def test_application_cement_mixer_concrete_furnace(self):
+        user_input = [
+            "1 cement_mixer + 1 concrete_furnace",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "data/test_cement_mixer_concrete_furnace.txt"
         )
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
 
     def test_recover(self):
         user_input = [
@@ -181,6 +213,14 @@ class ApplicationTest(unittest.TestCase):
                 ]
                 args = [arg for arg in args if arg != ""]
                 return args
+
+    @classmethod
+    def read_testfile(cls, filename) -> list[str]:
+        with open(filename) as reader:
+            data = reader.read()
+        expected_output = data.splitlines()
+        expected_output[:1] = []  # Remove first line.
+        return expected_output
 
 
 if __name__ == "__main__":

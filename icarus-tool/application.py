@@ -1,5 +1,4 @@
-﻿import resource
-from calculator import Calculator, Equation, Resource
+﻿from calculator import Calculator, Equation
 import sys, getopt
 
 
