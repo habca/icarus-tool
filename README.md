@@ -54,7 +54,6 @@ The manual will be displayed and program waits for a keyboard input.
 ```
 Welcome to use Icarus tool
 --------------------------
-amount name = amount name [+ amount name]
 amount name [+ amount name]
 
 > 

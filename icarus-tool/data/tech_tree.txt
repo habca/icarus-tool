@@ -75,7 +75,7 @@ character : 1 wood_halfpieces = 12 fiber + 20 wood
 character : 1 wood_ladder = 6 fiber + 10 wood
 character : 1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather
 
-# TIER 2 - CRAFTING BENCH (37 kpl)
+# TIER 2 - CRAFTING BENCH (37 + 6 kpl)
 
 crafting_bench : 1 oxite_dissolver = 18 wood + 24 leather + 8 bone
 crafting_bench : 1 rain_reservoir = 8 stick + 24 wood + 60 stone + 8 leather
@@ -115,7 +115,14 @@ crafting_bench : 1 reinforced_door = 4 wood + 6 iron_ingot + 8 iron_nail + 4 rop
 crafting_bench : 1 reinforced_ladder = 10 wood + 8 iron_ingot + 8 iron_nail
 crafting_bench : 1 machining_bench = 20 wood + 12 stone + 120 iron_nail + 40 iron_ingot + 10 epoxy + 24 rope
 
-# TIER 2 - ANVIL BENCH (17 kpl)
+crafting_bench : 1 rope = 12 fiber
+crafting_bench : 1 scorpion_hedgehog = 1 medium_wood_hedgehog + 1 scorpion_tail
+crafting_bench : 1 scorpion_pincer_trap = 4 stone + 4 stick + 1 scorpion_pincer
+crafting_bench : 1 chimney_extension = 40 stone + 20 wood
+crafting_bench : 1 chimney_cap = 40 stone + 20 wood
+crafting_bench : 1 chimney_cap_half = 30 stone + 15 wood
+
+# TIER 2 - ANVIL BENCH (17 + 2 kpl)
 
 anvil_bench : 1 iron_axe = 5 wood + 4 leather + 6 iron_ingot + 2 iron_nail
 anvil_bench : 1 iron_pickaxe = 5 wood + 4 leather + 6 iron_ingot
@@ -135,7 +142,10 @@ anvil_bench : 1 copper_bolt = 1 wood + 1 copper_ingot
 anvil_bench : 1 iron_bolt = 1 wood + 2 iron_ingot
 anvil_bench : 1 steel_bolt = 1 wood + 2 steel_ingot
 
-# TIER 2 - MORTAR AND PESTLE (7 kpl)
+anvil_bench : 10 iron_nail = 1 iron_ingot
+anvil_bench : 10 copper_nail = 1 copper_ingot
+
+# TIER 2 - MORTAR AND PESTLE (7 + 2 kpl)
 
 mortar_and_pestle : 1 flour = 10 wheat
 mortar_and_pestle : 1 crushed_bone = 2 bone
@@ -144,6 +154,9 @@ mortar_and_pestle : 1 poison_paste = 2 spoiled_meat + 1 sulfur
 mortar_and_pestle : 1 carbon_paste = 1 silica_ore + 1 aluminium_ingot + 4 organic_resin + 2 epoxy
 mortar_and_pestle : 1 gunpowder = 1 sulfur + 3 charcoal
 mortar_and_pestle : 1 steel_bloom = 6 iron_ore + 1 coal_ore
+
+mortar_and_pestle : 1 organic_resin = 1 wood + 1 oxite
+mortar_and_pestle : 1 tree_sap = 4 stick
 
 # TIER 2 - TEXTILES BENCH (21 kpl)
 
@@ -226,7 +239,36 @@ masonry_bench : 1 stone_halfpitches = 6 wood + 20 stone + 4 leather + 6 iron_nai
 masonry_bench : 1 stone_halfpieces = 6 wood + 20 stone + 4 leather + 6 iron_nail
 masonry_bench : 1 stone_stairs = 6 wood + 20 stone + 4 leather + 6 iron_nail
 
-# TIER 3 - MACHINING BENCH (68 kpl)
+# TIER 2 - STONE FURNACE (2 kpl)
+
+stone_furnace : 1 iron_ingot = 2 iron_ore
+stone_furnace : 1 copper_ingot = 2 copper_ore
+
+# TIER 2 - FIREPLACE (21 kpl)
+
+fireplace : 1 cooked_meat = 1 raw_meat
+fireplace : 1 flatbread = 1 flatbread_dough
+fireplace : 1 charcoal = 1 spoiled_meat
+fireplace : 1 grilled_pumpkin = 1 pumpkin
+fireplace : 1 barbecue_carrot = 1 carrot
+fireplace : 1 hot_tea = 30 tea + 1 thermos
+fireplace : 1 hot_cocoa = 20 cocoa_seed + 1 thermos
+fireplace : 1 cooked_giant_steak = 1 giant_steak
+fireplace : 1 cooked_gamey_meat = 1 gamey_meat
+fireplace : 1 cooked_stringy_meat = 1 stringy_meat
+fireplace : 1 cooked_bacon = 1 raw_bacon
+fireplace : 1 cooked_fish = 1 raw_fish
+fireplace : 1 water = 1 ice + 1 waterskin
+fireplace : 1 charred_corn = 1 corn
+fireplace : 1 roast_squash = 1 squash
+fireplace : 1 mushroom_soup = 1 mushroom
+fireplace : 1 gorse_tea = 40 gorse_flower + 1 thermos
+fireplace : 1 hot_coffee = 40 coffee_bean + 1 thermos
+fireplace : 1 cooked_fatty_tbone = 1 fatty_t-bone
+fireplace : 1 cooked_soft_meat = 1 soft_meat
+fireplace : 1 cooked_white_meat = 1 white_meat
+
+# TIER 3 - MACHINING BENCH (68 + 2 kpl)
 
 machining_bench : 1 basic_wall_light = 15 iron_ingot + 6 glass + 10 copper_ingot
 machining_bench : 1 electronics = 1 refined_gold + 3 copper_ingot + 2 organic_resin + 2 epoxy
@@ -297,6 +339,9 @@ machining_bench : 1 aluminium_halfpieces = 4 aluminium_ore + 6 wood + 4 steel_sc
 machining_bench : 1 aluminium_ladder = 2 aluminium_ore + 2 wood + 6 steel_screw
 machining_bench : 1 fabricator = 40 aluminium_ingot + 30 electronics + 30 concrete_mix + 8 carbon_fiber + 30 steel_screw
 
+machining_bench : 100 steel_screw = 1 steel_ingot
+machining_bench : 10 steel_rebar = 1 steel_ingot
+
 # TIER 3 - KITCHEN BENCH (8 kpl)
 
 kitchen_bench : 1 anti-parasitic_pill = 1 anti-parasitic_tonic + 1 organic_resin + 5 charcoal
@@ -322,7 +367,7 @@ glassworking_bench : 1 glass_roof = 6 iron_ingot + 20 glass + 12 epoxy
 glassworking_bench : 1 heavy_glass_window = 12 iron_ingot + 18 glass + 4 epoxy
 glassworking_bench : 1 glass_roof_corner = 3 iron_ingot + 10 glass + 6 epoxy
 
-# TIER 3 - CEMENT MIXER (13 kpl)
+# TIER 3 - CEMENT MIXER (13 + 1 kpl)
 
 cement_mixer : 1 concrete_frame = 20 steel_rebar + 8 concrete_mix + 10 steel_screw
 cement_mixer : 1 concrete_beam = 8 steel_rebar + 2 concrete_mix + 2 steel_screw
@@ -337,6 +382,22 @@ cement_mixer : 1 concrete_stairs = 12 steel_rebar + 4 concrete_mix + 4 steel_scr
 cement_mixer : 1 concrete_roof/ramp = 12 steel_rebar + 4 concrete_mix + 4 steel_screw
 cement_mixer : 1 concrete_halfpitches = 10 steel_rebar + 4 concrete_mix + 4 steel_screw
 cement_mixer : 1 concrete_halfpieces = 10 steel_rebar + 4 concrete_mix + 4 steel_screw
+
+cement_mixer : 1 concrete_mix = 1 tree_sap + 8 stone + 4 silica_ore
+
+# TIER 3 - CONCRETE FURNACE (7 kpl)
+
+concret_furnace : 1 refined_gold = 2 gold_ore
+concret_furnace : 1 carbon_fiber = 1 carbon_paste
+concret_furnace : 1 titanium_ingot = 5 titanium_ore
+concret_furnace : 1 steel_ingot = 1 steel_bloom
+concret_furnace : 1 glass = 1 silica_ore
+concret_furnace : 1 aluminium_ingot = 1 aluminium_ore
+concret_furnace : 1 platinum_ingot = 5 platinum_ore
+
+# TIER 3 - BIOFUEL COMPOSTER (1 kpl)
+
+biofuel_composter : 1 fuel = 1 wood + 1 tree_sap
 
 # TIER 4 - FABRICATOR (45 kpl)
 
@@ -397,23 +458,7 @@ chemistry_bench : 1 high-quality_fertilizer = 1 basic_fertilizer + 5 sulfur
 
 # TODO MATERIAALIT
 
-crafting_bench : 1 rope = 12 fiber
-anvil_bench : 10 iron_nail = 1 iron_ingot
-anvil_bench : 10 copper_nail = 1 copper_ingot
-machining_bench : 100 steel_screw = 1 steel_ingot
-concrete_furnace : 1 glass = 1 silica_ore
-concrete_furnace : 1 steel_ingot = 1 steel_bloom
-concrete_furnace : 1 aluminium_ingot = 1 aluminium_ore
-concrete_furnace : 1 refined_gold = 2 gold_ore
-concrete_furnace : 1 carbon_fiber = 1 carbon_paste
-concrete_furnace : 1 titanium_ingot = 5 titanium_ore
 wood_composter : 1 basic_fertilizer = 10 spoiled_plants
 electric_furnace : 1 composites = 1 composite_paste
-stone_furnace : 1 iron_ingot = 2 iron_ore
-stone_furnace : 1 copper_ingot = 2 copper_ore
-mortar_and_pestle : 1 organic_resin = 1 wood + 1 oxite
-mortar_and_pestle : 1 tree_sap = 4 stick
-cement_mixer : 1 concrete_mix = 1 tree_sap + 8 stone + 4 silica_ore
-biofuel_composter : 1 fill_biofuel_can = 100 wood + 100 tree_sap
 
 # TODO korvaa alaviivat valilyonneilla
