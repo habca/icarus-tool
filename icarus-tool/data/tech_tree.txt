@@ -387,13 +387,13 @@ cement_mixer : 1 concrete_mix = 1 tree_sap + 8 stone + 4 silica_ore
 
 # TIER 3 - CONCRETE FURNACE (7 kpl)
 
-concret_furnace : 1 refined_gold = 2 gold_ore
-concret_furnace : 1 carbon_fiber = 1 carbon_paste
-concret_furnace : 1 titanium_ingot = 5 titanium_ore
-concret_furnace : 1 steel_ingot = 1 steel_bloom
-concret_furnace : 1 glass = 1 silica_ore
-concret_furnace : 1 aluminium_ingot = 1 aluminium_ore
-concret_furnace : 1 platinum_ingot = 5 platinum_ore
+concrete_furnace : 1 refined_gold = 2 gold_ore
+concrete_furnace : 1 carbon_fiber = 1 carbon_paste
+concrete_furnace : 1 titanium_ingot = 5 titanium_ore
+concrete_furnace : 1 steel_ingot = 1 steel_bloom
+concrete_furnace : 1 glass = 1 silica_ore
+concrete_furnace : 1 aluminium_ingot = 1 aluminium_ore
+concrete_furnace : 1 platinum_ingot = 5 platinum_ore
 
 # TIER 3 - BIOFUEL COMPOSTER (1 kpl)
 

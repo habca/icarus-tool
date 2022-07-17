@@ -27,7 +27,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="data\tech_tree.txt" />
-    <Content Include="data\TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="application.py" />
