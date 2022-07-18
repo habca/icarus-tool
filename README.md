@@ -1,3 +1,7 @@
+# Icarus tool
+
+The command line tool calculates total amount of resources and groups them by workstations.
+
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
@@ -52,12 +56,19 @@ The command line options supported by the program are as follows.
 The manual will be displayed and program waits for a keyboard input.
 
 ```
-Welcome to use Icarus tool
+Welcome to Icarus tool!
 --------------------------
 amount name [+ amount name]
 
 > 
 ```
+
+## The most common recipes
+
+- To fill one fuel tank: `1 biofuel_composter + 1 biofuel_can + 100 fuel`
+- To mine one exotic deposit: `1 biofuel_generator + 1 electricity_tool + 1 electric_extractor`
+- To exterminate world boss: `1 hunting_rifle + 100 rifle_round`
+- To attain poison resistance: `1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill`
 
 ## Features
 

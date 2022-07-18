@@ -44,7 +44,7 @@ class Application:
 
     def help(self):
         print()  # Empty line to make welcome text readable.
-        print(welcome := "Welcome to use Icarus tool")
+        print(welcome := "Welcome to Icarus tool!")
         print("-" * len(welcome))
         print("amount name [+ amount name]")
 
