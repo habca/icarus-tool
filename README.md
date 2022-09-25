@@ -57,7 +57,7 @@ The manual will be displayed and program waits for a keyboard input.
 
 ```
 Welcome to Icarus tool!
---------------------------
+-----------------------
 amount name [+ amount name]
 
 > 
@@ -65,20 +65,23 @@ amount name [+ amount name]
 
 ## The most common recipes
 
-- To fill one fuel tank: `1 biofuel_composter + 1 biofuel_can + 100 fuel`
-- To mine one exotic deposit: `1 biofuel_generator + 1 electricity_tool + 1 electric_extractor`
+- To fill fuel tank: `1 biofuel_composter + 1 biofuel_can + 100 fuel`
+- To mine exotic deposit: `1 biofuel_generator + 1 electricity_tool + 1 electric_extractor`
 - To exterminate world boss: `1 hunting_rifle + 100 rifle_round`
-- To attain poison resistance: `1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill`
+- To resist poison: `1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill`
+- To resist cold: `1 thermos + 4 hot_coffee`
 
 ## Features
 
-GNU readline provides a `TAB` completion, `^R` reverse search, `↑↓` history search and so on.
+GNU readline provides a `TAB` completion, `^R` reverse search, `^L` clear screen, `↑↓` history search and so on.
 
 ```
 > 1 biofuel_
-biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
+biofuel_can               biofuel_deep-mining_drill biofuel_generator         biofuel_radar
+biofuel_composter         biofuel_extractor         biofuel_lamp              biofuel_stove
 > 1 biofuel_extractor + 1 biofuel_
-biofuel_can       biofuel_composter biofuel_extractor biofuel_generator
+biofuel_can               biofuel_deep-mining_drill biofuel_generator         biofuel_radar
+biofuel_composter         biofuel_extractor         biofuel_lamp              biofuel_stove
 > 1 biofuel_extractor + 1 biofuel_generator
 ===========================================
 FABRICATOR
@@ -154,6 +157,9 @@ STONE FURNACE
 ===========================================
 TOTAL RESOURCES
 ===========================================
+1 biofuel_extractor
+1 biofuel_generator
+-------------------------------------------
 156 iron_ore
  90 copper_ore
  63 wood
