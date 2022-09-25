@@ -1,8 +1,8 @@
 from fractions import Fraction
+from typing import Iterator
 import difflib
 import math
 import re
-from typing import Iterator
 
 
 class Resource:

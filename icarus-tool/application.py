@@ -74,27 +74,39 @@ class Application:
             resources = resources.sort_resources()
             resource_names = resources.format_resources()
 
+            # Separate equations from each other.
+            print(separator.replace("-", "="))
+
+            # Update current station.
             current_station = self.calculator.get_station(resources)
             if current_station != previous_station:
                 previous_station = current_station
 
-                print(separator.replace("-", "="))
+                # Print the name of station when it changes.
                 print(current_station.replace("_", " ").upper())
                 print(separator.replace("-", "="))
-            else:
-                print(separator.replace("-", "="))
 
+            # The total resources equal to recipes listed in user input as is.
+            if equations[i] == equations[-1]:
+                resources = Equation.parse(equation)
+                resources = resources.sort_resources()
+                resource_names = resources.format_resources()
+
+            # Print recipes above the separator.
             for resource_name in resource_names:
                 print(resource_name)
 
+            # Separate recipes and resources by the separator.
+            print(separator)
+
+            # Pick resources craftable in the current station only.
             resources = self.calculator.resources_per_station(equations[i])
             resources = resources.sort_resources()
             resource_names = resources.format_resources()
 
-            if equations[i] != equations[-1]:
-                print(separator)
-                for resource_name in resource_names:
-                    print(resource_name)
+            # Print resources below the separator.
+            for resource_name in resource_names:
+                print(resource_name)
 
     def recover(self, equation: str) -> None:
         resources = Equation.parse(equation)

@@ -58,6 +58,9 @@ STONE FURNACE
 =====================================
 TOTAL RESOURCES
 =====================================
+1 cement_mixer
+1 concrete_furnace
+-------------------------------------
 200 stone
 192 fiber
  80 silica_ore

@@ -17,7 +17,7 @@ python -m pip install mypy
 python -m pip install black
 
 python -m unittest
-python -m mypy *.py
+python -m mypy application.py calculator.py test_application.py test_calculator.py
 python -m black *.py
 python application.py -g <inputfile>
 deactivate
@@ -168,11 +168,11 @@ The spell checker assists a user to find a correct spelling elegantly.
 
 ```
 > 1 biofuelextractor + 1 biofuel_gen
-ValueError: biofuelextractor
+ValueError: biofuelextractor, biofuel_gen
 
 Did you mean?
-- biofuelextractor: biofuel_extractor, biofuel_generator, electric_extractor
-- biofuel_gen: biofuel_can, biofuel_generator
+- biofuelextractor: biofuel_extractor, biofuel_generator, biofuel_radar
+- biofuel_gen: biofuel_can, biofuel_generator, biofuel_stove
 ```
 
 ## Developers

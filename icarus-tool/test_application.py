@@ -41,8 +41,8 @@ class ApplicationTest(unittest.TestCase):
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
-            "Welcome to use Icarus tool",
-            "--------------------------",
+            "Welcome to Icarus tool!",
+            "-----------------------",
             "amount name [+ amount name]",
         ]
 
@@ -70,6 +70,8 @@ class ApplicationTest(unittest.TestCase):
             "==================",
             "TOTAL RESOURCES",
             "==================",
+            "1 crafting_bench",
+            "------------------",
             "60 fiber",
             "50 wood",
             "20 leather",

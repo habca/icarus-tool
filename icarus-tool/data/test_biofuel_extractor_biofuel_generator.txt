@@ -73,6 +73,9 @@ STONE FURNACE
 ===========================================
 TOTAL RESOURCES
 ===========================================
+1 biofuel_extractor
+1 biofuel_generator
+-------------------------------------------
 156 iron_ore
  90 copper_ore
  63 wood

@@ -81,6 +81,8 @@ CONCRETE FURNACE
 ==============
 TOTAL RESOURCES
 ==============
+1 fabricator
+--------------
 240 stone
 226 wood
 180 copper_ore

@@ -248,7 +248,6 @@ stone_furnace : 1 copper_ingot = 2 copper_ore
 
 fireplace : 1 cooked_meat = 1 raw_meat
 fireplace : 1 flatbread = 1 flatbread_dough
-fireplace : 1 charcoal = 1 spoiled_meat
 fireplace : 1 grilled_pumpkin = 1 pumpkin
 fireplace : 1 barbecue_carrot = 1 carrot
 fireplace : 1 hot_tea = 30 tea + 1 thermos
@@ -449,7 +448,7 @@ fabricator : 1 electric_masonry_bench = 60 steel_ingot + 10 composites + 100 con
 
 # TIER 4 - MATERIAL PROCESSOR (1 kpl)
 
-material_processor : 1 composite_paste = 2 iron_ore + 1 silica_ore + 1 organic_resin + 1 gold_ore
+material_processor : 1 composite_paste = 2 iron_ore + 1 silica_ore + 1 organic_resin + 1 platinum_ore
 
 # TIER 4 - CHEMISTRY BENCH (2 kpl)
 
@@ -460,5 +459,12 @@ chemistry_bench : 1 high-quality_fertilizer = 1 basic_fertilizer + 5 sulfur
 
 wood_composter : 1 basic_fertilizer = 10 spoiled_plants
 electric_furnace : 1 composites = 1 composite_paste
+oxite_dissolver : 1 oxygen = 1 oxite
+carpentery_bench : 10 refined_wood = 1 wood
 
-# TODO korvaa alaviivat valilyonneilla
+potbelly_stove : 1 sweetcorn_soup = 1 corn
+potbelly_stove : 1 stew = 1 mushroom + 1 carrot + 1 raw_meat
+potbelly_stove : 1 soy_bean_stir-fry = 1 carrot + 1 mushroom + 1 soy_bean
+potbelly_stove : 1 fish_curry = 1 animal_fat + 1 soy_bean + 1 raw_fish
+potbelly_stove : 1 roast_vegetables = 1 pumpkin + 1 squash + 1 carrot
+potbelly_stove : 1 crispy_bacon = 1 raw_bacon + 1 animal_fat
