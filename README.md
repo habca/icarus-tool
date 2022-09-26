@@ -5,13 +5,13 @@ The command line tool calculates total amount of resources and groups them by wo
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions much easier.
+A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions a trifling matter.
 
 ### Windows
 
 ```
-py -m venv .venv
-.venv\Scripts\activate
+py -m venv .wenv
+.wenv\Scripts\activate
 python -m pip install pyreadline
 python -m pip install mypy
 python -m pip install black
@@ -19,7 +19,7 @@ python -m pip install black
 python -m unittest
 python -m mypy application.py calculator.py test_application.py test_calculator.py
 python -m black *.py
-python application.py -g <inputfile>
+python application.py -g data\tech_tree.txt
 deactivate
 ```
 
@@ -37,7 +37,7 @@ python -m pip install black
 python -m unittest
 python -m mypy *.py
 python -m black *.py
-python application.py -g <inputfile>
+python application.py -g data/tech_tree.txt
 deactivate
 ```
 
@@ -63,17 +63,97 @@ amount name [+ amount name]
 > 
 ```
 
-## The most common recipes
+### Practical example
+
+```
+> 1 stone_furnace + 1 anvil_bench + 1 machining_bench
+=====================================================
+CRAFTING BENCH
+=====================================================
+1 machining_bench
+-----------------------------------------------------
+120 iron_nail
+ 40 iron_ingot
+ 24 rope
+ 20 wood
+ 12 stone
+ 10 epoxy
+=====================================================
+ANVIL BENCH
+=====================================================
+120 iron_nail
+-----------------------------------------------------
+12 iron_ingot
+=====================================================
+CRAFTING BENCH
+=====================================================
+24 rope
+ 1 anvil_bench
+-----------------------------------------------------
+288 fiber
+ 40 iron_ingot
+ 20 wood
+ 10 stone
+=====================================================
+STONE FURNACE
+=====================================================
+92 iron_ingot
+-----------------------------------------------------
+184 iron_ore
+=====================================================
+MORTAR AND PESTLE
+=====================================================
+10 epoxy
+-----------------------------------------------------
+40 tree_sap
+20 sulfur
+=====================================================
+40 tree_sap
+-----------------------------------------------------
+160 stick
+=====================================================
+CRAFTING BENCH
+=====================================================
+1 stone_furnace
+-----------------------------------------------------
+80 stone
+12 leather
+12 wood
+ 4 stick
+=====================================================
+CHARACTER
+=====================================================
+164 stick
+-----------------------------------------------------
+17 wood
+=====================================================
+TOTAL RESOURCES
+=====================================================
+1 anvil_bench
+1 machining_bench
+1 stone_furnace
+-----------------------------------------------------
+288 fiber
+184 iron_ore
+102 stone
+ 69 wood
+ 20 sulfur
+ 12 leather
+```
+
+### The most common recipes
 
 - To fill fuel tank: `1 biofuel_composter + 1 biofuel_can + 100 fuel`
-- To mine exotic deposit: `1 biofuel_generator + 1 electricity_tool + 1 electric_extractor`
+- To mine exotic deposit: `1 biofuel_generator + 1 electricity_tool + 2 electric_extractor + 1 biofuel_radar`
 - To exterminate world boss: `1 hunting_rifle + 100 rifle_round`
 - To resist poison: `1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill`
-- To resist cold: `1 thermos + 4 hot_coffee`
+- To resist cold: `1 thermos + 4 hot_coffee + 4 heat_bandage`
 
 ## Features
 
 GNU readline provides a `TAB` completion, `^R` reverse search, `^L` clear screen, `↑↓` history search and so on.
+
+### Automatic completion
 
 ```
 > 1 biofuel_
@@ -82,93 +162,9 @@ biofuel_composter         biofuel_extractor         biofuel_lamp              bi
 > 1 biofuel_extractor + 1 biofuel_
 biofuel_can               biofuel_deep-mining_drill biofuel_generator         biofuel_radar
 biofuel_composter         biofuel_extractor         biofuel_lamp              biofuel_stove
-> 1 biofuel_extractor + 1 biofuel_generator
-===========================================
-FABRICATOR
-===========================================
-1 biofuel_generator
--------------------------------------------
-20 steel_ingot
-20 steel_screw
-12 electronics
- 8 copper_ingot
- 2 glass
-===========================================
-MACHINING BENCH
-===========================================
-20 steel_screw
-12 electronics
- 1 biofuel_extractor
--------------------------------------------
-36 copper_ingot
-24 epoxy
-24 organic_resin
-17 refined_gold
-15 iron_ingot
-10 copper_nail
- 1 steel_ingot
-===========================================
-CONCRETE FURNACE
-===========================================
-21 steel_ingot
-17 refined_gold
- 2 glass
--------------------------------------------
-34 gold_ore
-21 steel_bloom
- 2 silica_ore
-===========================================
-MORTAR AND PESTLE
-===========================================
-24 epoxy
-24 organic_resin
-21 steel_bloom
--------------------------------------------
-126 iron_ore
- 96 tree_sap
- 48 sulfur
- 24 oxite
- 24 wood
- 21 coal_ore
-===========================================
-96 tree_sap
--------------------------------------------
-384 stick
-===========================================
-ANVIL BENCH
-===========================================
-10 copper_nail
--------------------------------------------
-1 copper_ingot
-===========================================
-CHARACTER
-===========================================
-384 stick
--------------------------------------------
-39 wood
-===========================================
-STONE FURNACE
-===========================================
-45 copper_ingot
-15 iron_ingot
--------------------------------------------
-90 copper_ore
-30 iron_ore
-===========================================
-TOTAL RESOURCES
-===========================================
-1 biofuel_extractor
-1 biofuel_generator
--------------------------------------------
-156 iron_ore
- 90 copper_ore
- 63 wood
- 48 sulfur
- 34 gold_ore
- 24 oxite
- 21 coal_ore
-  2 silica_ore
 ```
+
+### Spell checker
 
 The spell checker assists a user to find a correct spelling elegantly.
 
@@ -188,3 +184,7 @@ Did you mean?
 To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in the editor.
 
 Enable from the settings `Editor: Format On Save`.
+
+### Visual Studio Community
+
+For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing. VS Code had no such error.

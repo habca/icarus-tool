@@ -1,10 +1,4 @@
 calculator-luokka ei parsi merkkijonoja vaan application-luokka.
 lisaa optio jolla tulostetaan tiedostoon
-poista sijoituslause koska ei ollut käytössä
+lisaa optio jolla kopioidaan leikepöydälle
 selvitä onko powershellissä joku ongelma mortarissa: 1 cement_mixer + 1 concrete_furnace
-
-> 1 stone_furnace + 1 anvil_bench + 1 machining_bench
-> crafting bench -> anvil bench -> iron nail -> crafting bench
-
->> 1 cement_mixer + 1 concrete_furnace
->> cement_mixer -> concrete_mix -> concrete_furnace

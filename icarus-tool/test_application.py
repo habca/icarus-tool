@@ -147,6 +147,24 @@ class ApplicationTest(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
+    def test_application_stone_furnace_anvil_bench_machining_bench(self):
+        user_input = [
+            "1 stone_furnace + 1 anvil_bench + 1 machining_bench",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "data/test_stone_furnace_anvil_bench_machining_bench.txt"
+        )
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
+
     def test_recover(self):
         user_input = [
             "1 anvi",

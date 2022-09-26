@@ -240,14 +240,25 @@ class Calculator:
     ) -> list[str]:
         variables = []
         for part in equation:
+
+            # Variable occures in a derivative expression.
             if part.name == variable and not_first:
                 variables.append(part.name)
+
+            # Variable is required elsewhere as a workbench.
+            if part.name in self.stations and not_first:
+                station = self.stations[part.name]
+                if variable == station:
+                    variables.append(variable)
+
+            # Recursive function call for a derivative expression.
             if part.name in self.resources.keys():
                 expression = self.resources[part.name]
                 expression = expression.make_copy()
                 found: list[str] = self.search_variable(variable, expression, True)
                 if found != []:
                     variables.append(part.name)
+
         return variables
 
     def find_similar(self, equation: Equation) -> dict[str, list[str]]:
@@ -306,7 +317,11 @@ class Calculator:
                     for resource in groups[temp]:
                         found = self.search_variable(resource.name, equation, True)
                         # TODO kovakoodattu vakio huono
-                        if found != [] and found != ["aluminium_ingot"]:
+                        if (
+                            found != []
+                            and found != ["aluminium_ingot"]
+                            and found != ["stone_furnace"]
+                        ):
                             lippu = False
 
                 if lippu:
