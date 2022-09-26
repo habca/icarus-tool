@@ -1,6 +1,6 @@
 # Icarus tool
 
-The command line tool calculates total amount of resources and groups them by workstations.
+The command line tool calculates total amount of resources and groups them by workstations. List of recipes was **last updated 27.09.2022** at the Icarus week forty two update.
 
 ## Getting started
 

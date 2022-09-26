@@ -409,7 +409,7 @@ class CalculatorTest(unittest.TestCase):
         e4 = Equation([Resource(1, "anvi")])
 
         self.assertEqual(["anvil_bench"], calc.find_similar(e1)["anvil"])
-        self.assertEqual(["anvil_bench"], calc.find_similar(e2)["anvil_bvve"])
+        self.assertIn("anvil_bench", calc.find_similar(e2)["anvil_bvve"])
         self.assertIn("anvil_bench", calc.find_similar(e3)["anvil_benchs"])
 
         # The dictionary omits searches that have no matches.

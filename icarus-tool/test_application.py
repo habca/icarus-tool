@@ -180,8 +180,8 @@ class ApplicationTest(unittest.TestCase):
             "- anvil: anvil_bench",
             "ValueError: anvil_benchs, anvil_bvve",
             "Did you mean?",
-            "- anvil_benchs: anvil_bench, masonry_bench, textiles_bench",
-            "- anvil_bvve: anvil_bench",
+            "- anvil_benchs: anvil_bench, masonry_bench, animal_bed",
+            "- anvil_bvve: anvil_bench, animal_bed",
         ]
 
         application = Application()
