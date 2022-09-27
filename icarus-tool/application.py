@@ -64,11 +64,17 @@ class Application:
         # Return a valid equation.
         return equation
 
-    def calculate(self, equation: str) -> None:
+    def calculate(self, equation_str: str) -> None:
         # To make program's output more readable.
-        separator = "-" * (len(equation) + 2)
+        separator = "-" * (len(equation_str) + 2)
 
-        # TODO: equation = Equation.parse(input)
+        # Validate an equation before processing any further.
+        self.calculator.validator.validate_syntax_calculation(equation_str)
+
+        equation = Equation.parse(equation_str)
+
+        # Ensure there are only pre-assigned variable names.
+        self.calculator.validator.validate_value_calculation(equation)
 
         # List of derivative equations explaining materials step by step.
         equations: list[Equation] = self.calculator.calculate(equation)
@@ -124,7 +130,7 @@ class Application:
         """
 
         # From here, print the program's input.
-        resources = Equation.parse(equation)
+        resources = Equation.parse(equation_str)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
 

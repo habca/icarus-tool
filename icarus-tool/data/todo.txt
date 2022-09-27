@@ -1,8 +1,3 @@
-calculator-luokka ei parsi merkkijonoja vaan application-luokka.
-lisaa optio jolla tulostetaan tiedostoon
-lisaa optio jolla kopioidaan leikepöydälle
-
 jarjesta workbenchit tierin mukaan
 - esim > 1 biofuel_extractor + 1 biofuel_generator -> fabricator
-
 poista vanhat suodata-funktiot joita ei tarvita

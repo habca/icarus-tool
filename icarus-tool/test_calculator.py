@@ -255,7 +255,7 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(["steel_bloom"], calc.search_variable("iron_ore", l2))
         self.assertEqual([], calc.search_variable("iron_ore", l3))
 
-    def test_calculate_1(self):
+    def test_calculate(self):
         """The final form of an equation should contain known variables."""
         calc = self.calc
 
@@ -265,11 +265,30 @@ class CalculatorTest(unittest.TestCase):
         e4 = Equation.parse("80 iron_ore")
         e5 = Equation.parse("1 wood")
 
-        self.assertEqual(e1, calc.calculate("1 crafting_bench")[-1])
-        self.assertEqual(e2, calc.calculate("1 anvil_bench")[-1])
-        self.assertEqual(e3, calc.calculate("2 stone_furnace")[-1])
-        self.assertEqual(e4, calc.calculate("40 iron_ingot")[-1])
-        self.assertEqual(e5, calc.calculate("8 stick")[-1])
+        self.assertEqual(e1, calc.calculate(Equation.parse("1 crafting_bench"))[-1])
+        self.assertEqual(e2, calc.calculate(Equation.parse("1 anvil_bench"))[-1])
+        self.assertEqual(e3, calc.calculate(Equation.parse("2 stone_furnace"))[-1])
+        self.assertEqual(e4, calc.calculate(Equation.parse("40 iron_ingot"))[-1])
+        self.assertEqual(e5, calc.calculate(Equation.parse("8 stick"))[-1])
+
+    def test_calculate_two_times(self):
+        """
+        More than one equation may have the same resource cost.
+        Same amount of resources should have same crafting cost.
+        """
+        calc = self.calc
+
+        self.assertEqual(
+            calc.calculate(Equation.parse("1 stone_axe"))[-1],
+            calc.calculate(Equation.parse("1 stone_pickaxe"))[-1],
+        )
+
+        anvil_bench1 = Equation.parse("1 anvil_bench + 1 anvil_bench")
+        anvil_bench2 = Equation.parse("2 anvil_bench")
+
+        self.assertEqual(
+            calc.calculate(anvil_bench1)[-1], calc.calculate(anvil_bench2)[-1]
+        )
 
     def test_calculate_electric_extractor(self):
         """Crafting cost of an electric extractor."""
@@ -278,9 +297,10 @@ class CalculatorTest(unittest.TestCase):
         iron_ingot1 = Equation.parse("40 iron_ore")
 
         self.assertEqual(
-            calc.calculate("40 iron_ore")[-1], calc.calculate(str(iron_ingot1))[-1]
+            calc.calculate(Equation.parse("40 iron_ore"))[-1],
+            calc.calculate(iron_ingot1)[-1],
         )
-        self.assertEqual(calc.calculate("40 iron_ore")[-1], iron_ingot1)
+        self.assertEqual(calc.calculate(Equation.parse("40 iron_ore"))[-1], iron_ingot1)
 
         electronics1 = Equation.parse(
             "5 refined_gold + 15 copper_ingot + 10 organic_resin + 10 epoxy"
@@ -296,18 +316,24 @@ class CalculatorTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            calc.calculate("5 electronics")[-1], calc.calculate(str(electronics1))[-1]
+            calc.calculate(Equation.parse("5 electronics"))[-1],
+            calc.calculate(electronics1)[-1],
         )
         self.assertEqual(
-            calc.calculate("5 electronics")[-1], calc.calculate(str(electronics2))[-1]
+            calc.calculate(Equation.parse("5 electronics"))[-1],
+            calc.calculate(electronics2)[-1],
         )
         self.assertEqual(
-            calc.calculate("5 electronics")[-1], calc.calculate(str(electronics3))[-1]
+            calc.calculate(Equation.parse("5 electronics"))[-1],
+            calc.calculate(electronics3)[-1],
         )
         self.assertEqual(
-            calc.calculate("5 electronics")[-1], calc.calculate(str(electronics4))[-1]
+            calc.calculate(Equation.parse("5 electronics"))[-1],
+            calc.calculate(electronics4)[-1],
         )
-        self.assertEqual(calc.calculate("5 electronics")[-1], electronics4)
+        self.assertEqual(
+            calc.calculate(Equation.parse("5 electronics"))[-1], electronics4
+        )
 
         electric_extractor1 = Equation.parse("60 iron_ingot + 15 electronics")
         electric_extractor2 = Equation.parse(
@@ -315,15 +341,16 @@ class CalculatorTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            calc.calculate("3 electric_extractor")[-1],
-            calc.calculate(str(electric_extractor1))[-1],
+            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
+            calc.calculate(electric_extractor1)[-1],
         )
         self.assertEqual(
-            calc.calculate("3 electric_extractor")[-1],
-            calc.calculate(str(electric_extractor2))[-1],
+            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
+            calc.calculate(electric_extractor2)[-1],
         )
         self.assertEqual(
-            calc.calculate("3 electric_extractor")[-1], electric_extractor2
+            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
+            electric_extractor2,
         )
 
     def test_calculate_hunting_rifle(self):
@@ -333,36 +360,42 @@ class CalculatorTest(unittest.TestCase):
         titanium_ingot1 = Equation.parse("200 titanium_ore")
 
         self.assertEqual(
-            calc.calculate("40 titanium_ingot")[-1],
-            calc.calculate(str(titanium_ingot1))[-1],
+            calc.calculate(Equation.parse("40 titanium_ingot"))[-1],
+            calc.calculate(titanium_ingot1)[-1],
         )
-        self.assertEqual(calc.calculate("40 titanium_ingot")[-1], titanium_ingot1)
+        self.assertEqual(
+            calc.calculate(Equation.parse("40 titanium_ingot"))[-1], titanium_ingot1
+        )
 
         epoxy_1 = Equation.parse("8 sulfur + 16 tree_sap")
         epoxy_2 = Equation.parse("8 sulfur + 64 stick")
         epoxy_3 = Equation.parse("8 sulfur + 7 wood")
 
         self.assertEqual(
-            calc.calculate("4 epoxy")[-1], calc.calculate(str(epoxy_1))[-1]
+            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_1)[-1]
         )
         self.assertEqual(
-            calc.calculate("4 epoxy")[-1], calc.calculate(str(epoxy_2))[-1]
+            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_2)[-1]
         )
         self.assertEqual(
-            calc.calculate("4 epoxy")[-1], calc.calculate(str(epoxy_3))[-1]
+            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_3)[-1]
         )
-        self.assertEqual(calc.calculate("4 epoxy")[-1], epoxy_3)
+        self.assertEqual(calc.calculate(Equation.parse("4 epoxy"))[-1], epoxy_3)
 
         steel_screw1 = Equation.parse("1 steel_ingot")
         steel_screw2 = Equation.parse("6 iron_ore + 1 coal_ore")
 
         self.assertEqual(
-            calc.calculate("16 steel_screw")[-1], calc.calculate(str(steel_screw1))[-1]
+            calc.calculate(Equation.parse("16 steel_screw"))[-1],
+            calc.calculate(steel_screw1)[-1],
         )
         self.assertEqual(
-            calc.calculate("16 steel_screw")[-1], calc.calculate(str(steel_screw2))[-1]
+            calc.calculate(Equation.parse("16 steel_screw"))[-1],
+            calc.calculate(steel_screw2)[-1],
         )
-        self.assertEqual(calc.calculate("16 steel_screw")[-1], steel_screw2)
+        self.assertEqual(
+            calc.calculate(Equation.parse("16 steel_screw"))[-1], steel_screw2
+        )
 
         hunting_rifle1 = Equation.parse(
             "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
@@ -372,31 +405,15 @@ class CalculatorTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            calc.calculate("1 hunting_rifle")[-1],
-            calc.calculate(str(hunting_rifle1))[-1],
+            calc.calculate(Equation.parse("1 hunting_rifle"))[-1],
+            calc.calculate(hunting_rifle1)[-1],
         )
         self.assertEqual(
-            calc.calculate("1 hunting_rifle")[-1],
-            calc.calculate(str(hunting_rifle2))[-1],
+            calc.calculate(Equation.parse("1 hunting_rifle"))[-1],
+            calc.calculate(hunting_rifle2)[-1],
         )
-        self.assertEqual(calc.calculate("1 hunting_rifle")[-1], hunting_rifle2)
-
-    def test_calculate_4(self):
-        """
-        More than one equation may have the same resource cost.
-        Same amount of resources should have same crafting cost.
-        """
-        calc = self.calc
-
         self.assertEqual(
-            calc.calculate("1 stone_axe")[-1], calc.calculate("1 stone_pickaxe")[-1]
-        )
-
-        anvil_bench1 = Equation.parse("1 anvil_bench + 1 anvil_bench")
-        anvil_bench2 = Equation.parse("2 anvil_bench")
-
-        self.assertEqual(
-            calc.calculate(str(anvil_bench1))[-1], calc.calculate(str(anvil_bench2))[-1]
+            calc.calculate(Equation.parse("1 hunting_rifle"))[-1], hunting_rifle2
         )
 
     def test_find_similar(self):

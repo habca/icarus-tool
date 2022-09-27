@@ -144,17 +144,9 @@ class Calculator:
     def get_keywords(self) -> list[str]:
         return list(self.resources.keys())
 
-    def calculate(self, equation_str: str) -> list[Equation]:
-
-        # TODO: Siirra merkkijonon kasittely sovellus-luokkaan.
-
-        # Validate an equation before processing any further.
-        self.validator.validate_syntax_calculation(equation_str)
-
-        equation = Equation.parse(equation_str)
-
-        # Ensure there are only pre-assigned variable names.
-        self.validator.validate_value_calculation(equation)
+    def calculate(self, equation: Equation) -> list[Equation]:
+        # Never alter original equation.
+        equation = equation.make_copy()
 
         equations = []
         while True:
