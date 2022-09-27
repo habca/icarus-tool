@@ -437,35 +437,6 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(Equation([r3]), groups["concrete_furnace"])
         self.assertEqual(Equation([r4]), groups["mortar_and_pestle"])
 
-    def test_resources_per_station_1(self):
-        calc = self.calc
-
-        e1 = Equation([Resource(Fraction(1), "biofuel_generator")])
-
-        r1 = Resource(Fraction(20), "steel_ingot")
-        r2 = Resource(Fraction(8), "copper_ingot")
-        r3 = Resource(Fraction(12), "electronics")
-        r4 = Resource(Fraction(20), "steel_screw")
-        r5 = Resource(Fraction(2), "glass")
-
-        expected = Equation([r1, r2, r3, r4, r5])
-
-        self.assertEqual(expected, calc.resources_per_station(e1))
-
-    def test_resources_per_station_2(self):
-        """
-        Return the original equation since the
-        raw materials belong to the same group.
-        """
-        calc = self.calc
-
-        r1 = Resource(Fraction(40), "iron_ore")
-        r2 = Resource(Fraction(245), "fiber")
-
-        e1 = Equation([r1, r2])
-
-        self.assertEqual(e1, calc.resources_per_station(e1))
-
     def test_order_by_station(self):
         calc = self.calc
 
@@ -506,26 +477,37 @@ class CalculatorTest(unittest.TestCase):
 
         self.assertEqual(expected, ordered)
 
-    def test_suodata(self):
-        calc = self.calc
+    def test_suodata_practical_1(self):
+        equation = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
+        expected = Equation([Resource(Fraction(1), "biofuel_generator")])
+        self.assertEqual(expected, self.calc.suodata(equation))
 
-        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
-        e2 = Equation.parse("1 iron_ore + 1 wood")
+    def test_suodata_practical_2(self):
+        equation = Equation.parse("1 cement_mixer + 1 concrete_furnace")
+        expected = Equation([Resource(Fraction(1), "concrete_furnace")])
+        self.assertEqual(expected, self.calc.suodata(equation))
 
-        r1 = Resource(Fraction(1), "biofuel_generator")
+    def test_suodata_practical_3(self):
+        equation = Equation.parse("1 stone_furnace + 1 anvil_bench + 1 machining_bench")
+        expected = Equation([Resource(Fraction(1), "machining_bench")])
+        self.assertEqual(expected, self.calc.suodata(equation))
 
-        self.assertEqual(str(r1), str(calc.suodata(e1)))
-        self.assertEqual(e2, calc.suodata(e2))
+    def test_suodata_practical_4(self):
+        equation = Equation.parse(
+            "1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator"
+        )
+        expected = Equation([Resource(Fraction(1), "fabricator")])
+        self.assertEqual(expected, self.calc.suodata(equation))
+
+    def test_suodata_raw_materials(self):
+        equation = Equation.parse("1 iron_ore + 1 wood")
+        expected = equation.make_copy()
+        self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_does_not_change_parameter(self):
-        calc = self.calc
-
-        mjono = "1 anvil_bench + 1 anvil_bench"
-        e1 = Equation.parse(mjono)
-
-        calc.suodata(e1)
-
-        self.assertEqual(mjono, str(e1))
+        equation = Equation.parse("1 anvil_bench + 1 anvil_bench")
+        expected = equation.make_copy()
+        self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_korvaa(self):
         calc = self.calc
@@ -555,18 +537,96 @@ class CalculatorTest(unittest.TestCase):
 
         self.assertEqual(e3, calc.korvaa(e1, e2))
 
+    def test_resources_per_station(self):
+        """
+        Return the exact material cost as is written in the tech tree.
+        > 1 biofuel_generator = 20 steel_ingot + 8 copper_ingot + 12 electronics + 20 steel_screw + 2 glass
+        """
+
+        calc = self.calc
+
+        e1 = Equation([Resource(Fraction(1), "biofuel_generator")])
+
+        r1 = Resource(Fraction(20), "steel_ingot")
+        r2 = Resource(Fraction(8), "copper_ingot")
+        r3 = Resource(Fraction(12), "electronics")
+        r4 = Resource(Fraction(20), "steel_screw")
+        r5 = Resource(Fraction(2), "glass")
+
+        expected = Equation([r1, r2, r3, r4, r5])
+
+        self.assertEqual(expected, calc.resources_per_station(e1))
+
+    def test_resources_per_station_raw_materials(self):
+        """
+        Return the original equation since raw materials don't have any recipes.
+        > 40 iron_ore + 245 fiber = 40 iron_ore + 245 fiber
+        """
+
+        calc = self.calc
+
+        r1 = Resource(Fraction(40), "iron_ore")
+        r2 = Resource(Fraction(245), "fiber")
+
+        e1 = Equation([r1, r2])
+
+        expected = e1.make_copy()
+
+        self.assertEqual(expected, calc.resources_per_station(e1))
+
+    def test_resources_per_station_multiple_stations(self):
+        """
+        Returns a material cost of an equation.
+        Equation may have recipes for multiple stations.
+        """
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_generator + 40 iron_ore + 245 fiber")
+
+        r1 = Resource(Fraction(20), "steel_ingot")
+        r2 = Resource(Fraction(8), "copper_ingot")
+        r3 = Resource(Fraction(12), "electronics")
+        r4 = Resource(Fraction(20), "steel_screw")
+        r5 = Resource(Fraction(2), "glass")
+        r6 = Resource(Fraction(40), "iron_ore")
+        r7 = Resource(Fraction(245), "fiber")
+
+        expected = Equation([r1, r2, r3, r4, r5, r6, r7])
+
+        self.assertEqual(expected, calc.resources_per_station(e1))
+
     def test_get_station(self):
+        """Returns a name of station where items can be crafted."""
         calc = self.calc
 
         e1 = Equation.parse("1 biofuel_generator")
-        e2 = Equation.parse("1 iron_ore")
-        e3 = Equation([])
+        e2 = Equation.parse("40 iron_ore + 245 fiber")
 
         self.assertEqual("fabricator", calc.get_station(e1))
         self.assertEqual("total_resources", calc.get_station(e2))
+
+    def test_get_station_empty_equation(self):
+        """
+        Trying to get crafting station for empty equation is an error.
+        Responsibility lies on the function caller.
+        """
+        calc = self.calc
+
         with self.assertRaises(ValueError) as err:
-            calc.get_station(e3)
-        self.assertEqual("Equation was empty", str(err.exception))
+            calc.get_station(Equation([]))
+        self.assertEqual("Equation was empty.", str(err.exception))
+
+    def test_get_station_multiple_stations(self):
+        """
+        Trying to get one return value for multiple suitable stations is an error.
+        Responsibility lies on the function caller.
+        """
+        calc = self.calc
+
+        e1 = Equation.parse("1 biofuel_generator + 1 iron_ore")
+        with self.assertRaises(ValueError) as err:
+            calc.get_station(e1)
+        self.assertEqual("Equation had multiple stations.", str(err.exception))
 
 
 if __name__ == "__main__":

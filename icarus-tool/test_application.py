@@ -204,9 +204,9 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = [
-            "Usage: ./application.py -g <inputfile>",
+            "Usage: ./application.py -g data/tech_tree.txt",
             "option -i not recognized",
-            "Usage: ./application.py -g <inputfile>",
+            "Usage: ./application.py -g data/tech_tree.txt",
             "No such file or directory: '-i'",
             "No such file or directory: '-g'",
             "option -i not recognized",

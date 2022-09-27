@@ -65,35 +65,36 @@ class Application:
         return equation
 
     def calculate(self, equation: str) -> None:
+        # To make program's output more readable.
         separator = "-" * (len(equation) + 2)
-        equations = self.calculator.calculate(equation)
+
+        # TODO: equation = Equation.parse(input)
+
+        # List of derivative equations explaining materials step by step.
+        equations: list[Equation] = self.calculator.calculate(equation)
 
         previous_station = None
-        for i in range(len(equations)):
+        for i in range(len(equations) - 1):
+
             resources = equations[i]
             resources = resources.sort_resources()
-            resource_names = resources.format_resources()
+            resources_str = resources.format_resources()
 
-            # Separate equations from each other.
-            print(separator.replace("-", "="))
-
-            # Update current station.
+            # Print the name of station when it changes.
+            # Otherwise, separate equations from each other.
             current_station = self.calculator.get_station(resources)
             if current_station != previous_station:
-                previous_station = current_station
-
-                # Print the name of station when it changes.
+                print(separator.replace("-", "="))
                 print(current_station.replace("_", " ").upper())
                 print(separator.replace("-", "="))
+            else:
+                print(separator.replace("-", "="))
 
-            # The total resources equal to recipes listed in user input as is.
-            if equations[i] == equations[-1]:
-                resources = Equation.parse(equation)
-                resources = resources.sort_resources()
-                resource_names = resources.format_resources()
+            # Update current station.
+            previous_station = current_station
 
             # Print recipes above the separator.
-            for resource_name in resource_names:
+            for resource_name in resources_str:
                 print(resource_name)
 
             # Separate recipes and resources by the separator.
@@ -102,11 +103,51 @@ class Application:
             # Pick resources craftable in the current station only.
             resources = self.calculator.resources_per_station(equations[i])
             resources = resources.sort_resources()
-            resource_names = resources.format_resources()
+            resources_str = resources.format_resources()
 
             # Print resources below the separator.
-            for resource_name in resource_names:
+            for resource_name in resources_str:
                 print(resource_name)
+
+        """
+        ==================================
+        TOTAL RESOURCES
+        ==================================
+        1 anvil_bench
+        1 crafting_bench
+        ----------------------------------
+        80 iron_ore
+        70 wood
+        60 fiber
+        22 stone
+        20 leather
+        """
+
+        # From here, print the program's input.
+        resources = Equation.parse(equation)
+        resources = resources.sort_resources()
+        resources_str = resources.format_resources()
+
+        # There may be multiple crafting stations.
+        print(separator.replace("-", "="))
+        print("TOTAL RESOURCES")
+        print(separator.replace("-", "="))
+
+        # Print sorted and formated user input.
+        for resource_name in resources_str:
+            print(resource_name)
+
+        # Separate crafting recipes and material costs.
+        print(separator)
+
+        # From here, print the program's output.
+        resources = equations[-1].make_copy()
+        resources = resources.sort_resources()
+        resources_str = resources.format_resources()
+
+        # Print sorted and formated program output.
+        for resource_name in resources_str:
+            print(resource_name)
 
     def recover(self, equation: str) -> None:
         resources = Equation.parse(equation)
@@ -160,7 +201,7 @@ class Application:
         except FileNotFoundError as err:
             print(str(err).replace("[Errno 2] ", ""))
         except ArgumentError:
-            print("Usage:", argv[0], "-g", "<inputfile>")
+            print("Usage:", argv[0], "-g", "data/tech_tree.txt")
 
 
 class ArgumentError(Exception):

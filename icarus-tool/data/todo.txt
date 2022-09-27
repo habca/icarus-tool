@@ -2,7 +2,7 @@ calculator-luokka ei parsi merkkijonoja vaan application-luokka.
 lisaa optio jolla tulostetaan tiedostoon
 lisaa optio jolla kopioidaan leikepöydälle
 
-> 1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator
-> 1 fabricator (MORTAR AND PESTLE)
-> 1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill (CRAFTING BENCH)
-> 1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill (MACHINING BENCH / KITCHEN BENCH)
+jarjesta workbenchit tierin mukaan
+- esim > 1 biofuel_extractor + 1 biofuel_generator -> fabricator
+
+poista vanhat suodata-funktiot joita ei tarvita

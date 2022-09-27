@@ -10,6 +10,16 @@ MACHINING BENCH
 30 steel_screw
  8 carbon_fiber
 ==============
+CEMENT MIXER
+==============
+30 concrete_mix
+--------------
+240 stone
+120 silica_ore
+ 30 tree_sap
+==============
+MACHINING BENCH
+==============
 30 electronics
 30 steel_screw
 --------------
@@ -18,14 +28,6 @@ MACHINING BENCH
 60 organic_resin
 30 refined_gold
  1 steel_ingot
-==============
-CEMENT MIXER
-==============
-30 concrete_mix
---------------
-240 stone
-120 silica_ore
- 30 tree_sap
 ==============
 CONCRETE FURNACE
 ==============

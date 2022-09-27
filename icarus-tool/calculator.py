@@ -145,6 +145,9 @@ class Calculator:
         return list(self.resources.keys())
 
     def calculate(self, equation_str: str) -> list[Equation]:
+
+        # TODO: Siirra merkkijonon kasittely sovellus-luokkaan.
+
         # Validate an equation before processing any further.
         self.validator.validate_syntax_calculation(equation_str)
 
@@ -152,18 +155,6 @@ class Calculator:
 
         # Ensure there are only pre-assigned variable names.
         self.validator.validate_value_calculation(equation)
-
-        """
-        equations = [equation]
-        while True:
-            equation = self.substitute_variables(equation)
-            equation = equation.evaluate()
-            equations.append(equation)
-
-            # Equation did not change so it is ready.
-            if [r for r in equation if r.name in self.resources] == []:
-                break
-        """
 
         equations = []
         while True:
@@ -183,25 +174,32 @@ class Calculator:
     def suodata(self, equation: Equation) -> Equation:
         """
         Returns equation with only highest tier resources in it.
+
         Example: 1 biofuel_extractor + 1 biofuel_generator -> 1 biofuel_generator
+        Example: 1 cement_mixer + 1 concrete_furnace -> 1 concrete_furnace
+        Example: 1 stone_furnace + 1 anvil_bench + 1 machining_bench -> 1 machining_bench
+        Example: 1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator -> 1 fabricator
         """
-        grouped_resources = self.group_by_station(equation)
-        ordered_stations = self.order_by_station(grouped_resources)
 
-        # Resources can't be filtered based on crafting stations.
-        if ordered_stations == []:
-            return equation
-
-        current_station = ordered_stations.pop(0)
+        equation = equation.make_copy()
 
         new_resources = []
         for resource in equation:
-            temp: list[Resource] = [r for r in equation if r.name != resource.name]
-            found: list[str] = self.search_variable(resource.name, Equation(temp))
+            temp = Equation([r for r in equation if r.name != resource.name])
+            found: list[str] = self.search_variable(resource.name, temp)
             if found == [] and resource.name in self.resources:
-                station = self.stations[resource.name]
-                if station == current_station:
-                    new_resources.append(resource)
+                new_resources.append(resource)
+
+        # All resources are raw materials.
+        if new_resources == []:
+            return equation
+
+        # Pick a station of currently highest tier.
+        # TODO: Legacy code to pass old tests before changing implementation.
+        grouped_resources = self.group_by_station(Equation(new_resources))
+        ordered_stations = self.order_by_station(grouped_resources)
+        station = ordered_stations.pop(0)
+        new_resources = [r for r in new_resources if self.stations[r.name] == station]
 
         return Equation(new_resources)
 
@@ -255,7 +253,7 @@ class Calculator:
             if part.name in self.resources.keys():
                 expression = self.resources[part.name]
                 expression = expression.make_copy()
-                found: list[str] = self.search_variable(variable, expression, True)
+                found = self.search_variable(variable, expression, True)
                 if found != []:
                     variables.append(part.name)
 
@@ -331,24 +329,63 @@ class Calculator:
         return list(reversed(new_groups))
 
     def resources_per_station(self, equation: Equation) -> Equation:
+        """
+        Returns a material cost of an equation.
+
+        Example: 1 biofuel_generator -> 20 steel_ingot + 8 copper_ingot + 12 electronics + 20 steel_screw + 2 glass
+        Example: 40 iron_ore + 245 fiber = 40 iron_ore + 245 fiber
+        """
+
+        # Never alter the original copy.
+        equation = equation.make_copy()
+
         crafting_cost = []
         for resource in equation:
             if resource.name in self.resources:
-                for new_resource in self.resources[resource.name].make_copy():
+
+                # Never alter the original copy.
+                new_equation = self.resources[resource.name]
+                new_equation = new_equation.make_copy()
+
+                # Calculate the amounts of new resources.
+                for new_resource in new_equation:
                     new_resource.amount *= resource.amount
                     crafting_cost.append(new_resource)
+
             else:
                 crafting_cost.append(resource)
+
         return Equation(crafting_cost).evaluate()
 
     def get_station(self, equation: Equation) -> str:
-        equation = equation.make_copy()
+        """
+        Returns the name of the crafting station where resources in equation can be crafted.
+        Function assumes that all resources in an equation belong to the same crafting station.
+
+        Example: 1 biofuel_extractor + 1 biofuel_generator -> fabricator
+        Example: 1 cement_mixer + 1 concrete_furnace -> machining_bench
+        Example: 40 iron_ore + 245 fiber -> total_resources
+        Example: 1 biofuel_generator + 40 iron_ore -> fabricator
+        """
+
+        # There should be at least one resource to be crafted.
         if equation.resources == []:
-            raise ValueError("Equation was empty")
-        first_resource = equation.resources[0]
-        if first_resource.name not in self.stations:
-            return "total_resources"
-        return self.stations[first_resource.name]
+            raise ValueError("Equation was empty.")
+
+        # Convert items
+        stations = []
+        for resource in equation:
+            if resource.name not in self.stations:
+                stations.append("total_resources")
+            else:
+                station = self.stations[resource.name]
+                stations.append(station)
+
+        # All resources should be crafted at the same station.
+        if stations.count(stations[0]) != len(stations):
+            raise ValueError("Equation had multiple stations.")
+
+        return stations[0]
 
 
 class Validator:
