@@ -1,3 +1,0 @@
-jarjesta workbenchit tierin mukaan
-- esim > 1 biofuel_extractor + 1 biofuel_generator -> fabricator
-poista vanhat suodata-funktiot joita ei tarvita

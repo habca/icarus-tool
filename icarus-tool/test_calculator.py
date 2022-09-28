@@ -419,40 +419,11 @@ class CalculatorTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             calc.find_similar(e1)["anvil_bench"]
 
-    def test_group_by_station(self):
-        calc = self.calc
-
-        r1 = Resource(Fraction(20), "steel_ingot")
-        r2 = Resource(Fraction(20), "steel_screw")
-
-        e1 = Equation([r1, r2])
-
-        groups = calc.group_by_station(e1)
-
-        r3 = Resource(Fraction(21), "steel_ingot")
-        r4 = Resource(Fraction(21), "steel_bloom")
-
-        self.assertEqual(Equation([r2]), groups["machining_bench"])
-        self.assertEqual(Equation([r3]), groups["concrete_furnace"])
-        self.assertEqual(Equation([r4]), groups["mortar_and_pestle"])
-
     def test_order_by_station(self):
-        calc = self.calc
+        r1 = Resource(Fraction(1), "biofuel_extractor")
+        r2 = Resource(Fraction(1), "biofuel_generator")
 
-        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
-        groups = calc.group_by_station(e1)
-
-        expected = [
-            "fabricator",
-            "machining_bench",
-            "concrete_furnace",
-            "mortar_and_pestle",
-            "character",
-            "anvil_bench",
-            "stone_furnace",
-        ]
-
-        self.assertEqual(expected, calc.order_by_station(groups))
+        self.assertEqual("fabricator", self.calc.order_by_station([r1, r2]))
 
     def test_order_by_station_revisit_workbench(self):
         """
@@ -463,18 +434,18 @@ class CalculatorTest(unittest.TestCase):
         - mortar_and_pestle: carbon_paste
         - concrete_furnace: aluminium_ingot
         """
-        calc = self.calc
-
         r1 = Resource(Fraction(8), "carbon_fiber")
         r2 = Resource(Fraction(1), "steel_ingot")
-        e1 = Equation([r1, r2])
 
-        grouped = calc.group_by_station(e1)
-        ordered = calc.order_by_station(grouped)
+        self.assertEqual("concrete_furnace", self.calc.order_by_station([r1, r2]))
 
-        expected = ["concrete_furnace", "mortar_and_pestle", "character"]
-
-        self.assertEqual(expected, ordered)
+    def test_get_station_value(self):
+        self.assertEqual(1, self.calc.get_station_value("character_crafting"))
+        self.assertEqual(2, self.calc.get_station_value("crafting_bench"))
+        self.assertEqual(3, self.calc.get_station_value("machining_bench"))
+        self.assertEqual(4, self.calc.get_station_value("fabricator"))
+        self.assertEqual(3, self.calc.get_station_value("mortar_and_pestle"))
+        self.assertEqual(4, self.calc.get_station_value("concrete_furnace"))
 
     def test_suodata_practical_1(self):
         equation = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
@@ -508,7 +479,7 @@ class CalculatorTest(unittest.TestCase):
         expected = equation.make_copy()
         self.assertEqual(expected, self.calc.suodata(equation))
 
-    def test_korvaa(self):
+    def test_korvaa_1(self):
         calc = self.calc
 
         e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")

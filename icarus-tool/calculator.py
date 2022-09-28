@@ -187,10 +187,7 @@ class Calculator:
             return equation
 
         # Pick a station of currently highest tier.
-        # TODO: Legacy code to pass old tests before changing implementation.
-        grouped_resources = self.group_by_station(Equation(new_resources))
-        ordered_stations = self.order_by_station(grouped_resources)
-        station = ordered_stations.pop(0)
+        station = self.order_by_station(new_resources)
         new_resources = [r for r in new_resources if self.stations[r.name] == station]
 
         return Equation(new_resources)
@@ -246,65 +243,34 @@ class Calculator:
                 similar_words[resource.name] = words
         return similar_words
 
-    def group_by_station(
-        self, equation: Equation, groups: dict[str, Equation] = None
-    ) -> dict[str, Equation]:
-        """Groups resources based on which station they are crafted in."""
-        equation = equation.make_copy()
+    def order_by_station(self, resources: list[Resource]) -> str:
+        """
+        Return the order in which resources should be crafted in.
+        Ordering is a numeric value based on items tier in tech tree.
 
-        if groups is None:
-            groups = dict()
+        Example: 1 biofuel_extractor + 1 biofuel_generator = fabricator
+        """
 
-        for resource in equation:
-            if resource.name in self.variables:
-                continue
+        max_station = self.stations[resources[0].name]
+        max_value = self.get_station_value(max_station)
+        for i in range(1, len(resources)):
+            station = self.stations[resources[i].name]
+            value = self.get_station_value(station)
+            if max_value < value:
+                max_value = value
+                max_station = station
+            elif max_value == value and max_station < station:
+                max_value = value
+                max_station = station
 
-            station = self.stations[resource.name]
-            if station not in groups.keys():
-                groups[station] = Equation([])
+        return max_station
 
-            groups[station].resources.append(resource)
-            groups[station] = groups[station].evaluate()
-
-            if resource.name in self.resources.keys():
-                substituted = self.resources[resource.name]
-                substituted = substituted.make_copy()
-                substituted = substituted.multiply(resource.amount)
-                substituted = substituted.evaluate()
-                groups = self.group_by_station(substituted, groups)
-
-        return groups
-
-    def order_by_station(self, groups: dict[str, Equation]) -> list[str]:
-        """Regroup resources based on which order they are crafted in."""
-        new_groups: list[str] = []
-        available_stations = list(groups.keys())
-        while len(new_groups) < len(groups):
-            for station in available_stations:
-                equation: Equation = groups[station]
-                equation = self.resources_per_station(equation)
-
-                available = available_stations[:]
-                available.remove(station)
-
-                # TODO lippumuuttuja huono
-                lippu = True
-                for temp in available:
-                    for resource in groups[temp]:
-                        found = self.search_variable(resource.name, equation, True)
-                        # TODO kovakoodattu vakio huono
-                        if (
-                            found != []
-                            and found != ["aluminium_ingot"]
-                            and found != ["stone_furnace"]
-                        ):
-                            lippu = False
-
-                if lippu:
-                    new_groups.append(station)
-                    available_stations.remove(station)
-
-        return list(reversed(new_groups))
+    def get_station_value(self, station: str) -> int:
+        value = 1
+        while station in self.stations:
+            station = self.stations[station]
+            value += 1
+        return value
 
     def resources_per_station(self, equation: Equation) -> Equation:
         """
