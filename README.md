@@ -79,6 +79,17 @@ CRAFTING BENCH
  12 stone
  10 epoxy
 =====================================================
+MORTAR AND PESTLE
+=====================================================
+10 epoxy
+-----------------------------------------------------
+40 tree_sap
+20 sulfur
+=====================================================
+40 tree_sap
+-----------------------------------------------------
+160 stick
+=====================================================
 ANVIL BENCH
 =====================================================
 120 iron_nail
@@ -100,17 +111,6 @@ STONE FURNACE
 92 iron_ingot
 -----------------------------------------------------
 184 iron_ore
-=====================================================
-MORTAR AND PESTLE
-=====================================================
-10 epoxy
------------------------------------------------------
-40 tree_sap
-20 sulfur
-=====================================================
-40 tree_sap
------------------------------------------------------
-160 stick
 =====================================================
 CRAFTING BENCH
 =====================================================
@@ -147,7 +147,7 @@ TOTAL RESOURCES
 - To mine exotic deposit: `1 biofuel_generator + 1 electricity_tool + 2 electric_extractor + 1 biofuel_radar`
 - To exterminate world boss: `1 hunting_rifle + 100 rifle_round`
 - To resist poison: `1 carpentery_bench + 1 kitchen_bench + 2 anti-poison_pill`
-- To resist cold: `1 thermos + 4 hot_coffee + 4 heat_bandage`
+- To resist cold: `1 thermos + 4 hot_coffee + 2 heat_bandage`
 
 ## Features
 
@@ -157,11 +157,11 @@ GNU readline provides a `TAB` completion, `^R` reverse search, `^L` clear screen
 
 ```
 > 1 biofuel_
-biofuel_can               biofuel_deep-mining_drill biofuel_generator         biofuel_radar
-biofuel_composter         biofuel_extractor         biofuel_lamp              biofuel_stove
+biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar              
+biofuel_composter          biofuel_extractor          biofuel_lamp               biofuel_stove
 > 1 biofuel_extractor + 1 biofuel_
-biofuel_can               biofuel_deep-mining_drill biofuel_generator         biofuel_radar
-biofuel_composter         biofuel_extractor         biofuel_lamp              biofuel_stove
+biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar              
+biofuel_composter          biofuel_extractor          biofuel_lamp               biofuel_stove
 ```
 
 ### Spell checker
