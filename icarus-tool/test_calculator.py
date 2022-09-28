@@ -226,24 +226,6 @@ class CalculatorTest(unittest.TestCase):
                 calc.assign_equation(error)
             self.assertEqual(f"SyntaxError: {error}", str(err.exception))
 
-    def test_replace_variables(self):
-        calc = self.calc
-
-        r1 = Resource(Fraction(2), "hunting_rifle")
-        r2 = Resource(Fraction(16), "steel_screw")
-        r3 = Resource(Fraction(10), "stick")
-
-        e1 = calc.substitute_variables(Equation([r1]))
-        e2 = calc.substitute_variables(Equation([r2]))
-        e3 = calc.substitute_variables(Equation([r3]))
-
-        self.assertEqual(
-            "24 wood + 16 leather + 80 titanium_ingot + 8 epoxy + 32 steel_screw",
-            str(e1),
-        )
-        self.assertEqual("4/25 steel_ingot", str(e2))
-        self.assertEqual("1 wood", str(e3))
-
     def test_search_variable(self):
         calc = self.calc
 
@@ -553,6 +535,24 @@ class CalculatorTest(unittest.TestCase):
         e3 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
 
         self.assertEqual(e3, calc.korvaa(e1, e2))
+
+    def test_korvaa_3(self):
+        calc = self.calc
+
+        r1 = Equation([Resource(Fraction(2), "hunting_rifle")])
+        r2 = Equation([Resource(Fraction(16), "steel_screw")])
+        r3 = Equation([Resource(Fraction(10), "stick")])
+
+        e1 = calc.korvaa(r1, r1)
+        e2 = calc.korvaa(r2, r2)
+        e3 = calc.korvaa(r3, r3)
+
+        self.assertEqual(
+            "24 wood + 16 leather + 80 titanium_ingot + 8 epoxy + 32 steel_screw",
+            str(e1),
+        )
+        self.assertEqual("4/25 steel_ingot", str(e2))
+        self.assertEqual("1 wood", str(e3))
 
     def test_resources_per_station(self):
         """

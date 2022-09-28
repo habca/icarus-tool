@@ -165,6 +165,24 @@ class ApplicationTest(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
+    def test_application_cement_mixer_concrete_furnace_thermos(self):
+        user_input = [
+            "1 cement_mixer + 1 concrete_furnace + 1 thermos",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "data/test_cement_mixer_concrete_furnace_thermos.txt"
+        )
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
+
     def test_recover(self):
         user_input = [
             "1 anvi",

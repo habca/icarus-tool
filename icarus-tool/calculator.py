@@ -211,20 +211,6 @@ class Calculator:
                 new_resources.append(resource)
         return Equation(new_resources)
 
-    def substitute_variables(self, equation: Equation) -> Equation:
-        new_resources = []
-        for resource in equation:
-            temp: list[Resource] = [r for r in equation if r.name != resource.name]
-            found: list[str] = self.search_variable(resource.name, Equation(temp))
-            if found == [] and resource.name in self.resources:
-                expression = self.resources[resource.name]
-                expression = expression.make_copy()
-                expression = expression.multiply(resource.amount)
-                new_resources += expression.resources
-            else:
-                new_resources.append(resource)
-        return Equation(new_resources)
-
     def search_variable(
         self, variable: str, equation: Equation, not_first: bool = False
     ) -> list[str]:
@@ -236,10 +222,10 @@ class Calculator:
                 variables.append(part.name)
 
             # Variable is required elsewhere as a workbench.
-            if part.name in self.stations and not_first:
+            if part.name in self.stations:
                 station = self.stations[part.name]
                 if variable == station:
-                    variables.append(variable)
+                    variables.append(part.name)
 
             # Recursive function call for a derivative expression.
             if part.name in self.resources.keys():
