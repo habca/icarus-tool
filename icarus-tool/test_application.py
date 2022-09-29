@@ -43,7 +43,7 @@ class ApplicationTest(unittest.TestCase):
         expected_output = [
             "Welcome to Icarus tool!",
             "-----------------------",
-            "amount name [+ amount name]",
+            "amount name [+ amount name] [- amount name]",
         ]
 
         self.maxDiff = None
@@ -173,6 +173,24 @@ class ApplicationTest(unittest.TestCase):
 
         expected_output = ApplicationTest.read_testfile(
             "data/test_cement_mixer_concrete_furnace_thermos.txt"
+        )
+
+        application = Application()
+        application.init(["./application.py", "-g", FileSystemTest.filename])
+
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.maxDiff = None
+        self.assertEqual(expected_output, actual_output)
+
+    def test_application_subtract(self):
+        user_input = [
+            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "data/test_stone_furnace_anvil_bench_machining_bench_stone_wood.txt"
         )
 
         application = Application()

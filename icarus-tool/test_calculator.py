@@ -21,6 +21,13 @@ class ResourceTest(unittest.TestCase):
         self.assertEqual("1 anvil_bench", str(r1))
         self.assertEqual("10 iron_ingot", str(r2))
 
+    def test_parse_negative(self):
+        r1 = Resource.parse("-1 anvil_bench")
+        r2 = Resource.parse("-10 iron_ingot")
+
+        self.assertEqual("-1 anvil_bench", str(r1))
+        self.assertEqual("-10 iron_ingot", str(r2))
+
     def test_equals(self):
         r1 = Resource(2, "biofuel_extractor")
         r2 = Resource(2, "biofuel_extractor")
@@ -49,6 +56,15 @@ class EquationTest(unittest.TestCase):
         self.assertEqual("12 fiber + 18 stick", str(e1))
         self.assertEqual("1 wood", str(e2))
 
+    def test_parse_negative(self):
+        e1 = Equation.parse("-12 fiber - -18 stick")
+        e2 = Equation.parse("-12 fiber - 18 stick")
+        e3 = Equation.parse("-1 wood")
+
+        self.assertEqual("-12 fiber + 18 stick", str(e1))
+        self.assertEqual("-12 fiber - 18 stick", str(e2))
+        self.assertEqual("-1 wood", str(e3))
+
     def test_equals(self):
         r1 = Resource(2, "biofuel_generator")
         r2 = Resource(4, "biofuel_generator")
@@ -70,25 +86,41 @@ class EquationTest(unittest.TestCase):
         self.assertTrue(e1 == e2 != e3 != e4 != e5 != e6)
         self.assertFalse(e1 != e2 == e3 == e4 == e5 == e6)
 
-    def test_evaluate_1(self):
-        r1 = Resource(Fraction(124 / 5), "wood")
+    def test_evaluate_ceil(self):
+        """
+        Equation should round up fractions.
+
+        > 124/5 wood + 160 stone + 0/24 leather
+        = 25 wood + 160 stone + 0 leather
+
+        > 1/3 wood + 0 stone + 1/3 wood
+        = 1 wood + 0 stone
+        """
+
+        r1 = Resource(Fraction(124, 5), "wood")
         r2 = Resource(Fraction(160), "stone")
-        r3 = Resource(Fraction(24), "leather")
+        r3 = Resource(Fraction(0, 24), "leather")
 
         e1 = Equation([r1, r2, r3]).evaluate()
 
-        self.assertEqual("25 wood + 160 stone + 24 leather", str(e1))
+        self.assertEqual("25 wood + 160 stone + 0 leather", str(e1))
 
         r1 = Resource(Fraction(1, 3), "wood")
-        r2 = Resource(Fraction(160), "stone")
+        r2 = Resource(Fraction(0), "stone")
         r3 = Resource(Fraction(1, 3), "wood")
 
         e1 = Equation([r1, r2, r3]).evaluate()
 
-        self.assertEqual("1 wood + 160 stone", str(e1))
+        self.assertEqual("1 wood + 0 stone", str(e1))
 
-    def test_evaluate_2(self):
-        """Equation should sum resources of same name."""
+    def test_evaluate_sum(self):
+        """
+        Equation should sum resources of same name.
+
+        > 10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 16 wood
+        = 10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur
+        """
+
         r1 = Resource(Fraction(10), "gold_ore")
         r2 = Resource(Fraction(30), "copper_ore")
         r3 = Resource(Fraction(10), "wood")
@@ -107,6 +139,23 @@ class EquationTest(unittest.TestCase):
         self.assertEqual("26 wood", str(next(iterator)))
         self.assertEqual("10 oxite", str(next(iterator)))
         self.assertEqual("20 sulfur", str(next(iterator)))
+
+    def test_evaluate_subtract(self):
+        """
+        Equation should subtract negative amounts.
+
+        > 1 wood - 2 wood + 0 stone + 0/2 sulfur
+        = 0 wood + 0 stone + 0 sulfur
+        """
+
+        r1 = Resource(Fraction(1), "wood")
+        r2 = Resource(Fraction(-2), "wood")
+        r3 = Resource(Fraction(-2), "stone")
+        r4 = Resource(Fraction(-3, 2), "sulfur")
+
+        e1 = Equation([r1, r2, r3, r4]).evaluate()
+
+        self.assertEqual("-1 wood - 2 stone - 1 sulfur", str(e1))
 
     def test_sort_resources(self):
         """Sort by an amount then by a name."""
@@ -137,6 +186,18 @@ class EquationTest(unittest.TestCase):
         self.assertEqual(" 10 copper_ingot", next(iterator))
         self.assertEqual("  2 iron_ingot", next(iterator))
         self.assertRaises(StopIteration, next, iterator)
+
+    def test_suodata(self):
+        equation = Equation.parse("-1 stone + 1 wood - 12 wood")
+
+        expected = Equation.parse("1 wood")
+        self.assertEqual(expected, equation.suodata(all=False, round=False))
+
+        expected = Equation.parse("-1 stone + 1 wood - 12 wood")
+        self.assertEqual(expected, equation.suodata(all=True, round=False))
+
+        expected = Equation.parse("0 stone + 1 wood + 0 wood")
+        self.assertEqual(expected, equation.suodata(all=True, round=True))
 
 
 class CalculatorTest(unittest.TestCase):
@@ -239,37 +300,73 @@ class CalculatorTest(unittest.TestCase):
 
     def test_calculate(self):
         """The final form of an equation should contain known variables."""
-        calc = self.calc
-
         e1 = Equation.parse("60 fiber + 50 wood + 12 stone + 20 leather")
         e2 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
         e3 = Equation.parse("25 wood + 160 stone + 24 leather")
         e4 = Equation.parse("80 iron_ore")
         e5 = Equation.parse("1 wood")
 
-        self.assertEqual(e1, calc.calculate(Equation.parse("1 crafting_bench"))[-1])
-        self.assertEqual(e2, calc.calculate(Equation.parse("1 anvil_bench"))[-1])
-        self.assertEqual(e3, calc.calculate(Equation.parse("2 stone_furnace"))[-1])
-        self.assertEqual(e4, calc.calculate(Equation.parse("40 iron_ingot"))[-1])
-        self.assertEqual(e5, calc.calculate(Equation.parse("8 stick"))[-1])
+        self.assertEqual(
+            e1, self.calc.calculate(Equation.parse("1 crafting_bench"))[-1]
+        )
+        self.assertEqual(e2, self.calc.calculate(Equation.parse("1 anvil_bench"))[-1])
+        self.assertEqual(e3, self.calc.calculate(Equation.parse("2 stone_furnace"))[-1])
+        self.assertEqual(e4, self.calc.calculate(Equation.parse("40 iron_ingot"))[-1])
+        self.assertEqual(e5, self.calc.calculate(Equation.parse("8 stick"))[-1])
+
+    def test_calculate_negative_amount(self):
+        """
+        Removing a total amount of a particular resource should total to zero.
+        Total amount should always be positive regardless of the number of iterations.
+
+        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench
+        = 288 fiber + 184 iron_ore + 102 stone + 69 wood + 20 sulfur + 12 leather
+
+        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 102 stone - 69 wood
+        = 288 fiber + 184 iron_ore + 0 stone + 0 wood + 20 sulfur + 12 leather
+
+        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 100 stone - 70 wood
+        = 288 fiber + 184 iron_ore + 2 stone + 0 wood + 20 sulfur + 12 leather
+        """
+
+        e1 = Equation.parse("1 stone_furnace + 1 anvil_bench + 1 machining_bench")
+        r1 = Resource(Fraction(102), "stone")
+        r2 = Resource(Fraction(69), "wood")
+
+        self.assertIn(r1, self.calc.calculate(e1)[-1])
+        self.assertIn(r2, self.calc.calculate(e1)[-1])
+
+        e2 = Equation.parse(
+            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 102 stone - 69 wood"
+        )
+        r1 = Resource(Fraction(0), "stone")
+        r2 = Resource(Fraction(0), "wood")
+
+        self.assertIn(r1, self.calc.calculate(e2)[-1])
+        self.assertIn(r2, self.calc.calculate(e2)[-1])
+
+        e3 = Equation.parse(
+            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 100 stone - 70 wood"
+        )
+        r1 = Resource(Fraction(2), "stone")
+        r2 = Resource(Fraction(-1), "wood")
+
+        self.assertIn(r1, self.calc.calculate(e3)[-1])
+        self.assertIn(r2, self.calc.calculate(e3)[-1])
 
     def test_calculate_two_times(self):
         """
-        More than one equation may have the same resource cost.
         Same amount of resources should have same crafting cost.
         """
-        calc = self.calc
 
         self.assertEqual(
-            calc.calculate(Equation.parse("1 stone_axe"))[-1],
-            calc.calculate(Equation.parse("1 stone_pickaxe"))[-1],
+            self.calc.calculate(Equation.parse("1 anvil_bench + 1 anvil_bench"))[-1],
+            self.calc.calculate(Equation.parse("2 anvil_bench"))[-1],
         )
 
-        anvil_bench1 = Equation.parse("1 anvil_bench + 1 anvil_bench")
-        anvil_bench2 = Equation.parse("2 anvil_bench")
-
         self.assertEqual(
-            calc.calculate(anvil_bench1)[-1], calc.calculate(anvil_bench2)[-1]
+            self.calc.calculate(Equation.parse("1 anvil_bench - 1 anvil_bench"))[-1],
+            self.calc.calculate(Equation.parse("0 anvil_bench"))[-1],
         )
 
     def test_calculate_electric_extractor(self):
@@ -615,6 +712,22 @@ class CalculatorTest(unittest.TestCase):
         with self.assertRaises(ValueError) as err:
             calc.get_station(e1)
         self.assertEqual("Equation had multiple stations.", str(err.exception))
+
+
+class ValidatorTest(unittest.TestCase):
+    def setUp(self) -> None:
+        """Create a calculator before any test method."""
+        self.calc = Calculator()
+        file = FileSystem(FileSystemTest.filename)
+        file.read(self.calc)
+
+    def test_validate_value_calculation_negative_recipes(self):
+        equation = Equation.parse("100 stone - 100 wood")
+        expected = "ValueError: 100 stone"
+
+        with self.assertRaises(ValueError) as err:
+            self.calc.validator.validate_value_calculation(equation)
+        self.assertEqual(expected, str(err.exception))
 
 
 if __name__ == "__main__":

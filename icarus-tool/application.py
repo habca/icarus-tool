@@ -46,7 +46,7 @@ class Application:
         print()  # Empty line to make welcome text readable.
         print(welcome := "Welcome to Icarus tool!")
         print("-" * len(welcome))
-        print("amount name [+ amount name]")
+        print("amount name [+ amount name] [- amount name]")
 
     def ask_input(self) -> str:
         """Throws SyntaxError, ValueError or SystemExit!"""
@@ -83,8 +83,13 @@ class Application:
         for i in range(len(equations) - 1):
 
             resources = equations[i]
+            resources = resources.suodata(all=False, round=False)
             resources = resources.sort_resources()
             resources_str = resources.format_resources()
+
+            # After subraction there may not be anything to craft.
+            if not resources.resources:
+                continue
 
             # Print the name of station when it changes.
             # Otherwise, separate equations from each other.
@@ -108,6 +113,7 @@ class Application:
 
             # Pick resources craftable in the current station only.
             resources = self.calculator.resources_per_station(equations[i])
+            resources = resources.suodata(all=False, round=False)
             resources = resources.sort_resources()
             resources_str = resources.format_resources()
 
@@ -131,6 +137,7 @@ class Application:
 
         # From here, print the program's input.
         resources = Equation.parse(equation_str)
+        resources = resources.suodata(all=True, round=False)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
 
@@ -148,6 +155,7 @@ class Application:
 
         # From here, print the program's output.
         resources = equations[-1].make_copy()
+        resources = resources.suodata(all=True, round=True)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
 

@@ -27,6 +27,10 @@ class Resource:
         amount, name = resource.split(" ")
         return Resource(Fraction(amount), name)
 
+    def format_resource(self, margin: int) -> str:
+        amount: int = int(self.amount)
+        return f"{amount:{margin}d} {self.name}"
+
 
 class Equation:
     def __init__(self, resources: list[Resource]):
@@ -42,7 +46,24 @@ class Equation:
         return iter(self.resources)
 
     def __str__(self) -> str:
-        return " + ".join([str(resource) for resource in self.resources])
+        """
+        Example: 1 wood - 2 wood
+        Example: -1 wood + 0 wood
+        """
+
+        output = ""
+        if self.resources:
+            # Create an iterator to avoid accessing an index.
+            iterator = iter(self.resources)
+
+            # Print the first element as is.
+            output = str(next(iterator))
+            for resource in iterator:
+                # Print an operator based on sign of number.
+                output += " - " if resource.amount < 0 else " + "
+                output += f"{abs(resource.amount)} {resource.name}"
+
+        return output
 
     def __repr__(self) -> str:
         # AssertionError: <calculator.Equation object at 0x7f685b1b3ee0> != <calculator.Equation object at 0x7f685b1cb1c0>
@@ -61,7 +82,26 @@ class Equation:
 
     @classmethod
     def parse(cls, equation: str) -> "Equation":
-        resources = [Resource.parse(r) for r in equation.split(" + ")]
+        resources: list[Resource] = []
+
+        if parts := equation.split():
+            amount = Fraction(parts[0])
+            name = parts[1]
+            resources.append(Resource(amount, name))
+
+        if (len(parts) - 2) % 3 != 0:
+            error = "Error in equation: " + str(equation)
+            raise ValueError(error)
+
+        for i in range((len(parts) - 2) // 3):
+            index = 2 + i * 3
+            operator = parts[index]
+            amount = Fraction(parts[index + 1])
+            if operator == "-":
+                amount = -amount
+            name = parts[index + 2]
+            resources.append(Resource(amount, name))
+
         return Equation(resources)
 
     def multiply(self, fraction: Fraction) -> "Equation":
@@ -78,8 +118,8 @@ class Equation:
                 variables[resource.name].amount += resource.amount
 
         for name, resource in variables.items():
-            fraction = Fraction(math.ceil(resource.amount))
-            variables[name].amount = fraction
+            amount = math.ceil(resource.amount)
+            variables[name].amount = Fraction(amount)
 
         resources = [variables[name] for name in variables.keys()]
         return Equation(resources)
@@ -97,12 +137,22 @@ class Equation:
             return []
 
         margin = max([len(str(r.amount)) for r in self.resources])
+        return [r.format_resource(margin) for r in self.sort_resources()]
 
-        def format_resource(resource: Resource) -> str:
-            amount: int = int(resource.amount)
-            return f"{amount:{margin}d} {resource.name}"
+    def suodata(self, all: bool = True, round: bool = True) -> "Equation":
+        """Example: -1 stone + 1 wood - 12 wood = 0 stone + 1 wood + 0 wood"""
 
-        return [format_resource(r) for r in self.sort_resources()]
+        new_resources: list[Resource] = []
+        for resource in self.resources:
+            if resource.amount < 0 and round:
+                resource.amount = Fraction(0)
+
+            if resource.amount <= 0 and all:
+                new_resources.append(resource)
+            elif resource.amount > 0:
+                new_resources.append(resource)
+
+        return Equation(new_resources)
 
 
 class Calculator:
@@ -145,7 +195,7 @@ class Calculator:
         return list(self.resources.keys())
 
     def calculate(self, equation: Equation) -> list[Equation]:
-        # Never alter original equation.
+        # Never alter an original equation.
         equation = equation.make_copy()
 
         equations = []
@@ -154,8 +204,7 @@ class Calculator:
             equations.append(suodatettu)
 
             # Equation did not change so it is ready.
-            valmis = [r for r in equation if r.name in self.resources]
-            if valmis == []:
+            if not [r for r in equation if r.name in self.resources]:
                 break
 
             equation = self.korvaa(equation, suodatettu)
@@ -343,7 +392,7 @@ class Validator:
         num = Validator.pattern_num
         var = Validator.pattern_var
 
-        pattern = re.compile(f"{var} : {num} {var} = {num} {var}( \+ {num} {var})*")
+        pattern = re.compile(f"{var} : {num} {var} = {num} {var}( [+-] {num} {var})*")
         if not pattern.fullmatch(assignment):
             raise SyntaxError("SyntaxError: " + assignment)
 
@@ -351,7 +400,7 @@ class Validator:
         num = Validator.pattern_num
         var = Validator.pattern_var
 
-        pattern = re.compile(f"{num} {var}( \+ {num} {var})*")
+        pattern = re.compile(f"[-]?{num} {var}( [+-] {num} {var})*")
         if not pattern.fullmatch(equation):
             raise SyntaxError("SyntaxError: " + equation)
 
@@ -362,9 +411,17 @@ class Validator:
     def validate_value_calculation(self, equation: Equation) -> None:
         errors: list[str] = []
         for resource in equation:
+
+            # Resource should be mentioned in tech tree.
             if resource.name not in self.calc.resources:
                 if resource.name not in self.calc.variables:
                     errors.append(resource.name)
+
+            # Attempt to create raw materials is pointless.
+            if resource.name in self.calc.variables:
+                if resource.amount >= 0:
+                    errors.append(f"{resource.amount} {resource.name}")
+
         if errors != []:
             error: str = ", ".join(errors)
             raise ValueError("ValueError: " + error)
