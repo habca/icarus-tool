@@ -192,11 +192,12 @@ class Calculator:
                     self.variables.append(resource.name)
 
     def get_keywords(self) -> list[str]:
-        return list(self.resources.keys())
+        return list(self.resources.keys()) + self.variables[:]
 
     def calculate(self, equation: Equation) -> list[Equation]:
         # Never alter an original equation.
         equation = equation.make_copy()
+        equation = equation.evaluate()
 
         equations = []
         while True:

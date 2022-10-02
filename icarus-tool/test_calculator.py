@@ -216,7 +216,7 @@ class CalculatorTest(unittest.TestCase):
         calc.assign_equation("character : 1 wood_spear = 12 fiber + 18 stick")
         calc.assign_equation("character : 10 stick = 1 wood")
 
-        self.assertEqual(["wood_spear", "stick"], calc.get_keywords())
+        self.assertEqual(["wood_spear", "stick", "fiber", "wood"], calc.get_keywords())
 
     def test_assign_equation_1(self):
         """An equation should be stored in a dictionary as follows."""
@@ -298,8 +298,8 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(["steel_bloom"], calc.search_variable("iron_ore", l2))
         self.assertEqual([], calc.search_variable("iron_ore", l3))
 
-    def test_calculate(self):
-        """The final form of an equation should contain known variables."""
+    def test_calculate_last_element(self):
+        """Equation should contain only raw materials as the last element."""
         e1 = Equation.parse("60 fiber + 50 wood + 12 stone + 20 leather")
         e2 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
         e3 = Equation.parse("25 wood + 160 stone + 24 leather")
@@ -313,6 +313,12 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(e3, self.calc.calculate(Equation.parse("2 stone_furnace"))[-1])
         self.assertEqual(e4, self.calc.calculate(Equation.parse("40 iron_ingot"))[-1])
         self.assertEqual(e5, self.calc.calculate(Equation.parse("8 stick"))[-1])
+
+    def test_calculate_first_element(self):
+        """Equation should evaluate subtraction in the first element as well."""
+        e1 = Equation.parse("120 00_buckshot_shell - 40 00_buckshot_shell")
+
+        self.assertEqual("80 00_buckshot_shell", str(self.calc.calculate(e1)[0]))
 
     def test_calculate_negative_amount(self):
         """

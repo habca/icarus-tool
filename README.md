@@ -1,6 +1,6 @@
 # Icarus tool
 
-The command line tool calculates total amount of resources and groups them by workstations. List of recipes was **last updated 27.09.2022** after Icarus week forty two update.
+The command line tool calculates total amount of resources and groups them by workstations. Tech tree has been updated after **Icarus week forty two update**.
 
 ## Getting started
 
@@ -147,9 +147,6 @@ GNU readline provides a `TAB` completion, `^R` reverse search, `^L` clear screen
 
 ```
 > 1 biofuel_
-biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar              
-biofuel_composter          biofuel_extractor          biofuel_lamp               biofuel_stove
-> 1 biofuel_extractor + 1 biofuel_
 biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar              
 biofuel_composter          biofuel_extractor          biofuel_lamp               biofuel_stove
 ```
