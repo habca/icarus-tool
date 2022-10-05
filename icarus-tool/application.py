@@ -1,5 +1,7 @@
-﻿from calculator import Calculator, Equation
+﻿from typing import Any
+from calculator import Calculator, Equation
 import sys, getopt
+import json
 
 
 class FileSystem:
@@ -20,6 +22,43 @@ class FileSystem:
                 # Skip comments and empty lines.
                 if not (line == "" or line.startswith("#")):
                     calculator.assign_equation(line)
+
+
+class JsonSystem(FileSystem):
+    def __init__(self, filename: str):
+        super().__init__(filename)
+
+    def read(self, calculator: Calculator) -> None:
+        with open(self.filename) as file:
+            data = file.read()
+        recipes = json.loads(data)
+
+        for recipe in recipes["Rows"]:
+            try:
+                line = JsonSystem.to_equation(recipe)
+                calculator.assign_equation(line)
+            except IndexError:
+                calculator.errors.append(line)
+
+    @classmethod
+    def to_equation(cls, recipe: dict[str, Any]) -> str:
+        """Function may throw a ValueError."""
+        line = recipe["RecipeSets"][0]["RowName"].lower()
+        line += " : "
+        line += str(recipe["Outputs"][0]["Count"])
+        line += " "
+        line += recipe["Outputs"][0]["Element"]["RowName"].lower()
+        line += " = "
+        line += str(recipe["Inputs"][0]["Count"])
+        line += " "
+        line += recipe["Inputs"][0]["Element"]["RowName"].lower()
+        for i in range(1, len(recipe["Inputs"])):
+            line += " + "
+            line += str(recipe["Inputs"][i]["Count"])
+            line += " "
+            line += recipe["Inputs"][i]["Element"]["RowName"].lower()
+
+        return line
 
 
 class Completer:
@@ -189,6 +228,22 @@ class Application:
             except KeyboardInterrupt:
                 break
 
+    def read(self, filename: str) -> None:
+        """
+        Application class should create a file system since
+        filename is given as a command line argument.
+        """
+
+        # Read from a json file.
+        if filename.endswith(".json"):
+            filesystem: FileSystem = JsonSystem(filename)
+            filesystem.read(self.calculator)
+            return
+
+        # Read from a text file by default.
+        filesystem = FileSystem(filename)
+        filesystem.read(self.calculator)
+
     def init(self, argv: list[str]) -> None:
         try:
             # Parse command line arguments.
@@ -199,8 +254,17 @@ class Application:
 
             # Import equations from files.
             for argument in args:
-                file_system = FileSystem(argument)
-                file_system.read(self.calculator)
+                self.read(argument)
+
+                temporary = self.calculator.options.copy()
+                for name in temporary.keys():
+                    for i, value in enumerate(temporary[name]):
+                        print(f"({i}) {value}")
+                    else:
+                        choice = int(input("Which recipe would you like to use? "))
+                        equation = temporary[name][choice]
+                        self.calculator.assign_equation(equation)
+                        del self.calculator.options[name]
 
             # Configure program based on options.
             for opt, arg in opts:
@@ -219,10 +283,9 @@ class Application:
 
 
 class ArgumentError(Exception):
-    """Custom error type to validate an argument string."""
+    """Error type to validate a command line argument string."""
 
-    def __init__(self):
-        super().__init__()
+    pass
 
 
 if __name__ == "__main__":

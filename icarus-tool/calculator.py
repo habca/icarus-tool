@@ -158,29 +158,45 @@ class Equation:
 class Calculator:
     def __init__(self):
         self.resources: dict[str, Equation] = dict()
+        self.resources_str: dict[str, str] = dict()
+        self.options: dict[str, list[str]] = dict()
         self.variables: list[str] = list()
         self.stations: dict[str, str] = dict()
         self.validator: Validator = Validator(self)
+        self.errors: list[str] = list()
 
     def assign_equation(self, assignment: str) -> None:
         # Validate an assignment before processing any further.
         self.validator.validate_syntax_assignment(assignment)
 
         # Every craftable resource should have a crafting station.
-        station, assignment = assignment.split(" : ")
+        station, assignment_tail = assignment.split(" : ")
 
         # Separate an assignment into a Resource and an Equation.
-        left, right = assignment.split(" = ")
+        left, right = assignment_tail.split(" = ")
 
         resource = Resource.parse(left)
         equation = Equation.parse(right)
         equation = equation.multiply(Fraction(1, resource.amount))
 
-        # Variable name can be assigned just once.
-        self.validator.validate_value_assignment(resource)
+        name = resource.name
 
-        self.resources[resource.name] = equation
-        self.stations[resource.name] = station
+        # Variable name can be assigned just once.
+        if name in self.resources:
+            if name not in self.options:
+                self.options[name] = []
+                self.options[name].append(self.resources_str[name])
+                self.options[name].append(assignment)
+                del self.stations[name]
+                del self.resources[name]
+                del self.resources_str[name]
+        elif name not in self.resources:
+            if name not in self.options:
+                self.resources[name] = equation
+                self.stations[name] = station
+                self.resources_str[name] = assignment
+            elif name in self.options:
+                self.options[name].append(assignment)
 
         # Resource will be removed from the variables list when it's assigned.
         self.variables = [var for var in self.variables if var != resource.name]
@@ -384,7 +400,7 @@ class Calculator:
 
 class Validator:
     pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
-    pattern_var = "(?:[0-9]+[-_])*[a-z/]+(?:[-_][a-z/]+)*"
+    pattern_var = "(?:[0-9]+[-_])*[a-z/0-9]+(?:[-_][a-z/0-9]+)*"
 
     def __init__(self, calc: Calculator):
         self.calc = calc
@@ -404,10 +420,6 @@ class Validator:
         pattern = re.compile(f"[-]?{num} {var}( [+-] {num} {var})*")
         if not pattern.fullmatch(equation):
             raise SyntaxError("SyntaxError: " + equation)
-
-    def validate_value_assignment(self, resource: Resource) -> None:
-        if resource.name in self.calc.resources:
-            raise ValueError(f"Name is already in use: {resource.name}")
 
     def validate_value_calculation(self, equation: Equation) -> None:
         errors: list[str] = []

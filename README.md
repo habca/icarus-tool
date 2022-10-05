@@ -5,7 +5,6 @@ The command line tool calculates total amount of resources and groups them by wo
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.
-A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions a trifling matter.
 
 ### Windows
 
@@ -166,12 +165,46 @@ Did you mean?
 
 ## Developers
 
+A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions a trifling matter.
+
 ### Visual Studio Code
+
+A package manager Snap provides automatic updates which is convenient, but classic confinement requires the `/snap` directory. To allow the installation of classic snaps, create a symbolic link between `/var/lib/snapd/snap` and `/snap`. [1]
+
+```
+git clone https://aur.archlinux.org/snapd.git
+cd snapd
+makepkg -sr
+pacman -U *.pkg.tar.zst
+
+systemctl enable --now snapd.socket
+ln -s /var/lib/snapd/snap /snap
+snap install code --classic
+```
+
+- Quick Open `(Ctrl+P)`
+
+      ext install ms-python.python
+
+- Command Palette `(Ctrl+Shift+P)`
+
+      Python: Select Interpreter (./.venv/bin/python)
+      Python: Configure Tests (unittest > Root directory > test_*.py)
+
+- Settings `(Ctrl+,)`
+
+      Formatting: provider (black)
+      Editor: Format On Save (yes)
+      Linting: Mypy Enabled (yes)
 
 To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in the editor.
 
-Enable from the settings `Editor: Format On Save`.
-
 ### Visual Studio Community
 
-For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing. VS Code had no such error.
+To change command line arguments, edit `Project > Properties > Debug > Script Arguments` field and use either `Start Debugging (F5)` or `Start Without Debugging (Ctrl+F5)`.
+
+For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing.
+
+## References
+
+- [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>

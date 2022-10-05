@@ -1,5 +1,5 @@
 from typing import Any, Callable
-from application import Application, FileSystem
+from application import Application, FileSystem, JsonSystem
 from calculator import Calculator
 
 import unittest
@@ -8,6 +8,7 @@ import unittest.mock
 
 class FileSystemTest(unittest.TestCase):
     filename = "data/tech_tree.txt"
+    filejson = "data/crafting/D_ProcessorRecipes.json"
 
     def test_file(self):
         """Reading a file should not raise any errors."""
@@ -18,6 +19,17 @@ class FileSystemTest(unittest.TestCase):
                 line = line.replace("\n", "")
                 if line != "" and not line.startswith("#"):
                     calc.assign_equation(line)
+
+    def test_file_json(self):
+        reader = JsonSystem(FileSystemTest.filejson)
+        reader.read(calculator := Calculator())
+
+        options = sum([len(r) for r in calculator.options.values()])
+
+        self.assertEqual(577, resources := len(calculator.resources))
+        self.assertEqual(9, errors := len(calculator.errors))
+        self.assertEqual(57, options)
+        self.assertEqual(643, resources + errors + options)
 
     def test_read(self):
         calc = Calculator()

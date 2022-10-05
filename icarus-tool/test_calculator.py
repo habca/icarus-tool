@@ -236,19 +236,25 @@ class CalculatorTest(unittest.TestCase):
 
     def test_assign_equation_2(self):
         """
-        A duplicate equation should raise an exception.
         Resources or variables should not have duplicate entries.
+        A duplicate equation should stage optional equations.
+        An user should choose a correct equation themselves.
         """
         calc = Calculator()
 
         calc.assign_equation("crafting_bench : 1 rope = 12 fiber")
-        with self.assertRaises(ValueError) as err1:
-            calc.assign_equation("crafting_bench : 1 rope = 12 fiber")
-        with self.assertRaises(ValueError) as err2:
-            calc.assign_equation("character : 1 rope = 5 leather")
+        calc.assign_equation("crafting_bench : 1 rope = 12 fiber")
+        calc.assign_equation("character : 1 rope = 5 leather")
 
-        self.assertEqual("Name is already in use: rope", str(err1.exception))
-        self.assertEqual("Name is already in use: rope", str(err2.exception))
+        with self.assertRaises(KeyError) as err:
+            calc.resources["rope"]
+
+        equations = calc.options["rope"]
+
+        self.assertEqual(3, len(equations))
+        self.assertEqual("crafting_bench : 1 rope = 12 fiber", equations[0])
+        self.assertEqual("crafting_bench : 1 rope = 12 fiber", equations[1])
+        self.assertEqual("character : 1 rope = 5 leather", equations[2])
 
     def test_assign_equation_3(self):
         calc = self.calc

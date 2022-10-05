@@ -11,7 +11,7 @@
             "program": "application.py",
             "args": [
                 "-g",
-                "data/tech_tree.txt",
+                "data/crafting/D_ProcessorRecipes.json",
             ],
             "console": "integratedTerminal",
             "justMyCode": true
