@@ -81,6 +81,22 @@ class Application:
     def __init__(self):
         self.calculator = Calculator()
 
+    def read(self, filename: str) -> None:
+        """
+        Application class should create a file system since
+        filename is given as a command line argument.
+        """
+
+        # Read from a json file.
+        if filename.endswith(".json"):
+            filesystem: FileSystem = JsonSystem(filename)
+            filesystem.read(self.calculator)
+            return
+
+        # Read from a text file by default.
+        filesystem = FileSystem(filename)
+        filesystem.read(self.calculator)
+
     def help(self):
         print()  # Empty line to make welcome text readable.
         print(welcome := "Welcome to Icarus tool!")
@@ -103,22 +119,33 @@ class Application:
         # Return a valid equation.
         return equation
 
-    def calculate(self, equation_str: str) -> None:
-        # To make program's output more readable.
-        separator = "-" * (len(equation_str) + 2)
-
+    def parse_input(self, equation: str) -> Equation:
         # Validate an equation before processing any further.
-        self.calculator.validator.validate_syntax_calculation(equation_str)
+        self.calculator.validator.validate_syntax_calculation(equation)
 
-        equation = Equation.parse(equation_str)
+        equation_obj: Equation = Equation.parse(equation)
 
         # Ensure there are only pre-assigned variable names.
-        self.calculator.validator.validate_value_calculation(equation)
+        self.calculator.validator.validate_value_calculation(equation_obj)
 
-        # List of derivative equations explaining materials step by step.
-        equations: list[Equation] = self.calculator.calculate(equation)
+        return equation_obj
 
-        previous_station = None
+    def recover(self, equation: str) -> None:
+        resources = Equation.parse(equation)
+        similar_words = self.calculator.find_similar(resources)
+        if similar_words != {}:
+            # Line break for a readable terminal output.
+            print()
+
+            print(f"Did you mean?")
+            for name, word_list in similar_words.items():
+                print("- " + name + ": " + ", ".join(word_list))
+
+    def print_output(self, user_input: str, equations: list[Equation]) -> None:
+        # To make program's output more readable.
+        separator: str = "-" * (len(user_input) + 2)
+
+        previous_station: str | None = None
         for i in range(len(equations) - 1):
 
             resources = equations[i]
@@ -175,7 +202,7 @@ class Application:
         """
 
         # From here, print the program's input.
-        resources = Equation.parse(equation_str)
+        resources = Equation.parse(user_input)
         resources = resources.suodata(all=True, round=False)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
@@ -202,47 +229,22 @@ class Application:
         for resource_name in resources_str:
             print(resource_name)
 
-    def recover(self, equation: str) -> None:
-        resources = Equation.parse(equation)
-        similar_words = self.calculator.find_similar(resources)
-        if similar_words != {}:
-            # Line break for a readable terminal output.
-            print()
-
-            print(f"Did you mean?")
-            for name, word_list in similar_words.items():
-                print("- " + name + ": " + ", ".join(word_list))
-
     def main(self):
         while True:
             try:
-                equation = self.ask_input()
-                self.calculate(equation)
-            except SyntaxError as err:
-                print(str(err))
-            except ValueError as err:
-                print(str(err))
-                self.recover(equation)
+                user_input = self.ask_input()
+                equation = self.parse_input(user_input)
+                equations = self.calculator.calculate(equation)
+                self.print_output(user_input, equations)
             except SystemExit:
                 break
             except KeyboardInterrupt:
                 break
-
-    def read(self, filename: str) -> None:
-        """
-        Application class should create a file system since
-        filename is given as a command line argument.
-        """
-
-        # Read from a json file.
-        if filename.endswith(".json"):
-            filesystem: FileSystem = JsonSystem(filename)
-            filesystem.read(self.calculator)
-            return
-
-        # Read from a text file by default.
-        filesystem = FileSystem(filename)
-        filesystem.read(self.calculator)
+            except SyntaxError as err:
+                print(str(err))
+            except ValueError as err:
+                print(str(err))
+                self.recover(user_input)
 
     def init(self, argv: list[str]) -> None:
         try:
@@ -250,7 +252,7 @@ class Application:
             opts, args = getopt.getopt(argv[1:], "g", ["gnu"])
 
             if args == []:
-                raise ArgumentError
+                raise SyntaxError()
 
             # Import equations from files.
             for argument in args:
@@ -278,14 +280,8 @@ class Application:
             print(str(err))
         except FileNotFoundError as err:
             print(str(err).replace("[Errno 2] ", ""))
-        except ArgumentError:
+        except SyntaxError:
             print("Usage:", argv[0], "-g", "data/tech_tree.txt")
-
-
-class ArgumentError(Exception):
-    """Error type to validate a command line argument string."""
-
-    pass
 
 
 if __name__ == "__main__":

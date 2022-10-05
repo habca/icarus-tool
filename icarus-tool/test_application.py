@@ -8,20 +8,32 @@ import unittest.mock
 
 class FileSystemTest(unittest.TestCase):
     filename = "data/tech_tree.txt"
-    filejson = "data/crafting/D_ProcessorRecipes.json"
 
-    def test_file(self):
-        """Reading a file should not raise any errors."""
+    def test_read(self):
+        reader = FileSystem(FileSystemTest.filename)
+        reader.read(calculator := Calculator())
 
-        calc = Calculator()
-        with open(FileSystemTest.filename) as tiedosto:
-            for line in tiedosto:
-                line = line.replace("\n", "")
-                if line != "" and not line.startswith("#"):
-                    calc.assign_equation(line)
+        self.assertEqual(445, len(calculator.resources))
+        self.assertEqual(445, len(calculator.stations))
+        self.assertEqual(0, len(calculator.errors))
+        self.assertEqual(0, len(calculator.options))
 
-    def test_file_json(self):
-        reader = JsonSystem(FileSystemTest.filejson)
+        for resource in calculator.resources:
+            self.assertNotIn(resource, calculator.variables)
+            self.assertIn(resource, calculator.stations)
+        for variable in calculator.variables:
+            self.assertNotIn(variable, calculator.resources)
+            self.assertNotIn(variable, calculator.stations)
+        for station in calculator.stations:
+            self.assertIn(station, calculator.resources)
+            self.assertNotIn(station, calculator.variables)
+
+
+class JsonSystemTest(unittest.TestCase):
+    filename = "data/crafting/D_ProcessorRecipes.json"
+
+    def test_read(self):
+        reader = JsonSystem(JsonSystemTest.filename)
         reader.read(calculator := Calculator())
 
         options = sum([len(r) for r in calculator.options.values()])
@@ -31,25 +43,18 @@ class FileSystemTest(unittest.TestCase):
         self.assertEqual(57, options)
         self.assertEqual(643, resources + errors + options)
 
-    def test_read(self):
-        calc = Calculator()
-        tiedosto = FileSystem(FileSystemTest.filename)
-        tiedosto.read(calc)
-
-        self.assertTrue(len(calc.resources) > 0)
-        self.assertTrue(len(calc.variables) > 0)
-        self.assertEqual(len(calc.stations), len(calc.resources))
-
-        for resource in calc.resources:
-            self.assertNotIn(resource, calc.variables)
-        for variable in calc.variables:
-            self.assertNotIn(variable, calc.resources)
-            self.assertNotIn(variable, calc.stations)
+        for resource in calculator.resources:
+            self.assertNotIn(resource, calculator.variables)
+            self.assertIn(resource, calculator.stations)
+        for variable in calculator.variables:
+            self.assertNotIn(variable, calculator.resources)
+            self.assertNotIn(variable, calculator.stations)
+        for station in calculator.stations:
+            self.assertIn(station, calculator.resources)
+            self.assertNotIn(station, calculator.variables)
 
 
 class ApplicationTest(unittest.TestCase):
-    filename = "data/output.txt"
-
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
