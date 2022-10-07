@@ -1,5 +1,5 @@
 ﻿from typing import Any
-from calculator import Calculator, Equation
+from calculator import Calculator, Equation, Resource
 import sys, getopt
 import json
 
@@ -141,6 +141,31 @@ class Application:
             for name, word_list in similar_words.items():
                 print("- " + name + ": " + ", ".join(word_list))
 
+    def calculate(self, equation: Equation) -> list[Equation]:
+        stack: list[Resource] = equation.resources[:]
+        while stack != []:
+            resource: Resource = stack.pop(0)
+            if resource.name in self.calculator.options.keys():
+                options = self.calculator.options[resource.name]
+                for i, option in enumerate(options):
+                    print(f"({i}) {option}")
+
+                while True:
+                    user_input = input("Which recipe would you like to use? ")
+                    if user_input.isdigit() and 0 <= int(user_input) < len(options):
+                        line = self.calculator.options[resource.name][int(user_input)]
+                        break
+                    if user_input in ("exit", "quit"):
+                        raise SystemExit
+
+                del self.calculator.options[resource.name]
+                self.calculator.assign_equation(line)
+            if resource.name in self.calculator.resources:
+                next: Equation = self.calculator.resources[resource.name]
+                stack += next.resources.copy()
+
+        return self.calculator.calculate(equation)
+
     def print_output(self, user_input: str, equations: list[Equation]) -> None:
         # To make program's output more readable.
         separator: str = "-" * (len(user_input) + 2)
@@ -234,7 +259,7 @@ class Application:
             try:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
-                equations = self.calculator.calculate(equation)
+                equations = self.calculate(equation)
                 self.print_output(user_input, equations)
             except SystemExit:
                 break
@@ -257,16 +282,6 @@ class Application:
             # Import equations from files.
             for argument in args:
                 self.read(argument)
-
-                temporary = self.calculator.options.copy()
-                for name in temporary.keys():
-                    for i, value in enumerate(temporary[name]):
-                        print(f"({i}) {value}")
-                    else:
-                        choice = int(input("Which recipe would you like to use? "))
-                        equation = temporary[name][choice]
-                        self.calculator.assign_equation(equation)
-                        del self.calculator.options[name]
 
             # Configure program based on options.
             for opt, arg in opts:

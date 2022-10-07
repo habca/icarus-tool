@@ -13,9 +13,7 @@ Powershell might not provide the same output as Bash shell. The reason remains u
 ```
 py -m venv .wenv
 .wenv\Scripts\activate
-python -m pip install pyreadline
-python -m pip install mypy
-python -m pip install black
+python -m pip install pyreadline mypy black
 
 python -m unittest
 python -m mypy application.py calculator.py test_application.py test_calculator.py
@@ -31,9 +29,7 @@ The `readline` package is most likely already installed as a dependency of Bash.
 ```
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install readline
-python -m pip install mypy
-python -m pip install black
+python -m pip install readline mypy black
 
 python -m unittest
 python -m mypy *.py
@@ -161,6 +157,17 @@ ValueError: biofuelextractor, biofuel_gen
 Did you mean?
 - biofuelextractor: biofuel_extractor, biofuel_generator, biofuel_radar
 - biofuel_gen: biofuel_can, biofuel_generator, biofuel_stove
+```
+
+### Recipe chooser
+
+Program inquires a recipe if there are multiple variations for a same item.
+
+```
+> 1 fabricator
+(0) mortar_and_pestle : 1 epoxy = 2 sulfur + 4 tree_sap
+(1) mortar_and_pestle : 1 epoxy = 4 crushed_bone
+Which recipe would you like to use? 0
 ```
 
 ## Developers

@@ -13,11 +13,6 @@ class FileSystemTest(unittest.TestCase):
         reader = FileSystem(FileSystemTest.filename)
         reader.read(calculator := Calculator())
 
-        self.assertEqual(445, len(calculator.resources))
-        self.assertEqual(445, len(calculator.stations))
-        self.assertEqual(0, len(calculator.errors))
-        self.assertEqual(0, len(calculator.options))
-
         for resource in calculator.resources:
             self.assertNotIn(resource, calculator.variables)
             self.assertIn(resource, calculator.stations)
@@ -27,6 +22,11 @@ class FileSystemTest(unittest.TestCase):
         for station in calculator.stations:
             self.assertIn(station, calculator.resources)
             self.assertNotIn(station, calculator.variables)
+
+        self.assertEqual(445, len(calculator.resources))
+        self.assertEqual(445, len(calculator.stations))
+        self.assertEqual(0, len(calculator.errors))
+        self.assertEqual(0, len(calculator.options))
 
 
 class JsonSystemTest(unittest.TestCase):
@@ -38,11 +38,6 @@ class JsonSystemTest(unittest.TestCase):
 
         options = sum([len(r) for r in calculator.options.values()])
 
-        self.assertEqual(577, resources := len(calculator.resources))
-        self.assertEqual(9, errors := len(calculator.errors))
-        self.assertEqual(57, options)
-        self.assertEqual(643, resources + errors + options)
-
         for resource in calculator.resources:
             self.assertNotIn(resource, calculator.variables)
             self.assertIn(resource, calculator.stations)
@@ -52,6 +47,18 @@ class JsonSystemTest(unittest.TestCase):
         for station in calculator.stations:
             self.assertIn(station, calculator.resources)
             self.assertNotIn(station, calculator.variables)
+
+        # TODO: vaihda nimet samoiksi kuin pelissa
+        # self.assertIn("machining_bench", calculator.resources)
+        # self.assertIn("hunting_rifle", calculator.resources)
+        # self.assertIn("iron_ingot", calculator.resources)
+        # self.assertIn("iron_ore", calculator.variables)
+        # self.assertIn("aluminium_ore", calculator.variables)
+
+        self.assertEqual(577, resources := len(calculator.resources))
+        self.assertEqual(9, errors := len(calculator.errors))
+        self.assertEqual(57, options)
+        self.assertEqual(643, resources + errors + options)
 
 
 class ApplicationTest(unittest.TestCase):
@@ -119,7 +126,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "data/test_biofuel_extractor_biofuel_generator.txt"
+            "test/test_biofuel_extractor_biofuel_generator.txt"
         )
 
         application = Application()
@@ -136,7 +143,7 @@ class ApplicationTest(unittest.TestCase):
             "exit",
         ]
 
-        expected_output = ApplicationTest.read_testfile("data/test_fabricator.txt")
+        expected_output = ApplicationTest.read_testfile("test/test_fabricator.txt")
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
@@ -153,7 +160,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "data/test_cement_mixer_concrete_furnace.txt"
+            "test/test_cement_mixer_concrete_furnace.txt"
         )
 
         application = Application()
@@ -171,7 +178,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "data/test_stone_furnace_anvil_bench_machining_bench.txt"
+            "test/test_stone_furnace_anvil_bench_machining_bench.txt"
         )
 
         application = Application()
@@ -189,7 +196,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "data/test_cement_mixer_concrete_furnace_thermos.txt"
+            "test/test_cement_mixer_concrete_furnace_thermos.txt"
         )
 
         application = Application()
@@ -207,7 +214,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "data/test_stone_furnace_anvil_bench_machining_bench_stone_wood.txt"
+            "test/test_stone_furnace_anvil_bench_machining_bench_stone_wood.txt"
         )
 
         application = Application()

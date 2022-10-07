@@ -280,6 +280,11 @@ class Calculator:
         variables = []
         for part in equation:
 
+            # Expression contains optional subexpressions.
+            # TODO: ei kaytossa missaan mutta testattu
+            if part.name == variable and variable in self.options:
+                variables.append(part.name)
+
             # Variable occures in a derivative expression.
             if part.name == variable and not_first:
                 variables.append(part.name)
@@ -298,7 +303,8 @@ class Calculator:
                 if found != []:
                     variables.append(part.name)
 
-        return variables
+        # Remove duplicates before returning.
+        return list(dict.fromkeys(variables))
 
     def find_similar(self, equation: Equation) -> dict[str, list[str]]:
         word_list = self.get_keywords()

@@ -1,7 +1,7 @@
 from fractions import Fraction
-from application import FileSystem
+from application import FileSystem, JsonSystem
 from calculator import Calculator, Equation, Resource
-from test_application import FileSystemTest
+from test_application import FileSystemTest, JsonSystemTest
 
 import unittest
 
@@ -207,6 +207,10 @@ class CalculatorTest(unittest.TestCase):
         file = FileSystem(FileSystemTest.filename)
         file.read(self.calc)
 
+        self.calculator = Calculator()
+        filesystem = JsonSystem(JsonSystemTest.filename)
+        filesystem.read(self.calculator)
+
     def test_get_keywords(self):
         """Keywords consit of assigned variable names."""
         calc = Calculator()
@@ -294,15 +298,45 @@ class CalculatorTest(unittest.TestCase):
             self.assertEqual(f"SyntaxError: {error}", str(err.exception))
 
     def test_search_variable(self):
-        calc = self.calc
+        e1 = self.calc.resources["hunting_rifle"]
+        e2 = self.calc.resources["steel_ingot"]
+        e3 = self.calc.resources["steel_bloom"]
 
-        l1 = calc.resources["hunting_rifle"]
-        l2 = calc.resources["steel_ingot"]
-        l3 = calc.resources["steel_bloom"]
+        self.assertEqual([], self.calc.search_variable("steel_screw", e1))
+        self.assertEqual(["steel_screw"], self.calc.search_variable("steel_ingot", e1))
+        self.assertEqual(["steel_screw"], self.calc.search_variable("steel_ingot", e1))
+        self.assertEqual(["steel_screw"], self.calc.search_variable("steel_bloom", e1))
+        self.assertEqual([], self.calc.search_variable("iron_ingot", e1))
+        self.assertEqual(["steel_screw"], self.calc.search_variable("iron_ore", e1))
 
-        self.assertEqual(["steel_screw"], calc.search_variable("iron_ore", l1))
-        self.assertEqual(["steel_bloom"], calc.search_variable("iron_ore", l2))
-        self.assertEqual([], calc.search_variable("iron_ore", l3))
+        self.assertEqual([], self.calc.search_variable("steel_bloom", e2))
+        self.assertEqual([], self.calc.search_variable("iron_ingot", e2))
+        self.assertEqual(["steel_bloom"], self.calc.search_variable("iron_ore", e2))
+        self.assertEqual([], self.calc.search_variable("iron_ingot", e3))
+        self.assertEqual([], self.calc.search_variable("iron_ore", e3))
+
+    def test_search_optional_expression(self):
+        e1 = Equation.parse("1 rifle_hunting")
+        e2 = Equation.parse(
+            "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
+        )
+
+        self.assertIn("metal_ore", self.calculator.variables)
+        self.assertNotIn("metal_ore", self.calculator.resources)
+        self.assertEqual([], self.calculator.search_variable("metal_ore", e1))
+        self.assertEqual([], self.calculator.search_variable("metal_ore", e2))
+
+        self.assertIn("epoxy", self.calculator.options)
+        self.assertNotIn("epoxy", self.calculator.resources)
+        self.assertEqual(
+            ["rifle_hunting"], self.calculator.search_variable("epoxy", e1)
+        )
+        self.assertEqual(["epoxy"], self.calculator.search_variable("epoxy", e2))
+
+    def test_search_variable_remove_duplicates(self):
+        e1 = Equation.parse("1 epoxy + 1 epoxy + 1 rope + 1 rope")
+        self.assertEqual(["epoxy"], self.calculator.search_variable("epoxy", e1))
+        self.assertEqual(["rope"], self.calculator.search_variable("rope", e1))
 
     def test_calculate_last_element(self):
         """Equation should contain only raw materials as the last element."""
