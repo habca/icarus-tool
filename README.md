@@ -200,6 +200,8 @@ snap install code --classic
 
 - Settings `(Ctrl+,)`
 
+      Testing: Automatically Open Peek View (never)
+      Smart Scroll: Enabled (no)
       Formatting: provider (black)
       Editor: Format On Save (yes)
       Linting: Mypy Enabled (yes)

@@ -35,30 +35,39 @@ class JsonSystem(FileSystem):
 
         for recipe in recipes["Rows"]:
             try:
-                line = JsonSystem.to_equation(recipe)
-                calculator.assign_equation(line)
+                for line in JsonSystem.to_equation(recipe):
+                    calculator.assign_equation(line)
             except IndexError:
                 calculator.errors.append(line)
 
     @classmethod
-    def to_equation(cls, recipe: dict[str, Any]) -> str:
-        """Function may throw a ValueError."""
-        line = recipe["RecipeSets"][0]["RowName"].lower()
-        line += " : "
-        line += str(recipe["Outputs"][0]["Count"])
-        line += " "
-        line += recipe["Outputs"][0]["Element"]["RowName"].lower()
-        line += " = "
-        line += str(recipe["Inputs"][0]["Count"])
-        line += " "
-        line += recipe["Inputs"][0]["Element"]["RowName"].lower()
-        for i in range(1, len(recipe["Inputs"])):
-            line += " + "
-            line += str(recipe["Inputs"][i]["Count"])
-            line += " "
-            line += recipe["Inputs"][i]["Element"]["RowName"].lower()
+    def to_equation(cls, recipe: dict[str, Any]) -> list[str]:
+        lines: list[str] = []
 
-        return line
+        # Station
+        for i in range(len(recipe["RecipeSets"])):
+            line = recipe["RecipeSets"][i]["RowName"].lower()
+            line += " : "
+
+            # Output
+            line += str(recipe["Outputs"][0]["Count"])
+            line += " "
+            line += recipe["Outputs"][0]["Element"]["RowName"].lower()
+            line += " = "
+
+            # Input
+            line += str(recipe["Inputs"][0]["Count"])
+            line += " "
+            line += recipe["Inputs"][0]["Element"]["RowName"].lower()
+            for i in range(1, len(recipe["Inputs"])):
+                line += " + "
+                line += str(recipe["Inputs"][i]["Count"])
+                line += " "
+                line += recipe["Inputs"][i]["Element"]["RowName"].lower()
+
+            lines.append(line)
+
+        return lines
 
 
 class Completer:

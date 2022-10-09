@@ -55,10 +55,10 @@ class JsonSystemTest(unittest.TestCase):
         # self.assertIn("iron_ore", calculator.variables)
         # self.assertIn("aluminium_ore", calculator.variables)
 
-        self.assertEqual(577, resources := len(calculator.resources))
+        self.assertEqual(388, resources := len(calculator.resources))
         self.assertEqual(9, errors := len(calculator.errors))
-        self.assertEqual(57, options)
-        self.assertEqual(643, resources + errors + options)
+        self.assertEqual(475, options)
+        self.assertTrue(643 <= resources + errors + options)
 
 
 class ApplicationTest(unittest.TestCase):

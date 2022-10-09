@@ -222,6 +222,33 @@ class CalculatorTest(unittest.TestCase):
 
         self.assertEqual(["wood_spear", "stick", "fiber", "wood"], calc.get_keywords())
 
+    def test_get_keywords_read_json(self):
+        filesystem = JsonSystem(JsonSystemTest.filename)
+        filesystem.read(calculator := Calculator())
+
+        keywords = calculator.get_keywords()
+
+        # Keywords should contain unique recipes.
+        self.assertIn("crafting_bench", calculator.resources.keys())
+        self.assertIn("crafting_bench", keywords)
+        for resource in calculator.resources.keys():
+            self.assertIn(resource, keywords)
+
+        # Keywords should contain optional recipes
+        self.assertIn("refined_metal", calculator.options.keys())
+        self.assertIn("refined_metal", keywords)
+        for option in calculator.options.keys():
+            self.assertIn(option, keywords)
+
+        # Keywords should contain unique and optional variables
+        self.assertIn("stringy_meat", calculator.variables)
+        self.assertIn("stringy_meat", keywords)
+        for variable in calculator.variables:
+            self.assertIn(variable, keywords)
+
+        # Keywords should not contain duplicates.
+        self.assertEqual(keywords, list(dict.fromkeys(keywords)))
+
     def test_assign_equation_1(self):
         """An equation should be stored in a dictionary as follows."""
         calc = Calculator()

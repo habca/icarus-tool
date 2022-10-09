@@ -208,7 +208,12 @@ class Calculator:
                     self.variables.append(resource.name)
 
     def get_keywords(self) -> list[str]:
-        return list(self.resources.keys()) + self.variables[:]
+        keywords = list(self.resources.keys())
+        keywords += self.options.keys()
+        keywords += self.variables.copy()
+
+        # Remove duplicates keywords.
+        return list(dict.fromkeys(keywords))
 
     def calculate(self, equation: Equation) -> list[Equation]:
         # Never alter an original equation.
