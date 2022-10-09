@@ -367,206 +367,132 @@ class CalculatorTest(unittest.TestCase):
 
     def test_calculate_last_element(self):
         """Equation should contain only raw materials as the last element."""
-        e1 = Equation.parse("60 fiber + 50 wood + 12 stone + 20 leather")
-        e2 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
-        e3 = Equation.parse("25 wood + 160 stone + 24 leather")
-        e4 = Equation.parse("80 iron_ore")
-        e5 = Equation.parse("1 wood")
 
-        self.assertEqual(
-            e1, self.calc.calculate(Equation.parse("1 crafting_bench"))[-1]
-        )
-        self.assertEqual(e2, self.calc.calculate(Equation.parse("1 anvil_bench"))[-1])
-        self.assertEqual(e3, self.calc.calculate(Equation.parse("2 stone_furnace"))[-1])
-        self.assertEqual(e4, self.calc.calculate(Equation.parse("40 iron_ingot"))[-1])
-        self.assertEqual(e5, self.calc.calculate(Equation.parse("8 stick"))[-1])
+        e1 = "60 fiber + 50 wood + 12 stone + 20 leather"
+        e2 = "80 iron_ore + 20 wood + 10 stone"
+        e3 = "25 wood + 160 stone + 24 leather"
+        e4 = "80 iron_ore"
+        e5 = "1 wood"
+
+        self.assertEqual(e1, self.get_last_element("1 crafting_bench"))
+        self.assertEqual(e2, self.get_last_element("1 anvil_bench"))
+        self.assertEqual(e3, self.get_last_element("2 stone_furnace"))
+        self.assertEqual(e4, self.get_last_element("40 iron_ingot"))
+        self.assertEqual(e5, self.get_last_element("8 stick"))
 
     def test_calculate_first_element(self):
         """Equation should evaluate subtraction in the first element as well."""
-        e1 = Equation.parse("120 00_buckshot_shell - 40 00_buckshot_shell")
 
-        self.assertEqual("80 00_buckshot_shell", str(self.calc.calculate(e1)[0]))
+        e1 = "120 00_buckshot_shell - 40 00_buckshot_shell"
+        e2 = "1 biofuel_extractor + 1 biofuel_generator"
+
+        self.assertEqual("80 00_buckshot_shell", self.get_first_element(e1))
+        self.assertEqual("1 biofuel_generator", self.get_first_element(e2))
 
     def test_calculate_negative_amount(self):
         """
         Removing a total amount of a particular resource should total to zero.
         Total amount should always be positive regardless of the number of iterations.
-
-        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench
-        = 288 fiber + 184 iron_ore + 102 stone + 69 wood + 20 sulfur + 12 leather
-
-        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 102 stone - 69 wood
-        = 288 fiber + 184 iron_ore + 0 stone + 0 wood + 20 sulfur + 12 leather
-
-        > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 100 stone - 70 wood
-        = 288 fiber + 184 iron_ore + 2 stone + 0 wood + 20 sulfur + 12 leather
         """
 
-        e1 = Equation.parse("1 stone_furnace + 1 anvil_bench + 1 machining_bench")
-        r1 = Resource(Fraction(102), "stone")
-        r2 = Resource(Fraction(69), "wood")
+        e1 = "1 stone_furnace + 1 anvil_bench + 1 machining_bench"
+        e2 = "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 102 stone - 69 wood"
+        e3 = "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 100 stone - 70 wood"
 
-        self.assertIn(r1, self.calc.calculate(e1)[-1])
-        self.assertIn(r2, self.calc.calculate(e1)[-1])
+        self.assertIn("102 stone", self.get_last_element(e1))
+        self.assertIn("69 wood", self.get_last_element(e1))
 
-        e2 = Equation.parse(
-            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 102 stone - 69 wood"
-        )
-        r1 = Resource(Fraction(0), "stone")
-        r2 = Resource(Fraction(0), "wood")
+        self.assertIn("0 stone", self.get_last_element(e2))
+        self.assertIn("0 wood", self.get_last_element(e2))
 
-        self.assertIn(r1, self.calc.calculate(e2)[-1])
-        self.assertIn(r2, self.calc.calculate(e2)[-1])
-
-        e3 = Equation.parse(
-            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 100 stone - 70 wood"
-        )
-        r1 = Resource(Fraction(2), "stone")
-        r2 = Resource(Fraction(-1), "wood")
-
-        self.assertIn(r1, self.calc.calculate(e3)[-1])
-        self.assertIn(r2, self.calc.calculate(e3)[-1])
+        self.assertIn("2 stone", self.get_last_element(e3))
+        self.assertIn("-1 wood", self.get_last_element(e3))
 
     def test_calculate_two_times(self):
-        """
-        Same amount of resources should have same crafting cost.
-        """
+        """Same amount of resources should have same crafting cost."""
 
         self.assertEqual(
-            self.calc.calculate(Equation.parse("1 anvil_bench + 1 anvil_bench"))[-1],
-            self.calc.calculate(Equation.parse("2 anvil_bench"))[-1],
+            self.get_last_element("1 anvil_bench + 1 anvil_bench"),
+            self.get_last_element("2 anvil_bench"),
         )
 
         self.assertEqual(
-            self.calc.calculate(Equation.parse("1 anvil_bench - 1 anvil_bench"))[-1],
-            self.calc.calculate(Equation.parse("0 anvil_bench"))[-1],
+            self.get_last_element("1 anvil_bench - 1 anvil_bench"),
+            self.get_last_element("0 anvil_bench"),
         )
 
     def test_calculate_electric_extractor(self):
         """Crafting cost of an electric extractor."""
-        calc = self.calc
 
-        iron_ingot1 = Equation.parse("40 iron_ore")
+        # 20 iron_ingot = 40 iron_ore
+        e0 = "20 iron_ingot"
+        e1 = "40 iron_ore"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("40 iron_ore"))[-1],
-            calc.calculate(iron_ingot1)[-1],
-        )
-        self.assertEqual(calc.calculate(Equation.parse("40 iron_ore"))[-1], iron_ingot1)
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), e1)
 
-        electronics1 = Equation.parse(
-            "5 refined_gold + 15 copper_ingot + 10 organic_resin + 10 epoxy"
-        )
-        electronics2 = Equation.parse(
+        # 5 electronics = 10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur
+        e0 = "5 electronics"
+        e1 = "5 refined_gold + 15 copper_ingot + 10 organic_resin + 10 epoxy"
+        e2 = (
             "10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 40 tree_sap"
         )
-        electronics3 = Equation.parse(
-            "10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 160 stick"
-        )
-        electronics4 = Equation.parse(
-            "10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur"
-        )
+        e3 = "10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 160 stick"
+        e4 = "10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("5 electronics"))[-1],
-            calc.calculate(electronics1)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("5 electronics"))[-1],
-            calc.calculate(electronics2)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("5 electronics"))[-1],
-            calc.calculate(electronics3)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("5 electronics"))[-1],
-            calc.calculate(electronics4)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("5 electronics"))[-1], electronics4
-        )
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e3))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e4))
+        self.assertEqual(self.get_last_element(e0), e4)
 
-        electric_extractor1 = Equation.parse("60 iron_ingot + 15 electronics")
-        electric_extractor2 = Equation.parse(
-            "120 iron_ore + 30 gold_ore + 90 copper_ore + 78 wood + 30 oxite + 60 sulfur"
-        )
+        # 3 electric_extractor = 120 iron_ore + 30 gold_ore + 90 copper_ore + 78 wood + 30 oxite + 60 sulfur
+        e0 = "3 electric_extractor"
+        e1 = "60 iron_ingot + 15 electronics"
+        e2 = "120 iron_ore + 30 gold_ore + 90 copper_ore + 78 wood + 30 oxite + 60 sulfur"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
-            calc.calculate(electric_extractor1)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
-            calc.calculate(electric_extractor2)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("3 electric_extractor"))[-1],
-            electric_extractor2,
-        )
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
+        self.assertEqual(self.get_last_element(e0), e2)
 
     def test_calculate_hunting_rifle(self):
         """Crafting cost of a hunting rifle."""
-        calc = self.calc
 
-        titanium_ingot1 = Equation.parse("200 titanium_ore")
+        # 40 titanium_ingot = 200 titanium_ore
+        e0 = "40 titanium_ingot"
+        e1 = "200 titanium_ore"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("40 titanium_ingot"))[-1],
-            calc.calculate(titanium_ingot1)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("40 titanium_ingot"))[-1], titanium_ingot1
-        )
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), e1)
 
-        epoxy_1 = Equation.parse("8 sulfur + 16 tree_sap")
-        epoxy_2 = Equation.parse("8 sulfur + 64 stick")
-        epoxy_3 = Equation.parse("8 sulfur + 7 wood")
+        # 4 epoxy = 8 sulfur + 7 wood
+        e0 = "4 epoxy"
+        e1 = "8 sulfur + 16 tree_sap"
+        e2 = "8 sulfur + 64 stick"
+        e3 = "8 sulfur + 7 wood"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_1)[-1]
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_2)[-1]
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("4 epoxy"))[-1], calc.calculate(epoxy_3)[-1]
-        )
-        self.assertEqual(calc.calculate(Equation.parse("4 epoxy"))[-1], epoxy_3)
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e3))
+        self.assertEqual(self.get_last_element(e0), e3)
 
-        steel_screw1 = Equation.parse("1 steel_ingot")
-        steel_screw2 = Equation.parse("6 iron_ore + 1 coal_ore")
+        # 16 steel_screw = 6 iron_ore + 1 coal_ore
+        e0 = "16 steel_screw"
+        e1 = "1 steel_ingot"
+        e2 = "6 iron_ore + 1 coal_ore"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("16 steel_screw"))[-1],
-            calc.calculate(steel_screw1)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("16 steel_screw"))[-1],
-            calc.calculate(steel_screw2)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("16 steel_screw"))[-1], steel_screw2
-        )
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
+        self.assertEqual(self.get_last_element(e0), e2)
 
-        hunting_rifle1 = Equation.parse(
-            "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
-        )
-        hunting_rifle2 = Equation.parse(
-            "19 wood + 8 leather + 200 titanium_ore + 8 sulfur + 6 iron_ore + 1 coal_ore"
-        )
+        # 1 hunting_rifle = 19 wood + 8 leather + 200 titanium_ore + 8 sulfur + 6 iron_ore + 1 coal_ore
+        e0 = "1 hunting_rifle"
+        e1 = "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
+        e2 = "19 wood + 8 leather + 200 titanium_ore + 8 sulfur + 6 iron_ore + 1 coal_ore"
 
-        self.assertEqual(
-            calc.calculate(Equation.parse("1 hunting_rifle"))[-1],
-            calc.calculate(hunting_rifle1)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("1 hunting_rifle"))[-1],
-            calc.calculate(hunting_rifle2)[-1],
-        )
-        self.assertEqual(
-            calc.calculate(Equation.parse("1 hunting_rifle"))[-1], hunting_rifle2
-        )
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e1))
+        self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
+        self.assertEqual(self.get_last_element(e0), e2)
 
     def test_find_similar(self):
         """There may be none, one or many good enough matches."""
@@ -770,7 +696,7 @@ class CalculatorTest(unittest.TestCase):
         """
         calc = self.calc
 
-        with self.assertRaises(ValueError) as err:
+        with self.assertRaises(AssertionError) as err:
             calc.get_station(Equation([]))
         self.assertEqual("Equation was empty.", str(err.exception))
 
@@ -782,9 +708,20 @@ class CalculatorTest(unittest.TestCase):
         calc = self.calc
 
         e1 = Equation.parse("1 biofuel_generator + 1 iron_ore")
-        with self.assertRaises(ValueError) as err:
+        with self.assertRaises(AssertionError) as err:
             calc.get_station(e1)
-        self.assertEqual("Equation had multiple stations.", str(err.exception))
+        self.assertEqual(
+            "Multiple stations: fabricator, total_resources", str(err.exception)
+        )
+
+    def get_element(self, equation: str, index: int) -> str:
+        return str(list(self.calc.calculate(Equation.parse(equation)))[index])
+
+    def get_first_element(self, equation: str) -> str:
+        return self.get_element(equation, index=0)
+
+    def get_last_element(self, equation: str) -> str:
+        return self.get_element(equation, index=-1)
 
 
 class ValidatorTest(unittest.TestCase):

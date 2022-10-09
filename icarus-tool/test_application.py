@@ -62,15 +62,14 @@ class JsonSystemTest(unittest.TestCase):
 
 
 class ApplicationTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.maxDiff = None
+
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
-            "Welcome to Icarus tool!",
-            "-----------------------",
-            "amount name [+ amount name] [- amount name]",
+            ":: Usage: amount name [+ amount name] [- amount name]",
         ]
-
-        self.maxDiff = None
         self.assertEqual(
             expected_output, ApplicationTest.get_output(user_input, Application().help)
         )
@@ -113,8 +112,6 @@ class ApplicationTest(unittest.TestCase):
         application = Application()
         for line in lines:
             application.calculator.assign_equation(line)
-
-        self.maxDiff = None
         self.assertEqual(
             expected_output, ApplicationTest.get_output(user_input, application.main)
         )
@@ -133,8 +130,6 @@ class ApplicationTest(unittest.TestCase):
         application.init(["./application.py", "-g", FileSystemTest.filename])
 
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_application_fabricator(self):
@@ -149,8 +144,6 @@ class ApplicationTest(unittest.TestCase):
         application.init(["./application.py", "-g", FileSystemTest.filename])
 
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_application_cement_mixer_concrete_furnace(self):
@@ -165,10 +158,7 @@ class ApplicationTest(unittest.TestCase):
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
-
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_application_stone_furnace_anvil_bench_machining_bench(self):
@@ -183,10 +173,7 @@ class ApplicationTest(unittest.TestCase):
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
-
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_application_cement_mixer_concrete_furnace_thermos(self):
@@ -201,10 +188,7 @@ class ApplicationTest(unittest.TestCase):
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
-
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_application_subtract(self):
@@ -219,11 +203,38 @@ class ApplicationTest(unittest.TestCase):
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
-
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
+
+    def test_ask_optional(self):
+        """
+        > 1 cement_mixer
+        (0) stone_furnace : 1 refined_metal = 2 metal_ore
+        (0) crafting_bench : 1 rope = 12 fiber
+        = AssertionError: Multiple stations: total_resources, total_resources, stone_furnace, crafting_bench
+        """
+
+        user_input = ["1 cement_mixer", "0", "exit"]
+        expected_output = [
+            "(0) stone_furnace : 1 refined_metal = 2 metal_ore",
+            "(1) concrete_furnace : 1 refined_metal = 2 metal_ore",
+            "(2) electric_furnace : 1 refined_metal = 2 metal_ore",
+            "(0) crafting_bench : 1 rope = 12 fiber",
+            "(1) advanced_armor_bench : 1 rope = 5 leather",
+            "(2) electric_armor_bench : 1 rope = 5 leather",
+            "(3) armor_bench : 1 rope = 5 leather",
+            "(4) character : 1 rope = 5 leather",
+        ]
+        application = Application()
+        application.init(["./application.py", JsonSystemTest.filename])
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+        self.assertEqual(expected_output, actual_output)
+
+        # Application should complete without an error.
+        user_input = ["1 cement_mixer", "0", "0", "exit"]
+        application = Application()
+        application.init(["./application.py", JsonSystemTest.filename])
+        ApplicationTest.get_output(user_input, application.main)
 
     def test_recover(self):
         user_input = [
@@ -236,20 +247,17 @@ class ApplicationTest(unittest.TestCase):
         expected_output = [
             "ValueError: anvi",
             "ValueError: anvil",
-            "Did you mean?",
+            ":: Did you mean?",
             "- anvil: anvil_bench",
             "ValueError: anvil_benchs, anvil_bvve",
-            "Did you mean?",
+            ":: Did you mean?",
             "- anvil_benchs: anvil_bench, masonry_bench, animal_bed",
             "- anvil_bvve: anvil_bench, animal_bed",
         ]
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
-
         actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.maxDiff = None
         self.assertEqual(expected_output, actual_output)
 
     def test_argv(self):

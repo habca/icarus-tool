@@ -215,24 +215,17 @@ class Calculator:
         # Remove duplicates keywords.
         return list(dict.fromkeys(keywords))
 
-    def calculate(self, equation: Equation) -> list[Equation]:
-        # Never alter an original equation.
-        equation = equation.make_copy()
-        equation = equation.evaluate()
-
-        equations = []
+    def calculate(self, equation: Equation) -> Iterator[Equation]:
         while True:
+            equation = equation.evaluate()
             suodatettu = self.suodata(equation)
-            equations.append(suodatettu)
+
+            yield suodatettu
+            equation = self.korvaa(equation, suodatettu)
 
             # Equation did not change so it is ready.
-            if not [r for r in equation if r.name in self.resources]:
+            if equation == suodatettu:
                 break
-
-            equation = self.korvaa(equation, suodatettu)
-            equation = equation.evaluate()
-
-        return equations
 
     def suodata(self, equation: Equation) -> Equation:
         """
@@ -391,7 +384,7 @@ class Calculator:
 
         # There should be at least one resource to be crafted.
         if equation.resources == []:
-            raise ValueError("Equation was empty.")
+            raise AssertionError("Equation was empty.")
 
         # Convert items
         stations = []
@@ -404,7 +397,7 @@ class Calculator:
 
         # All resources should be crafted at the same station.
         if stations.count(stations[0]) != len(stations):
-            raise ValueError("Equation had multiple stations.")
+            raise AssertionError("Multiple stations: %s" % ", ".join(stations))
 
         return stations[0]
 

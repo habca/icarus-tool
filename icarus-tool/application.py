@@ -108,9 +108,7 @@ class Application:
 
     def help(self):
         print()  # Empty line to make welcome text readable.
-        print(welcome := "Welcome to Icarus tool!")
-        print("-" * len(welcome))
-        print("amount name [+ amount name] [- amount name]")
+        print(":: Usage: amount name [+ amount name] [- amount name]")
 
     def ask_input(self) -> str:
         """Throws SyntaxError, ValueError or SystemExit!"""
@@ -143,14 +141,12 @@ class Application:
         resources = Equation.parse(equation)
         similar_words = self.calculator.find_similar(resources)
         if similar_words != {}:
-            # Line break for a readable terminal output.
-            print()
-
-            print(f"Did you mean?")
+            print()  # Line break for a readable terminal output.
+            print(f":: Did you mean?")
             for name, word_list in similar_words.items():
                 print("- " + name + ": " + ", ".join(word_list))
 
-    def calculate(self, equation: Equation) -> list[Equation]:
+    def ask_optional(self, equation: Equation) -> None:
         stack: list[Resource] = equation.resources[:]
         while stack != []:
             resource: Resource = stack.pop(0)
@@ -160,7 +156,9 @@ class Application:
                     print(f"({i}) {option}")
 
                 while True:
-                    user_input = input("Which recipe would you like to use? ")
+                    user_input = input(":: Which recipe would you like to use? ")
+                    print()  # Empty line to make welcome text readable.
+
                     if user_input.isdigit() and 0 <= int(user_input) < len(options):
                         line = self.calculator.options[resource.name][int(user_input)]
                         break
@@ -173,7 +171,8 @@ class Application:
                 next: Equation = self.calculator.resources[resource.name]
                 stack += next.resources.copy()
 
-        return self.calculator.calculate(equation)
+    def calculate(self, equation: Equation) -> list[Equation]:
+        return list(self.calculator.calculate(equation))
 
     def print_output(self, user_input: str, equations: list[Equation]) -> None:
         # To make program's output more readable.
@@ -268,6 +267,7 @@ class Application:
             try:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
+                self.ask_optional(equation)
                 equations = self.calculate(equation)
                 self.print_output(user_input, equations)
             except SystemExit:
@@ -276,6 +276,7 @@ class Application:
                 break
             except SyntaxError as err:
                 print(str(err))
+                self.help()
             except ValueError as err:
                 print(str(err))
                 self.recover(user_input)
