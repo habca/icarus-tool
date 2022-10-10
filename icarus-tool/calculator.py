@@ -276,9 +276,6 @@ class Calculator:
 
         return equation
 
-    def calculate_recursive(self, equation: Equation) -> Iterator[Equation]:
-        pass
-
     def suodata(self, equation: Equation) -> Equation:
         """
         Returns equation with only highest tier resources in it.
@@ -453,6 +450,15 @@ class Calculator:
 
         return stations[0]
 
+    def calculate_recursive(self, equation: Equation) -> Iterator[Equation]:
+        equation = equation.evaluate()
+        for resource in equation:
+            yield Equation([resource])
+            if resource.name in self.resources:
+                next_equation = Equation([resource])
+                next_equation = self.korvaa(next_equation, next_equation)
+                yield from self.calculate_recursive(next_equation)
+
 
 class Validator:
     pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"
@@ -523,4 +529,4 @@ class Iterative(Algorithm):
 
 class Recursive(Algorithm):
     def calculate(self, equation: Equation) -> Iterator[Equation]:
-        raise NotImplementedError
+        return self.calculator.calculate_recursive(equation)

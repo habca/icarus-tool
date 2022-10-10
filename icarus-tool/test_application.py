@@ -1,6 +1,6 @@
 from typing import Any, Callable
 from application import Application, FileSystem, JsonSystem
-from calculator import Calculator
+from calculator import Calculator, Equation
 
 import unittest
 import unittest.mock
@@ -206,7 +206,7 @@ class ApplicationTest(unittest.TestCase):
         actual_output = ApplicationTest.get_output(user_input, application.main)
         self.assertEqual(expected_output, actual_output)
 
-    def test_ask_optional(self):
+    def test_resolve_recipes(self):
         """
         > 1 cement_mixer
         (0) stone_furnace : 1 refined_metal = 2 metal_ore
@@ -289,6 +289,28 @@ class ApplicationTest(unittest.TestCase):
         self.assertEqual(
             expected_output, ApplicationTest.get_output(user_input, run_test_argv)
         )
+
+    def test_application_recursive(self):
+        e1 = "1 crafting_bench + 1 anvil_bench"
+        expected_output = [
+            "1 crafting_bench",
+            "60 fiber",
+            "50 wood",
+            "12 stone",
+            "20 leather",
+            "1 anvil_bench",
+            "40 iron_ingot",
+            "80 iron_ore",
+            "20 wood",
+            "10 stone",
+        ]
+
+        equation = Equation.parse(e1)
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(calculator := Calculator())
+        actual_output = list(calculator.calculate_recursive(equation))
+        actual_output = [str(r) for r in actual_output]
+        self.assertEqual(expected_output, actual_output)
 
     @classmethod
     def get_output(cls, user_input: list[str], callback: Callable):
