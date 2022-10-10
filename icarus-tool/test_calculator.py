@@ -1,6 +1,7 @@
 from fractions import Fraction
+from collections import deque
 from application import FileSystem, JsonSystem
-from calculator import Calculator, Equation, Resource
+from calculator import Calculator, Equation, Resource, Generator
 from test_application import FileSystemTest, JsonSystemTest
 
 import unittest
@@ -494,6 +495,20 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
         self.assertEqual(self.get_last_element(e0), e2)
 
+    def test_calculate_2nd(self):
+        e1 = [
+            "electric_extractor",
+            "iron_ingot",
+            "electronics",
+            "refined_gold",
+            "copper_ingot",
+            "organic_resin",
+            "epoxy",
+            "tree_sap",
+            "stick",
+        ]
+        self.assertEqual(e1, list(self.calc.calculate_2nd("3 electric_extractor")))
+
     def test_find_similar(self):
         """There may be none, one or many good enough matches."""
         calc = self.calc
@@ -714,14 +729,12 @@ class CalculatorTest(unittest.TestCase):
             "Multiple stations: fabricator, total_resources", str(err.exception)
         )
 
-    def get_element(self, equation: str, index: int) -> str:
-        return str(list(self.calc.calculate(Equation.parse(equation)))[index])
-
     def get_first_element(self, equation: str) -> str:
-        return self.get_element(equation, index=0)
+        return str(next(self.calc.calculate(Equation.parse(equation))))
 
     def get_last_element(self, equation: str) -> str:
-        return self.get_element(equation, index=-1)
+        gen = self.calc.calculate(Equation.parse(equation))
+        return str(deque(gen, maxlen=1).pop())
 
 
 class ValidatorTest(unittest.TestCase):
@@ -738,6 +751,23 @@ class ValidatorTest(unittest.TestCase):
         with self.assertRaises(ValueError) as err:
             self.calc.validator.validate_value_calculation(equation)
         self.assertEqual(expected, str(err.exception))
+
+
+class GeneratorTest(unittest.TestCase):
+    def test_generator_exhaust(self):
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(calculator := Calculator())
+
+        e1 = Equation.parse("3 electric_extractor")
+
+        g1 = Generator(calculator.calculate(e1))
+        g2 = Generator(calculator.calculate_2nd(str(e1)))
+
+        g1.exhaust()
+        g2.exhaust()
+
+        # Exhaust generators for their return values.
+        self.assertEqual(g1.value, g2.value)
 
 
 if __name__ == "__main__":

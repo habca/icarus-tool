@@ -11,6 +11,7 @@
             "program": "application.py",
             "args": [
                 "-g",
+                "-r",
                 "data/crafting/D_ProcessorRecipes.json",
             ],
             "console": "integratedTerminal",

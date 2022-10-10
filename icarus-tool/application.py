@@ -1,5 +1,5 @@
 ﻿from typing import Any
-from calculator import Calculator, Equation, Resource
+from calculator import Calculator, Equation, Recursive, Resource
 import sys, getopt
 import json
 
@@ -146,33 +146,29 @@ class Application:
             for name, word_list in similar_words.items():
                 print("- " + name + ": " + ", ".join(word_list))
 
-    def ask_optional(self, equation: Equation) -> None:
-        stack: list[Resource] = equation.resources[:]
-        while stack != []:
-            resource: Resource = stack.pop(0)
-            if resource.name in self.calculator.options.keys():
-                options = self.calculator.options[resource.name]
-                for i, option in enumerate(options):
-                    print(f"({i}) {option}")
+    def resolve_recipes(self, equation: Equation) -> None:
+        # Callback function to request user interaction.
+        def ask_optional(options: list[str]) -> int:
+            for i, option in enumerate(options):
+                print(f"({i}) {option}")
 
-                while True:
-                    user_input = input(":: Which recipe would you like to use? ")
-                    print()  # Empty line to make welcome text readable.
+            while True:
+                choice = input(":: Which recipe would you like to use? ")
+                print()  # Empty line to make welcome text readable.
 
-                    if user_input.isdigit() and 0 <= int(user_input) < len(options):
-                        line = self.calculator.options[resource.name][int(user_input)]
-                        break
-                    if user_input in ("exit", "quit"):
-                        raise SystemExit
+                if choice in ("exit", "quit"):
+                    raise SystemExit
 
-                del self.calculator.options[resource.name]
-                self.calculator.assign_equation(line)
-            if resource.name in self.calculator.resources:
-                next: Equation = self.calculator.resources[resource.name]
-                stack += next.resources.copy()
+                if choice.isdigit() and 0 <= int(choice) < len(options):
+                    return int(choice)
+
+        # Calculator knows all the recipes, but cannot inquire an user.
+        # Therefore it's necessary to use callback function as a parameter.
+        self.calculator.resolve_recipes(equation, callback=ask_optional)
 
     def calculate(self, equation: Equation) -> list[Equation]:
-        return list(self.calculator.calculate(equation))
+        # Algorithm depends on command line arguments.
+        return list(self.calculator.algorithm.calculate(equation))
 
     def print_output(self, user_input: str, equations: list[Equation]) -> None:
         # To make program's output more readable.
@@ -267,7 +263,7 @@ class Application:
             try:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
-                self.ask_optional(equation)
+                self.resolve_recipes(equation)
                 equations = self.calculate(equation)
                 self.print_output(user_input, equations)
             except SystemExit:
@@ -284,7 +280,7 @@ class Application:
     def init(self, argv: list[str]) -> None:
         try:
             # Parse command line arguments.
-            opts, args = getopt.getopt(argv[1:], "g", ["gnu"])
+            opts, args = getopt.getopt(argv[1:], "gr", ["gnu", "recursive"])
 
             if args == []:
                 raise SyntaxError()
@@ -300,6 +296,10 @@ class Application:
                 if opt in ("-g", "--gnu"):
                     variables = self.calculator.get_keywords()
                     Completer(variables)
+
+                if opt in ("-r", "--recursive"):
+                    algorithm = Recursive(self.calculator)
+                    self.calculator.algorithm = algorithm
 
         except getopt.GetoptError as err:
             print(str(err))

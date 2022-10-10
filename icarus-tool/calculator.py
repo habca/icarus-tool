@@ -1,5 +1,7 @@
 from fractions import Fraction
-from typing import Iterator
+from typing import Callable, Iterator
+from collections import deque
+from abc import ABC, abstractmethod
 import difflib
 import math
 import re
@@ -157,12 +159,17 @@ class Equation:
 
 class Calculator:
     def __init__(self):
+        # Algorithm depends on command line arguments.
+        self.algorithm: Algorithm = Iterative(self)
+
+        # Validator depends on the file being read.
+        self.validator: Validator = Validator(self)
+
         self.resources: dict[str, Equation] = dict()
         self.resources_str: dict[str, str] = dict()
         self.options: dict[str, list[str]] = dict()
         self.variables: list[str] = list()
         self.stations: dict[str, str] = dict()
-        self.validator: Validator = Validator(self)
         self.errors: list[str] = list()
 
     def assign_equation(self, assignment: str) -> None:
@@ -215,6 +222,24 @@ class Calculator:
         # Remove duplicates keywords.
         return list(dict.fromkeys(keywords))
 
+    def resolve_recipes(self, equation: Equation, callback: Callable) -> None:
+        stack: list[Resource] = equation.resources[:]
+        while stack != []:
+            resource: Resource = stack.pop(0)
+            if resource.name in self.options.keys():
+                options = self.options[resource.name]
+
+                # Return control to application to ask user.
+                # Application does not need to know details.
+                choice: int = callback(options)
+
+                line = self.options[resource.name][choice]
+                del self.options[resource.name]
+                self.assign_equation(line)
+            if resource.name in self.resources:
+                next: Equation = self.resources[resource.name]
+                stack += next.resources.copy()
+
     def calculate(self, equation: Equation) -> Iterator[Equation]:
         while True:
             equation = equation.evaluate()
@@ -226,6 +251,33 @@ class Calculator:
             # Equation did not change so it is ready.
             if equation == suodatettu:
                 break
+
+        return equation
+
+    def calculate_2nd(self, user_input: str) -> Iterator[str]:
+        """
+        Second version of function calculate.
+        Generates recipe names one at a time.
+        User may then repeat the process.
+        """
+
+        equation: Equation = Equation.parse(user_input)
+        while True:
+            equation = equation.evaluate()
+            suodatettu = self.suodata(equation)
+            for resource in suodatettu:
+                if resource.name in self.resources:
+                    yield resource.name
+            equation = self.korvaa(equation, suodatettu)
+
+            # Equation did not change so it is ready.
+            if equation == suodatettu:
+                break
+
+        return equation
+
+    def calculate_recursive(self, equation: Equation) -> Iterator[Equation]:
+        pass
 
     def suodata(self, equation: Equation) -> Equation:
         """
@@ -442,3 +494,33 @@ class Validator:
         if errors != []:
             error: str = ", ".join(errors)
             raise ValueError("ValueError: " + error)
+
+
+class Generator:
+    def __init__(self, gen):
+        self.gen = gen
+
+    def __iter__(self):
+        self.value = yield from self.gen
+
+    def exhaust(self):
+        deque(self, maxlen=0)
+
+
+class Algorithm(ABC):
+    def __init__(self, calculator: Calculator):
+        self.calculator = calculator
+
+    @abstractmethod
+    def calculate(self, equation: Equation) -> Iterator[Equation]:
+        pass
+
+
+class Iterative(Algorithm):
+    def calculate(self, equation: Equation) -> Iterator[Equation]:
+        return self.calculator.calculate(equation)
+
+
+class Recursive(Algorithm):
+    def calculate(self, equation: Equation) -> Iterator[Equation]:
+        raise NotImplementedError
