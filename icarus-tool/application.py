@@ -96,22 +96,6 @@ class Application:
 
         self.user_input: str = None
 
-    def read(self, filename: str) -> None:
-        """
-        Application class should create a file system since
-        filename is given as a command line argument.
-        """
-
-        # Read from a json file.
-        if filename.endswith(".json"):
-            filesystem: FileSystem = JsonSystem(filename)
-            filesystem.read(self.calculator)
-            return
-
-        # Read from a text file by default.
-        filesystem = FileSystem(filename)
-        filesystem.read(self.calculator)
-
     def help(self):
         print()  # Empty line to make welcome text readable.
         print(":: Usage: amount name [+ amount name] [- amount name]")
@@ -291,9 +275,19 @@ class Application:
             if args == []:
                 raise SyntaxError()
 
-            # Import equations from files.
             for argument in args:
-                self.read(argument)
+                # Application class should create a file reader.
+                # Because is given as a command line argument.
+
+                # Read from a json file.
+                if argument.endswith(".json"):
+                    filesystem: FileSystem = JsonSystem(argument)
+                    filesystem.read(self.calculator)
+
+                # Read from a text file by default.
+                else:
+                    filesystem = FileSystem(argument)
+                    filesystem.read(self.calculator)
 
             # Configure program based on options.
             for opt, arg in opts:
