@@ -1,5 +1,6 @@
 ﻿from typing import Any
-from calculator import Calculator, Equation, Recursive, Resource
+from calculator import Calculator, Equation, EquationTree
+from abc import ABC, abstractmethod
 import sys, getopt
 import json
 
@@ -90,6 +91,11 @@ class Application:
     def __init__(self):
         self.calculator = Calculator()
 
+        # Algorithm depends on command line arguments.
+        self.algorithm: Algorithm = Iterative(self)
+
+        self.user_input: str = None
+
     def read(self, filename: str) -> None:
         """
         Application class should create a file system since
@@ -135,6 +141,8 @@ class Application:
         # Ensure there are only pre-assigned variable names.
         self.calculator.validator.validate_value_calculation(equation_obj)
 
+        self.user_input = equation
+
         return equation_obj
 
     def recover(self, equation: str) -> None:
@@ -166,13 +174,9 @@ class Application:
         # Therefore it's necessary to use callback function as a parameter.
         self.calculator.resolve_recipes(equation, callback=ask_optional)
 
-    def calculate(self, equation: Equation) -> list[Equation]:
-        # Algorithm depends on command line arguments.
-        return list(self.calculator.algorithm.calculate(equation))
-
-    def print_output(self, user_input: str, equations: list[Equation]) -> None:
+    def print_output(self, equations: list[Equation]) -> None:
         # To make program's output more readable.
-        separator: str = "-" * (len(user_input) + 2)
+        separator = "-" * (len(self.user_input) + 2)
 
         previous_station: str | None = None
         for i in range(len(equations) - 1):
@@ -231,7 +235,7 @@ class Application:
         """
 
         # From here, print the program's input.
-        resources = Equation.parse(user_input)
+        resources = Equation.parse(self.user_input)
         resources = resources.suodata(all=True, round=False)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
@@ -258,14 +262,16 @@ class Application:
         for resource_name in resources_str:
             print(resource_name)
 
+    def print_output_recursive(self, root: EquationTree) -> None:
+        raise NotImplementedError
+
     def main(self):
         while True:
             try:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
                 self.resolve_recipes(equation)
-                equations = self.calculate(equation)
-                self.print_output(user_input, equations)
+                self.algorithm.calculate(equation)
             except SystemExit:
                 break
             except KeyboardInterrupt:
@@ -298,8 +304,8 @@ class Application:
                     Completer(variables)
 
                 if opt in ("-r", "--recursive"):
-                    algorithm = Recursive(self.calculator)
-                    self.calculator.algorithm = algorithm
+                    algorithm = Recursive(self)
+                    self.algorithm = algorithm
 
         except getopt.GetoptError as err:
             print(str(err))
@@ -307,6 +313,27 @@ class Application:
             print(str(err).replace("[Errno 2] ", ""))
         except SyntaxError:
             print("Usage:", argv[0], "-g", "data/tech_tree.txt")
+
+
+class Algorithm(ABC):
+    def __init__(self, application: Application):
+        self.application = application
+
+    @abstractmethod
+    def calculate(self, equation: Equation) -> None:
+        pass
+
+
+class Iterative(Algorithm):
+    def calculate(self, equation: Equation) -> None:
+        equations = self.application.calculator.calculate(equation)
+        self.application.print_output(list(equations))
+
+
+class Recursive(Algorithm):
+    def calculate(self, equation: Equation) -> None:
+        equation_tree = self.application.calculator.calculate_recursive(equation)
+        self.application.print_output_recursive(equation_tree)
 
 
 if __name__ == "__main__":

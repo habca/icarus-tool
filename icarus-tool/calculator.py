@@ -1,6 +1,5 @@
 from fractions import Fraction
 from typing import Callable, Iterator, Optional
-from abc import ABC, abstractmethod
 import difflib
 import math
 import re
@@ -170,9 +169,6 @@ class EquationTree:
 
 class Calculator:
     def __init__(self):
-        # Algorithm depends on command line arguments.
-        self.algorithm: Algorithm = Iterative(self)
-
         # Validator depends on the file being read.
         self.validator: Validator = Validator(self)
 
@@ -520,22 +516,3 @@ class Validator:
         if errors != []:
             error: str = ", ".join(errors)
             raise ValueError("ValueError: " + error)
-
-
-class Algorithm(ABC):
-    def __init__(self, calculator: Calculator):
-        self.calculator = calculator
-
-    @abstractmethod
-    def calculate(self, equation: Equation) -> Iterator[Equation]:
-        pass
-
-
-class Iterative(Algorithm):
-    def calculate(self, equation: Equation) -> Iterator[Equation]:
-        return self.calculator.calculate(equation)
-
-
-class Recursive(Algorithm):
-    def calculate(self, equation: Equation) -> Iterator[Equation]:
-        return self.calculator.calculate_recursive(equation)
