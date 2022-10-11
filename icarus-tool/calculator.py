@@ -156,11 +156,13 @@ class Equation:
 
 
 class EquationTree:
-    def __init__(self, data: Resource = None) -> None:
+    def __init__(self, data: Resource = None, station=None) -> None:
         self.children: list[EquationTree] = []
         self.data: Optional[Resource] = data
+        self.station: Optional[str] = station
 
     def __iter__(self) -> Iterator[Equation]:
+        """Helper function for unit tests"""
         if self.data:
             yield Equation([self.data])
         for tree_data in self.children:
@@ -218,8 +220,9 @@ class Calculator:
         # Add new variables into the unassigned variables list.
         for resource in equation.resources:
             if resource.name not in self.resources:
-                if resource.name not in self.variables:
-                    self.variables.append(resource.name)
+                if resource.name not in self.options:
+                    if resource.name not in self.variables:
+                        self.variables.append(resource.name)
 
     def get_keywords(self) -> list[str]:
         keywords = list(self.resources.keys())
@@ -366,7 +369,7 @@ class Calculator:
         similar_words: dict[str, list[str]] = dict()
         for resource in equation:
             words = difflib.get_close_matches(resource.name, word_list)
-            if words != [] and resource.name not in self.resources:
+            if words != [] and resource.name not in word_list:
                 similar_words[resource.name] = words
         return similar_words
 
@@ -458,22 +461,39 @@ class Calculator:
 
         return stations[0]
 
-    def calculate_recursive(self, equation: Equation) -> Iterator[Equation]:
+    def calculate_recursive(self, equation: Equation) -> EquationTree:
+        """
+        Equation tree represents the process of crafting items.
+        Equation may have non-positive values but they will be ignored.
+        Non-positive values make no sense when visualizing a crafting process.
+        """
+
         def create_equation_tree(
             root: EquationTree, equation: Equation
         ) -> EquationTree:
             equation = equation.evaluate()
             for resource in equation:
+                # Wrap into tree data structure.
                 node = EquationTree(resource)
-                root.children.append(node)
+
+                # Skip non-positive values.
+                if resource.amount > 0:
+                    root.children.append(node)
+
+                # Where resource should be crafted at.
+                if resource.name in self.stations:
+                    node.station = self.stations[resource.name]
+
+                # Repeat for the remaining recipes.
                 if resource.name in self.resources:
                     nodes = Equation([resource])
                     nodes = self.korvaa(nodes, nodes)
                     create_equation_tree(node, nodes)
+
             return root
 
         root = EquationTree()
-        return iter(create_equation_tree(root, equation))
+        return create_equation_tree(root, equation)
 
 
 class Validator:
@@ -505,8 +525,9 @@ class Validator:
 
             # Resource should be mentioned in tech tree.
             if resource.name not in self.calc.resources:
-                if resource.name not in self.calc.variables:
-                    errors.append(resource.name)
+                if resource.name not in self.calc.options:
+                    if resource.name not in self.calc.variables:
+                        errors.append(resource.name)
 
             # Attempt to create raw materials is pointless.
             if resource.name in self.calc.variables:

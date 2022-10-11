@@ -1,5 +1,6 @@
-﻿from typing import Any
-from calculator import Calculator, Equation, EquationTree
+﻿from collections import deque
+from typing import Any
+from calculator import Calculator, Equation, EquationTree, Resource
 from abc import ABC, abstractmethod
 import sys, getopt
 import json
@@ -136,7 +137,8 @@ class Application:
             print()  # Line break for a readable terminal output.
             print(f":: Did you mean?")
             for name, word_list in similar_words.items():
-                print("- " + name + ": " + ", ".join(word_list))
+                message = "- " + name + ": " + ", ".join(word_list)
+                print(message)
 
     def resolve_recipes(self, equation: Equation) -> None:
         # Callback function to request user interaction.
@@ -163,7 +165,7 @@ class Application:
         separator = "-" * (len(self.user_input) + 2)
 
         previous_station: str | None = None
-        for i in range(len(equations) - 1):
+        for i in range(len(equations)):
 
             resources = equations[i]
             resources = resources.suodata(all=False, round=False)
@@ -204,6 +206,10 @@ class Application:
             for resource_name in resources_str:
                 print(resource_name)
 
+    def print_total_resources(self, equation: Equation) -> None:
+        # To make program's output more readable.
+        separator = "-" * (len(self.user_input) + 2)
+
         """
         ==================================
         TOTAL RESOURCES
@@ -237,8 +243,7 @@ class Application:
         print(separator)
 
         # From here, print the program's output.
-        resources = equations[-1].make_copy()
-        resources = resources.suodata(all=True, round=True)
+        resources = equation.suodata(all=True, round=True)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
 
@@ -247,7 +252,38 @@ class Application:
             print(resource_name)
 
     def print_output_recursive(self, root: EquationTree) -> None:
-        raise NotImplementedError
+
+        # To make program's output more readable.
+        separator = "-" * (len(self.user_input) + 2)
+
+        def traverse(root: EquationTree, count: int = 0, step: int = 2) -> None:
+            if root.data:
+                resource: Resource = root.data
+                message = " " * count + str(resource)
+                if root.station:
+                    message += " [%s]" % root.station
+                print(message)
+
+            for i, node in enumerate(root.children):
+                # Separate root elements from user input.
+                # Because they form different tree stuctures.
+                if i > 0 and not root.data:
+                    print(separator)
+
+                # Do not increase indendation on empty root.
+                # Root node artificially connects user input.
+                if root.data:
+                    traverse(node, count + step)
+                else:
+                    traverse(node, count)
+
+        print()
+
+        print(separator.replace("-", "="))
+        print("RECURSIVE DATA STRUCTURE")
+        print(separator.replace("-", "="))
+
+        traverse(root)
 
     def main(self):
         while True:
@@ -320,14 +356,17 @@ class Algorithm(ABC):
 
 class Iterative(Algorithm):
     def calculate(self, equation: Equation) -> None:
-        equations = self.application.calculator.calculate(equation)
-        self.application.print_output(list(equations))
+        equations = list(self.application.calculator.calculate(equation))
+        self.application.print_output(equations[:-1])
+        self.application.print_total_resources(equations[-1])
 
 
 class Recursive(Algorithm):
     def calculate(self, equation: Equation) -> None:
+        total = deque(self.application.calculator.calculate(equation), maxlen=1).pop()
         equation_tree = self.application.calculator.calculate_recursive(equation)
         self.application.print_output_recursive(equation_tree)
+        self.application.print_total_resources(total)
 
 
 if __name__ == "__main__":

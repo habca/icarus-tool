@@ -530,6 +530,13 @@ class CalculatorTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             calc.find_similar(e1)["anvil_bench"]
 
+    def test_find_similar_optional_recipes(self):
+        """There was a bug and test assures it's gone."""
+
+        e1 = Equation.parse("1 machining_bench - 10 epoxy")
+        words = list(self.calculator.find_similar(e1))
+        self.assertEquals(["machining_bench"], words)
+
     def test_order_by_station(self):
         r1 = Resource(Fraction(1), "biofuel_extractor")
         r2 = Resource(Fraction(1), "biofuel_generator")
@@ -740,17 +747,24 @@ class CalculatorTest(unittest.TestCase):
 class ValidatorTest(unittest.TestCase):
     def setUp(self) -> None:
         """Create a calculator before any test method."""
-        self.calc = Calculator()
-        file = FileSystem(FileSystemTest.filename)
-        file.read(self.calc)
+
+        self.calculator = Calculator()
+        file = JsonSystem(JsonSystemTest.filename)
+        file.read(self.calculator)
 
     def test_validate_value_calculation_negative_recipes(self):
         equation = Equation.parse("100 stone - 100 wood")
         expected = "ValueError: 100 stone"
 
         with self.assertRaises(ValueError) as err:
-            self.calc.validator.validate_value_calculation(equation)
+            self.calculator.validator.validate_value_calculation(equation)
         self.assertEqual(expected, str(err.exception))
+
+    def test_validate_value_calculation_optional_recipe(self):
+        """Optional recipe is valid input should not raise an error."""
+
+        e1 = Equation.parse("1 concrete_mix")
+        self.calculator.validator.validate_value_calculation(e1)
 
 
 class EquationTreeTest(unittest.TestCase):
@@ -774,7 +788,7 @@ class EquationTreeTest(unittest.TestCase):
         e6.children = [e7, e9, e10]
         e7.children = [e8]
 
-        actuial = [str(r) for r in root]
+        actual = [str(r) for r in root]
         expected = [
             "1 crafting_bench",
             "60 fiber",
@@ -788,7 +802,7 @@ class EquationTreeTest(unittest.TestCase):
             "10 stone",
         ]
 
-        self.assertEqual(expected, actuial)
+        self.assertEqual(expected, actual)
 
     def test_calculate_recursive(self):
         filesystem = FileSystem(FileSystemTest.filename)
@@ -811,6 +825,23 @@ class EquationTreeTest(unittest.TestCase):
         actual = list(calculator.calculate_recursive(e1))
         actual = [str(r) for r in actual]
         self.assertEqual(expected, actual)
+
+    def test_calculate_recursive_ignore_negative(self):
+        """Tree data structure should have only positive numbers."""
+
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(calculator := Calculator())
+
+        e1 = Equation.parse("1 machining_bench - 10 epoxy")
+        e2 = Equation.parse("1 machining_bench + 0 epoxy")
+        e3 = Equation.parse("1 machining_bench")
+
+        a1 = list(calculator.calculate_recursive(e1))
+        a2 = list(calculator.calculate_recursive(e2))
+        a3 = list(calculator.calculate_recursive(e3))
+
+        self.assertEqual(a1, a2)
+        self.assertEqual(a1, a3)
 
 
 if __name__ == "__main__":

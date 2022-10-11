@@ -47,18 +47,17 @@ python application.py -g data/tech_tree.txt
 The command line options supported by the program are as follows.
 
 ```
--g --gnu    Apply GNU readline functionality to python's input.
+-g --gnu          Apply GNU readline functionality to python's input.
+-r --recursive    Show the output as a tree data structure.
 ```
 
 The manual will be displayed and program waits for a keyboard input.
 
 ```
-Welcome to Icarus tool!
------------------------
-amount name [+ amount name] [- amount name]
+:: Usage: amount name [+ amount name] [- amount name]
 ```
 
-### Example
+### Iterative algorithm
 
 ```
 > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy
@@ -110,16 +109,58 @@ CHARACTER
 4 stick
 ----------------------------------------------------------------
 1 wood
-================================================================
+```
+
+### Recursive algorithm
+
+```
+> 1 stone_furnace + 1 anvil_bench + 1 kit_machining_bench - 10 epoxy
+====================================================================
+RECURSIVE DATA STRUCTURE
+====================================================================
+1 stone_furnace [crafting_bench]
+  4 stick [character]
+    1 wood
+  12 wood
+  80 stone
+  12 leather
+--------------------------------------------------------------------
+1 anvil_bench [crafting_bench]
+  40 refined_metal [stone_furnace]
+    80 metal_ore
+  20 wood
+  10 stone
+--------------------------------------------------------------------
+1 kit_machining_bench [crafting_bench]
+  20 wood
+  12 stone
+  120 iron_nail [anvil_bench]
+    12 refined_metal [stone_furnace]
+      24 metal_ore
+  40 refined_metal [stone_furnace]
+    80 metal_ore
+  10 epoxy [mortar_and_pestle]
+    20 sulfur
+    40 tree_sap [mortar_and_pestle]
+      160 stick [character]
+        16 wood
+  24 rope [crafting_bench]
+    288 fiber
+```
+
+### Summary
+
+```
+====================================================================
 TOTAL RESOURCES
-================================================================
+====================================================================
   1 anvil_bench
-  1 machining_bench
+  1 kit_machining_bench
   1 stone_furnace
 -10 epoxy
-----------------------------------------------------------------
+--------------------------------------------------------------------
 288 fiber
-184 iron_ore
+184 metal_ore
 102 stone
  53 wood
  12 leather
@@ -208,6 +249,8 @@ snap install code --classic
 
 To change command line arguments, edit `.vscode/launch.json` file and use either `Start Debugging (F5)` or `Run Without Debugging (Ctrl+F5)`. Include a property as follows `"program": "application.py"` to run the main entry point rather than current file in the editor.
 
+Running program in an integrated terminal (`F5`) or (`Ctrl+F5`) fails to activate and VS Code uses `Python Debug Console` instead [2]. It remains open after program completes and ceases working properly until `Python Debug Console` process is killed.
+
 ### Visual Studio Community
 
 To change command line arguments, edit `Project > Properties > Debug > Script Arguments` field and use either `Start Debugging (F5)` or `Start Without Debugging (Ctrl+F5)`.
@@ -217,3 +260,4 @@ For me, there was a major problem detecting breakpoints when debugging test case
 ## References
 
 - [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>
+- [2] <https://github.com/microsoft/vscode/issues/158218>

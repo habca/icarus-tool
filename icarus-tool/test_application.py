@@ -1,3 +1,4 @@
+from os import stat
 from typing import Any, Callable
 from application import Application, FileSystem, JsonSystem
 from calculator import Calculator, Equation
@@ -16,12 +17,19 @@ class FileSystemTest(unittest.TestCase):
         for resource in calculator.resources:
             self.assertNotIn(resource, calculator.variables)
             self.assertIn(resource, calculator.stations)
+            self.assertNotIn(resource, calculator.options)
+        for option in calculator.options:
+            self.assertNotIn(option, calculator.resources)
+            self.assertNotIn(option, calculator.stations)
+            self.assertNotIn(option, calculator.variables)
         for variable in calculator.variables:
             self.assertNotIn(variable, calculator.resources)
             self.assertNotIn(variable, calculator.stations)
+            self.assertNotIn(variable, calculator.options)
         for station in calculator.stations:
             self.assertIn(station, calculator.resources)
             self.assertNotIn(station, calculator.variables)
+            self.assertNotIn(station, calculator.options)
 
         self.assertEqual(445, len(calculator.resources))
         self.assertEqual(445, len(calculator.stations))
@@ -41,12 +49,19 @@ class JsonSystemTest(unittest.TestCase):
         for resource in calculator.resources:
             self.assertNotIn(resource, calculator.variables)
             self.assertIn(resource, calculator.stations)
+            self.assertNotIn(resource, calculator.options)
+        for option in calculator.options:
+            self.assertNotIn(option, calculator.resources)
+            self.assertNotIn(option, calculator.stations)
+            self.assertNotIn(option, calculator.variables)
         for variable in calculator.variables:
             self.assertNotIn(variable, calculator.resources)
             self.assertNotIn(variable, calculator.stations)
+            self.assertNotIn(variable, calculator.options)
         for station in calculator.stations:
             self.assertIn(station, calculator.resources)
             self.assertNotIn(station, calculator.variables)
+            self.assertNotIn(station, calculator.options)
 
         # TODO: vaihda nimet samoiksi kuin pelissa
         # self.assertIn("machining_bench", calculator.resources)
@@ -290,6 +305,26 @@ class ApplicationTest(unittest.TestCase):
             expected_output, ApplicationTest.get_output(user_input, run_test_argv)
         )
 
+    def test_application_recursive(self):
+        user_input = [
+            "1 kit_machining_bench + 1 anvil_bench - 10 epoxy",
+            "0",
+            "0",
+            "0",
+            "0",
+            "2",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "test/test_kit_machining_bench_epoxy.txt"
+        )
+
+        application = Application()
+        application.init(["./application.py", "-r", JsonSystemTest.filename])
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+        self.assertEqual(expected_output, actual_output)
+
     @classmethod
     def get_output(cls, user_input: list[str], callback: Callable):
         with unittest.mock.patch("builtins.print") as mock_print:
@@ -313,7 +348,10 @@ class ApplicationTest(unittest.TestCase):
         with open(filename) as reader:
             data = reader.read()
         expected_output = data.splitlines()
+        expected_output = [l for l in expected_output if l != ""]
         expected_output[:1] = []  # Remove first line.
+        # Remove comments which clarify user interactions.
+        expected_output = [l for l in expected_output if not l.startswith("#")]
         return expected_output
 
 
