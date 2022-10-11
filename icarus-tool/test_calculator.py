@@ -1,7 +1,7 @@
 from fractions import Fraction
 from collections import deque
 from application import FileSystem, JsonSystem
-from calculator import Calculator, Equation, Resource, Generator
+from calculator import Calculator, Equation, Resource, EquationTree
 from test_application import FileSystemTest, JsonSystemTest
 
 import unittest
@@ -753,21 +753,64 @@ class ValidatorTest(unittest.TestCase):
         self.assertEqual(expected, str(err.exception))
 
 
-class GeneratorTest(unittest.TestCase):
-    def test_generator_exhaust(self):
+class EquationTreeTest(unittest.TestCase):
+    def test_equation_tree(self):
+        e1 = EquationTree(Resource.parse("1 crafting_bench"))
+        e2 = EquationTree(Resource.parse("60 fiber"))
+        e3 = EquationTree(Resource.parse("50 wood"))
+        e4 = EquationTree(Resource.parse("12 stone"))
+        e5 = EquationTree(Resource.parse("20 leather"))
+
+        e6 = EquationTree(Resource.parse("1 anvil_bench"))
+        e7 = EquationTree(Resource.parse("40 iron_ingot"))
+        e8 = EquationTree(Resource.parse("80 iron_ore"))
+        e9 = EquationTree(Resource.parse("20 wood"))
+        e10 = EquationTree(Resource.parse("10 stone"))
+
+        root = EquationTree()
+        root.children = [e1, e6]
+
+        e1.children = [e2, e3, e4, e5]
+        e6.children = [e7, e9, e10]
+        e7.children = [e8]
+
+        actuial = [str(r) for r in root]
+        expected = [
+            "1 crafting_bench",
+            "60 fiber",
+            "50 wood",
+            "12 stone",
+            "20 leather",
+            "1 anvil_bench",
+            "40 iron_ingot",
+            "80 iron_ore",
+            "20 wood",
+            "10 stone",
+        ]
+
+        self.assertEqual(expected, actuial)
+
+    def test_calculate_recursive(self):
         filesystem = FileSystem(FileSystemTest.filename)
         filesystem.read(calculator := Calculator())
 
-        e1 = Equation.parse("3 electric_extractor")
+        e1 = Equation.parse("1 crafting_bench + 1 anvil_bench")
+        expected = [
+            "1 crafting_bench",
+            "60 fiber",
+            "50 wood",
+            "12 stone",
+            "20 leather",
+            "1 anvil_bench",
+            "40 iron_ingot",
+            "80 iron_ore",
+            "20 wood",
+            "10 stone",
+        ]
 
-        g1 = Generator(calculator.calculate(e1))
-        g2 = Generator(calculator.calculate_2nd(str(e1)))
-
-        g1.exhaust()
-        g2.exhaust()
-
-        # Exhaust generators for their return values.
-        self.assertEqual(g1.value, g2.value)
+        actual = list(calculator.calculate_recursive(e1))
+        actual = [str(r) for r in actual]
+        self.assertEqual(expected, actual)
 
 
 if __name__ == "__main__":

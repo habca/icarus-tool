@@ -1,6 +1,5 @@
 from fractions import Fraction
-from typing import Callable, Iterator
-from collections import deque
+from typing import Callable, Iterator, Optional
 from abc import ABC, abstractmethod
 import difflib
 import math
@@ -157,6 +156,18 @@ class Equation:
         return Equation(new_resources)
 
 
+class EquationTree:
+    def __init__(self, data: Resource = None) -> None:
+        self.children: list[EquationTree] = []
+        self.data: Optional[Resource] = data
+
+    def __iter__(self) -> Iterator[Equation]:
+        if self.data:
+            yield Equation([self.data])
+        for tree_data in self.children:
+            yield from tree_data
+
+
 class Calculator:
     def __init__(self):
         # Algorithm depends on command line arguments.
@@ -259,6 +270,7 @@ class Calculator:
         Second version of function calculate.
         Generates recipe names one at a time.
         User may then repeat the process.
+        TODO: ei kaytossa
         """
 
         equation: Equation = Equation.parse(user_input)
@@ -451,13 +463,21 @@ class Calculator:
         return stations[0]
 
     def calculate_recursive(self, equation: Equation) -> Iterator[Equation]:
-        equation = equation.evaluate()
-        for resource in equation:
-            yield Equation([resource])
-            if resource.name in self.resources:
-                next_equation = Equation([resource])
-                next_equation = self.korvaa(next_equation, next_equation)
-                yield from self.calculate_recursive(next_equation)
+        def create_equation_tree(
+            root: EquationTree, equation: Equation
+        ) -> EquationTree:
+            equation = equation.evaluate()
+            for resource in equation:
+                node = EquationTree(resource)
+                root.children.append(node)
+                if resource.name in self.resources:
+                    nodes = Equation([resource])
+                    nodes = self.korvaa(nodes, nodes)
+                    create_equation_tree(node, nodes)
+            return root
+
+        root = EquationTree()
+        return iter(create_equation_tree(root, equation))
 
 
 class Validator:
@@ -500,17 +520,6 @@ class Validator:
         if errors != []:
             error: str = ", ".join(errors)
             raise ValueError("ValueError: " + error)
-
-
-class Generator:
-    def __init__(self, gen):
-        self.gen = gen
-
-    def __iter__(self):
-        self.value = yield from self.gen
-
-    def exhaust(self):
-        deque(self, maxlen=0)
 
 
 class Algorithm(ABC):

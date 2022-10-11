@@ -290,28 +290,6 @@ class ApplicationTest(unittest.TestCase):
             expected_output, ApplicationTest.get_output(user_input, run_test_argv)
         )
 
-    def test_application_recursive(self):
-        e1 = "1 crafting_bench + 1 anvil_bench"
-        expected_output = [
-            "1 crafting_bench",
-            "60 fiber",
-            "50 wood",
-            "12 stone",
-            "20 leather",
-            "1 anvil_bench",
-            "40 iron_ingot",
-            "80 iron_ore",
-            "20 wood",
-            "10 stone",
-        ]
-
-        equation = Equation.parse(e1)
-        filesystem = FileSystem(FileSystemTest.filename)
-        filesystem.read(calculator := Calculator())
-        actual_output = list(calculator.calculate_recursive(equation))
-        actual_output = [str(r) for r in actual_output]
-        self.assertEqual(expected_output, actual_output)
-
     @classmethod
     def get_output(cls, user_input: list[str], callback: Callable):
         with unittest.mock.patch("builtins.print") as mock_print:
