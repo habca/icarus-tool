@@ -1,7 +1,6 @@
-from os import stat
 from typing import Any, Callable
 from application import Application, FileSystem, JsonSystem
-from calculator import Calculator, Equation
+from calculator import Calculator
 
 import unittest
 import unittest.mock
@@ -83,7 +82,8 @@ class ApplicationTest(unittest.TestCase):
     def test_help(self):
         user_input = ["exit"]
         expected_output = [
-            ":: Usage: amount name [+ amount name] [- amount name]",
+            "Usage:",
+            "  amount name [+/- amount name ...]",
         ]
         self.assertEqual(
             expected_output, ApplicationTest.get_output(user_input, Application().help)
@@ -275,7 +275,7 @@ class ApplicationTest(unittest.TestCase):
         actual_output = ApplicationTest.get_output(user_input, application.main)
         self.assertEqual(expected_output, actual_output)
 
-    def test_argv(self):
+    def test_argv_gnu_option(self):
         user_input = [
             "./application.py",
             "./application.py -i -g",
@@ -287,9 +287,19 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = [
-            "Usage: ./application.py -g data/tech_tree.txt",
+            "Usage:",
+            "  python ./application.py [options ...] file",
+            "Options:",
+            "  -g --gnu          Apply GNU readline functionality to python's input.",
+            "  -r --recursive    Show the output as a tree data structure.",
+            "  -h --help         Show this user manual and exit.",
             "option -i not recognized",
-            "Usage: ./application.py -g data/tech_tree.txt",
+            "Usage:",
+            "  python ./application.py [options ...] file",
+            "Options:",
+            "  -g --gnu          Apply GNU readline functionality to python's input.",
+            "  -r --recursive    Show the output as a tree data structure.",
+            "  -h --help         Show this user manual and exit.",
             "No such file or directory: '-i'",
             "No such file or directory: '-g'",
             "option -i not recognized",

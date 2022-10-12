@@ -60,4 +60,4 @@ TOTAL RESOURCES
 102 stone
  53 wood
  12 leather
-  0 sulfur
+  0 epoxy

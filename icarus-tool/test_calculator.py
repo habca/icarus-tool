@@ -509,6 +509,26 @@ class CalculatorTest(unittest.TestCase):
         ]
         self.assertEqual(e1, list(self.calc.calculate_2nd("3 electric_extractor")))
 
+    def test_calculate_subtraction_zero(self):
+        e1 = "1 machining_bench - 1 fabricator"
+        e2 = "1 machining_bench"
+
+        a1 = "36 wood + 12 stone + 104 iron_ore + 20 sulfur + 288 fiber - 1 fabricator"
+        a2 = "36 wood + 12 stone + 104 iron_ore + 20 sulfur + 288 fiber"
+
+        self.assertEqual(a1, self.get_last_element(e1))
+        self.assertEqual(a2, self.get_last_element(e2))
+
+    def test_calculate_subtraction_negative(self):
+        e1 = "1 machining_bench - 30 epoxy"
+        e2 = "1 machining_bench - 10 epoxy"
+
+        a1 = "20 wood + 12 stone + 104 iron_ore - 20 epoxy + 288 fiber"
+        a2 = "20 wood + 12 stone + 104 iron_ore + 0 epoxy + 288 fiber"
+
+        self.assertEqual(a1, self.get_last_element(e1))
+        self.assertEqual(a2, self.get_last_element(e2))
+
     def test_find_similar(self):
         """There may be none, one or many good enough matches."""
         calc = self.calc
@@ -585,6 +605,13 @@ class CalculatorTest(unittest.TestCase):
             "1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator"
         )
         expected = Equation([Resource(Fraction(1), "fabricator")])
+        self.assertEqual(expected, self.calc.suodata(equation))
+
+    def test_suodata_practical_5(self):
+        equation = Equation.parse(
+            "4 stick + 52 wood + 102 stone + 12 leather + 184 iron_ore + 0 epoxy + 288 fiber"
+        )
+        expected = Equation([Resource(Fraction(4), "stick")])
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_raw_materials(self):

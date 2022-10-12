@@ -253,13 +253,15 @@ class Calculator:
     def calculate(self, equation: Equation) -> Iterator[Equation]:
         while True:
             equation = equation.evaluate()
-            suodatettu = self.suodata(equation)
+            positive = equation.suodata(False, False)
+            exchange = self.suodata(positive)
+            result = self.suodata(equation)
+            yield result
 
-            yield suodatettu
-            equation = self.korvaa(equation, suodatettu)
+            equation = self.korvaa(equation, exchange)
 
             # Equation did not change so it is ready.
-            if equation == suodatettu:
+            if all([r.name in self.variables for r in positive]):
                 break
 
         return equation
@@ -302,9 +304,13 @@ class Calculator:
         new_resources = []
         for resource in equation:
             temp = Equation([r for r in equation if r.name != resource.name])
+            # Recipes are not dependent on non-craftable recipes.
+            temp = Equation([r for r in temp if r.amount > 0])
             found: list[str] = self.search_variable(resource.name, temp)
             if found == [] and resource.name in self.resources:
-                new_resources.append(resource)
+                # Reduce positive resources only.
+                if resource.amount > 0:
+                    new_resources.append(resource)
 
         # All resources are raw materials.
         if new_resources == []:

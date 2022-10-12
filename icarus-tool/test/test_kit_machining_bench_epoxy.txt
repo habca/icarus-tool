@@ -61,4 +61,4 @@ TOTAL RESOURCES
 184 metal_ore
  40 wood
  22 stone
-  0 sulfur
+  0 epoxy

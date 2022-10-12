@@ -41,7 +41,7 @@ deactivate
 ## Usage
 
 ```
-python application.py -g data/tech_tree.txt
+python application.py [options ...] file
 ```
 
 The command line options supported by the program are as follows.
@@ -49,15 +49,19 @@ The command line options supported by the program are as follows.
 ```
 -g --gnu          Apply GNU readline functionality to python's input.
 -r --recursive    Show the output as a tree data structure.
+-h --help         Show this user manual and exit.
 ```
 
-The manual will be displayed and program waits for a keyboard input.
+The following lines will be displayed and program waits for a keyboard input.
 
 ```
-:: Usage: amount name [+ amount name] [- amount name]
+Usage:
+  amount name [+/- amount name ...]
 ```
 
 ### Iterative algorithm
+
+A comprehensive guide through the crafting process step by step. Intended to use after you have gathered all materials listed in section `total resources`.
 
 ```
 > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy
@@ -113,6 +117,8 @@ CHARACTER
 
 ### Recursive algorithm
 
+Advanced players will find this method most intuitive.
+
 ```
 > 1 stone_furnace + 1 anvil_bench + 1 kit_machining_bench - 10 epoxy
 ====================================================================
@@ -150,6 +156,8 @@ RECURSIVE DATA STRUCTURE
 
 ### Summary
 
+A concise presentation listing all the raw materials to be gathered. Non-positive numbers represent the resources already found in the inventory.
+
 ```
 ====================================================================
 TOTAL RESOURCES
@@ -164,7 +172,7 @@ TOTAL RESOURCES
 102 stone
  53 wood
  12 leather
-  0 sulfur
+  0 epoxy
 ```
 
 ### The most common recipes

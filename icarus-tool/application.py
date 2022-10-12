@@ -97,9 +97,21 @@ class Application:
 
         self.user_input: str = None
 
+    def manual(self, script: str):
+        print()
+        print("Usage:")
+        print("  python", script, "[options ...]", "file")
+        print()
+        print("Options:")
+        print("  -g --gnu          Apply GNU readline functionality to python's input.")
+        print("  -r --recursive    Show the output as a tree data structure.")
+        print("  -h --help         Show this user manual and exit.")
+        print()
+
     def help(self):
         print()  # Empty line to make welcome text readable.
-        print(":: Usage: amount name [+ amount name] [- amount name]")
+        print("Usage:")
+        print("  amount name [+/- amount name ...]")
 
     def ask_input(self) -> str:
         """Throws SyntaxError, ValueError or SystemExit!"""
@@ -177,7 +189,7 @@ class Application:
                 continue
 
             # Print the name of station when it changes.
-            # Otherwise, separate equations from each other.
+            # Otherwise separate equations from each other.
             current_station = self.calculator.get_station(resources)
             if current_station != previous_station:
                 print(separator.replace("-", "="))
@@ -306,7 +318,7 @@ class Application:
     def init(self, argv: list[str]) -> None:
         try:
             # Parse command line arguments.
-            opts, args = getopt.getopt(argv[1:], "gr", ["gnu", "recursive"])
+            opts, args = getopt.getopt(argv[1:], "grh", ["gnu", "recursive", "help"])
 
             if args == []:
                 raise SyntaxError()
@@ -333,16 +345,22 @@ class Application:
                     variables = self.calculator.get_keywords()
                     Completer(variables)
 
+                # Configure application's output.
                 if opt in ("-r", "--recursive"):
                     algorithm = Recursive(self)
                     self.algorithm = algorithm
+
+                # Print user manual and exit.
+                if opt in ("-h", "--help"):
+                    self.manual(argv[0])
+                    raise SystemExit
 
         except getopt.GetoptError as err:
             print(str(err))
         except FileNotFoundError as err:
             print(str(err).replace("[Errno 2] ", ""))
         except SyntaxError:
-            print("Usage:", argv[0], "-g", "data/tech_tree.txt")
+            self.manual(argv[0])
 
 
 class Algorithm(ABC):
