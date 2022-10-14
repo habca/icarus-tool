@@ -213,7 +213,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_stone_furnace_anvil_bench_machining_bench_stone_wood.txt"
+            "test/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
         )
 
         application = Application()

@@ -403,11 +403,11 @@ class CalculatorTest(unittest.TestCase):
         self.assertIn("102 stone", self.get_last_element(e1))
         self.assertIn("69 wood", self.get_last_element(e1))
 
-        self.assertIn("0 stone", self.get_last_element(e2))
-        self.assertIn("0 wood", self.get_last_element(e2))
+        self.assertNotIn("0 stone", self.get_last_element(e2))
+        self.assertNotIn("0 wood", self.get_last_element(e2))
 
         self.assertIn("2 stone", self.get_last_element(e3))
-        self.assertIn("-1 wood", self.get_last_element(e3))
+        self.assertNotIn("-1 wood", self.get_last_element(e3))
 
     def test_calculate_two_times(self):
         """Same amount of resources should have same crafting cost."""
@@ -513,18 +513,17 @@ class CalculatorTest(unittest.TestCase):
         e1 = "1 machining_bench - 1 fabricator"
         e2 = "1 machining_bench"
 
-        a1 = "36 wood + 12 stone + 104 iron_ore + 20 sulfur + 288 fiber - 1 fabricator"
-        a2 = "36 wood + 12 stone + 104 iron_ore + 20 sulfur + 288 fiber"
+        a1 = "36 wood + 12 stone + 104 iron_ore + 20 sulfur + 288 fiber"
 
         self.assertEqual(a1, self.get_last_element(e1))
-        self.assertEqual(a2, self.get_last_element(e2))
+        self.assertEqual(a1, self.get_last_element(e2))
 
     def test_calculate_subtraction_negative(self):
         e1 = "1 machining_bench - 30 epoxy"
         e2 = "1 machining_bench - 10 epoxy"
 
-        a1 = "20 wood + 12 stone + 104 iron_ore - 20 epoxy + 288 fiber"
-        a2 = "20 wood + 12 stone + 104 iron_ore + 0 epoxy + 288 fiber"
+        a1 = "20 wood + 12 stone + 104 iron_ore + 288 fiber"
+        a2 = "20 wood + 12 stone + 104 iron_ore + 288 fiber"
 
         self.assertEqual(a1, self.get_last_element(e1))
         self.assertEqual(a2, self.get_last_element(e2))
@@ -795,6 +794,11 @@ class ValidatorTest(unittest.TestCase):
 
 
 class EquationTreeTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.calculator = Calculator()
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(self.calculator)
+
     def test_equation_tree(self):
         e1 = EquationTree(Resource.parse("1 crafting_bench"))
         e2 = EquationTree(Resource.parse("60 fiber"))
@@ -832,9 +836,6 @@ class EquationTreeTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_calculate_recursive(self):
-        filesystem = FileSystem(FileSystemTest.filename)
-        filesystem.read(calculator := Calculator())
-
         e1 = Equation.parse("1 crafting_bench + 1 anvil_bench")
         expected = [
             "1 crafting_bench",
@@ -849,26 +850,105 @@ class EquationTreeTest(unittest.TestCase):
             "10 stone",
         ]
 
-        actual = list(calculator.calculate_recursive(e1))
+        actual = list(self.calculator.calculate_recursive(e1))
         actual = [str(r) for r in actual]
         self.assertEqual(expected, actual)
 
-    def test_calculate_recursive_ignore_negative(self):
-        """Tree data structure should have only positive numbers."""
+    def test_calculate_recursive_subtract_negative(self):
+        """Tree data structure should have valid quantities."""
 
-        filesystem = FileSystem(FileSystemTest.filename)
-        filesystem.read(calculator := Calculator())
-
+        # TODO: laske epoxyt puun eri haarassa vahennyslaskun takia
         e1 = Equation.parse("1 machining_bench - 10 epoxy")
-        e2 = Equation.parse("1 machining_bench + 0 epoxy")
-        e3 = Equation.parse("1 machining_bench")
+        e2 = Equation.parse("1 machining_bench - 12 epoxy")
+        e3 = Equation.parse("1 machining_bench - 8 epoxy")
+        e4 = Equation.parse("2 machining_bench - 10 epoxy")
+        e5 = Equation.parse("2 machining_bench - 12 epoxy")
 
-        a1 = list(calculator.calculate_recursive(e1))
-        a2 = list(calculator.calculate_recursive(e2))
-        a3 = list(calculator.calculate_recursive(e3))
+        a1 = list(self.calculator.calculate_recursive(e1))
+        a2 = list(self.calculator.calculate_recursive(e2))
+        a3 = list(self.calculator.calculate_recursive(e3))
+        a4 = list(self.calculator.calculate_recursive(e4))
+        a5 = list(self.calculator.calculate_recursive(e5))
 
         self.assertEqual(a1, a2)
-        self.assertEqual(a1, a3)
+        self.assertNotEqual(a4, a5)
+
+        expected_1 = [
+            "1 machining_bench",
+            "20 wood",
+            "12 stone",
+            "120 iron_nail",
+            "12 iron_ingot",
+            "24 iron_ore",
+            "40 iron_ingot",
+            "80 iron_ore",
+            "24 rope",
+            "288 fiber",
+        ]
+
+        expected_3 = [
+            "1 machining_bench",
+            "20 wood",
+            "12 stone",
+            "120 iron_nail",
+            "12 iron_ingot",
+            "24 iron_ore",
+            "40 iron_ingot",
+            "80 iron_ore",
+            "2 epoxy",
+            "4 sulfur",
+            "8 tree_sap",
+            "32 stick",
+            "4 wood",
+            "24 rope",
+            "288 fiber",
+        ]
+
+        expected_4 = [
+            "2 machining_bench",
+            "40 wood",
+            "24 stone",
+            "240 iron_nail",
+            "24 iron_ingot",
+            "48 iron_ore",
+            "80 iron_ingot",
+            "160 iron_ore",
+            "10 epoxy",
+            "20 sulfur",
+            "40 tree_sap",
+            "160 stick",
+            "16 wood",
+            "48 rope",
+            "576 fiber",
+        ]
+
+        self.assertEqual(expected_1, [str(r) for r in a1])
+        self.assertEqual(expected_3, [str(r) for r in a3])
+        self.assertEqual(expected_4, [str(r) for r in a4])
+
+    def test_calculate_recursive_same_quantity(self):
+        e1 = Equation.parse("1 machining_bench")
+        e2 = Equation.parse("1 machining_bench + 0 epoxy")
+        e3 = Equation.parse("2 machining_bench")
+        e4 = Equation.parse("1 machining_bench + 1 machining_bench")
+        e5 = Equation.parse("1 machining_bench + 2 epoxy")
+        e6 = Equation.parse("1 machining_bench + 12 epoxy - 10 epoxy")
+        e7 = Equation.parse("-2 epoxy")
+        e8 = Equation.parse("10 epoxy - 12 epoxy")
+
+        a1 = list(self.calculator.calculate_recursive(e1))
+        a2 = list(self.calculator.calculate_recursive(e2))
+        a3 = list(self.calculator.calculate_recursive(e3))
+        a4 = list(self.calculator.calculate_recursive(e4))
+        a5 = list(self.calculator.calculate_recursive(e5))
+        a6 = list(self.calculator.calculate_recursive(e6))
+        a7 = list(self.calculator.calculate_recursive(e7))
+        a8 = list(self.calculator.calculate_recursive(e8))
+
+        self.assertEqual(a1, a2)
+        self.assertEqual(a3, a4)
+        self.assertEqual(a5, a6)
+        self.assertEqual(a7, a8)
 
 
 if __name__ == "__main__":

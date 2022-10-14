@@ -251,12 +251,16 @@ class Calculator:
                 stack += next.resources.copy()
 
     def calculate(self, equation: Equation) -> Iterator[Equation]:
+        """
+        Function is intended to calculate required materials only.
+        Non-positive materials will be filtered out of the final result.
+        Do not use SURJECTIVE function to assert equivalence between two inputs.
+        """
         while True:
             equation = equation.evaluate()
             positive = equation.suodata(False, False)
             exchange = self.suodata(positive)
-            result = self.suodata(equation)
-            yield result
+            yield exchange
 
             equation = self.korvaa(equation, exchange)
 
@@ -474,17 +478,24 @@ class Calculator:
         Non-positive values make no sense when visualizing a crafting process.
         """
 
+        equation = equation.evaluate()
+        nonpositive = Equation([r for r in equation if r.amount < 0])
+        equation = Equation([r for r in equation if r.amount > 0])
+
         def create_equation_tree(
-            root: EquationTree, equation: Equation
-        ) -> EquationTree:
+            root: EquationTree, equation: Equation, nonpositive: Equation
+        ) -> tuple[EquationTree, Equation]:
+            equation.resources += nonpositive
             equation = equation.evaluate()
+            nonpositive = Equation([r for r in equation if r.amount < 0])
+            equation = Equation([r for r in equation if r.amount > 0])
+
             for resource in equation:
                 # Wrap into tree data structure.
                 node = EquationTree(resource)
 
                 # Skip non-positive values.
-                if resource.amount > 0:
-                    root.children.append(node)
+                root.children.append(node)
 
                 # Where resource should be crafted at.
                 if resource.name in self.stations:
@@ -494,12 +505,13 @@ class Calculator:
                 if resource.name in self.resources:
                     nodes = Equation([resource])
                     nodes = self.korvaa(nodes, nodes)
-                    create_equation_tree(node, nodes)
+                    _, nonpositive = create_equation_tree(node, nodes, nonpositive)
 
-            return root
+            return root, nonpositive
 
         root = EquationTree()
-        return create_equation_tree(root, equation)
+        root, nonpositive = create_equation_tree(root, equation, nonpositive)
+        return root
 
 
 class Validator:

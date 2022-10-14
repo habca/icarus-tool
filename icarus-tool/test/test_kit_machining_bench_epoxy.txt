@@ -26,6 +26,7 @@
 (2) character : 10 stick = 1 wood
 # :: Which recipe would you like to use? 2
 
+# > 1 kit_machining_bench + 1 anvil_bench - 10 epoxy
 ==================================================
 RECURSIVE DATA STRUCTURE
 ==================================================
@@ -37,11 +38,6 @@ RECURSIVE DATA STRUCTURE
       24 metal_ore
   40 refined_metal [stone_furnace]
     80 metal_ore
-  10 epoxy [mortar_and_pestle]
-    20 sulfur
-    40 tree_sap [mortar_and_pestle]
-      160 stick [character]
-        16 wood
   24 rope [crafting_bench]
     288 fiber
 --------------------------------------------------
@@ -61,4 +57,3 @@ TOTAL RESOURCES
 184 metal_ore
  40 wood
  22 stone
-  0 epoxy
