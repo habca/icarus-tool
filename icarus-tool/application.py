@@ -373,7 +373,7 @@ class Algorithm(ABC):
 class Iterative(Algorithm):
     def calculate(self, equation: Equation) -> None:
         equations = list(self.application.calculator.calculate(equation))
-        self.application.print_output(equations[:-1])
+        self.application.print_output(equations[:-1][::-1])
         self.application.print_total_resources(equations[-1])
 
 

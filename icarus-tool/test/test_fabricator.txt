@@ -1,43 +1,41 @@
 > 1 fabricator
 ==============
-MACHINING BENCH
+CHARACTER
 ==============
-1 fabricator
+1336 stick
 --------------
-40 aluminium_ingot
-30 concrete_mix
-30 electronics
-30 steel_screw
- 8 carbon_fiber
-==============
-CONCRETE FURNACE
-==============
-8 carbon_fiber
---------------
-8 carbon_paste
-==============
-CEMENT MIXER
-==============
-30 concrete_mix
---------------
-240 stone
-120 silica_ore
- 30 tree_sap
+134 wood
 ==============
 MORTAR AND PESTLE
 ==============
-8 carbon_paste
+334 tree_sap
 --------------
-32 organic_resin
-16 epoxy
- 8 aluminium_ingot
- 8 silica_ore
+1336 stick
+==============
+92 organic_resin
+76 epoxy
+ 1 steel_bloom
+--------------
+304 tree_sap
+152 sulfur
+ 92 oxite
+ 92 wood
+  6 iron_ore
+  1 coal_ore
+==============
+STONE FURNACE
+==============
+90 copper_ingot
+--------------
+180 copper_ore
 ==============
 CONCRETE FURNACE
 ==============
-48 aluminium_ingot
+30 refined_gold
+ 1 steel_ingot
 --------------
-48 aluminium_ore
+60 gold_ore
+ 1 steel_bloom
 ==============
 MACHINING BENCH
 ==============
@@ -52,40 +50,42 @@ MACHINING BENCH
 ==============
 CONCRETE FURNACE
 ==============
-30 refined_gold
- 1 steel_ingot
+48 aluminium_ingot
 --------------
-60 gold_ore
- 1 steel_bloom
-==============
-STONE FURNACE
-==============
-90 copper_ingot
---------------
-180 copper_ore
+48 aluminium_ore
 ==============
 MORTAR AND PESTLE
 ==============
-92 organic_resin
-76 epoxy
- 1 steel_bloom
+8 carbon_paste
 --------------
-304 tree_sap
-152 sulfur
- 92 oxite
- 92 wood
-  6 iron_ore
-  1 coal_ore
+32 organic_resin
+16 epoxy
+ 8 aluminium_ingot
+ 8 silica_ore
 ==============
-334 tree_sap
+CEMENT MIXER
+==============
+30 concrete_mix
 --------------
-1336 stick
+240 stone
+120 silica_ore
+ 30 tree_sap
 ==============
-CHARACTER
+CONCRETE FURNACE
 ==============
-1336 stick
+8 carbon_fiber
 --------------
-134 wood
+8 carbon_paste
+==============
+MACHINING BENCH
+==============
+1 fabricator
+--------------
+40 aluminium_ingot
+30 concrete_mix
+30 electronics
+30 steel_screw
+ 8 carbon_fiber
 ==============
 TOTAL RESOURCES
 ==============
