@@ -120,36 +120,31 @@ CHARACTER
 Advanced players will find this method most intuitive.
 
 ```
-> 1 stone_furnace + 1 anvil_bench + 1 kit_machining_bench - 10 epoxy
-====================================================================
+> 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy
+================================================================
 RECURSIVE DATA STRUCTURE
-====================================================================
+================================================================
 1 stone_furnace [crafting_bench]
   4 stick [character]
     1 wood
   12 wood
   80 stone
   12 leather
---------------------------------------------------------------------
+----------------------------------------------------------------
 1 anvil_bench [crafting_bench]
-  40 refined_metal [stone_furnace]
-    80 metal_ore
+  40 iron_ingot [stone_furnace]
+    80 iron_ore
   20 wood
   10 stone
---------------------------------------------------------------------
-1 kit_machining_bench [crafting_bench]
+----------------------------------------------------------------
+1 machining_bench [crafting_bench]
   20 wood
   12 stone
   120 iron_nail [anvil_bench]
-    12 refined_metal [stone_furnace]
-      24 metal_ore
-  40 refined_metal [stone_furnace]
-    80 metal_ore
-  10 epoxy [mortar_and_pestle]
-    20 sulfur
-    40 tree_sap [mortar_and_pestle]
-      160 stick [character]
-        16 wood
+    12 iron_ingot [stone_furnace]
+      24 iron_ore
+  40 iron_ingot [stone_furnace]
+    80 iron_ore
   24 rope [crafting_bench]
     288 fiber
 ```
@@ -159,20 +154,19 @@ RECURSIVE DATA STRUCTURE
 A concise presentation listing all the raw materials to be gathered. Non-positive numbers represent the resources already found in the inventory.
 
 ```
-====================================================================
+================================================================
 TOTAL RESOURCES
-====================================================================
+================================================================
   1 anvil_bench
-  1 kit_machining_bench
+  1 machining_bench
   1 stone_furnace
 -10 epoxy
---------------------------------------------------------------------
+----------------------------------------------------------------
 288 fiber
-184 metal_ore
+184 iron_ore
 102 stone
  53 wood
  12 leather
-  0 epoxy
 ```
 
 ### The most common recipes

@@ -30,6 +30,12 @@
 ==================================================
 RECURSIVE DATA STRUCTURE
 ==================================================
+1 anvil_bench [crafting_bench]
+  40 refined_metal [stone_furnace]
+    80 metal_ore
+  20 wood
+  10 stone
+--------------------------------------------------
 1 kit_machining_bench [crafting_bench]
   20 wood
   12 stone
@@ -40,12 +46,6 @@ RECURSIVE DATA STRUCTURE
     80 metal_ore
   24 rope [crafting_bench]
     288 fiber
---------------------------------------------------
-1 anvil_bench [crafting_bench]
-  40 refined_metal [stone_furnace]
-    80 metal_ore
-  20 wood
-  10 stone
 ==================================================
 TOTAL RESOURCES
 ==================================================

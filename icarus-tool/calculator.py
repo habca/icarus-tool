@@ -478,6 +478,7 @@ class Calculator:
         Non-positive values make no sense when visualizing a crafting process.
         """
 
+        equation = self.arrange_resources(equation)
         equation = equation.evaluate()
         nonpositive = Equation([r for r in equation if r.amount < 0])
         equation = Equation([r for r in equation if r.amount > 0])
@@ -512,6 +513,15 @@ class Calculator:
         root = EquationTree()
         root, nonpositive = create_equation_tree(root, equation, nonpositive)
         return root
+
+    def arrange_resources(self, equation: Equation) -> Equation:
+        new_resources: list[Resource] = []
+        while equation.resources:
+            resources = self.suodata(equation).resources
+            resources = sorted(resources, key=lambda r: r.amount, reverse=True)
+            new_resources += resources
+            equation = Equation([r for r in equation if r not in resources])
+        return Equation(new_resources[::-1])
 
 
 class Validator:

@@ -289,8 +289,6 @@ class Application:
                 else:
                     traverse(node, count)
 
-        print()
-
         print(separator.replace("-", "="))
         print("RECURSIVE DATA STRUCTURE")
         print(separator.replace("-", "="))

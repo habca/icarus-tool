@@ -950,6 +950,30 @@ class EquationTreeTest(unittest.TestCase):
         self.assertEqual(a5, a6)
         self.assertEqual(a7, a8)
 
+    def test_calculate_recursive_crafting_order(self):
+        e1 = Equation.parse("1 biofuel_generator + 1 biofuel_extractor")
+        a1 = self.calculator.calculate_recursive(e1)
+
+        self.assertEqual("1 biofuel_extractor", str(a1.children[0].data))
+        self.assertEqual("1 biofuel_generator", str(a1.children[1].data))
+
+    def test_arrange_resources(self):
+        # test_biofuel_extractor_biofuel_generator
+        e1 = Equation.parse("1 biofuel_generator + 1 biofuel_extractor")
+        a1 = "1 biofuel_extractor + 1 biofuel_generator"
+
+        # test_stone_furnace_anvil_bench_machining_bench.txt
+        e2 = Equation.parse("1 machining_bench + 1 stone_furnace + 1 anvil_bench")
+        a2 = "1 stone_furnace + 1 anvil_bench + 1 machining_bench"
+
+        # test_cement_mixer_concrete_furnace_thermos.txt
+        e3 = Equation.parse("3 concrete_furnace + 1 thermos + 2 cement_mixer")
+        a3 = "2 cement_mixer + 3 concrete_furnace + 1 thermos"
+
+        self.assertEqual(a1, str(self.calculator.arrange_resources(e1)))
+        self.assertEqual(a2, str(self.calculator.arrange_resources(e2)))
+        self.assertEqual(a3, str(self.calculator.arrange_resources(e3)))
+
 
 if __name__ == "__main__":
     unittest.main()
