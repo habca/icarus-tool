@@ -278,11 +278,11 @@ class ApplicationTest(unittest.TestCase):
     def test_argv_gnu_option(self):
         user_input = [
             "./application.py",
-            "./application.py -i -g",
+            "./application.py -z -g",
             "./application.py -g -g",
-            f"./application.py {FileSystemTest.filename} -i -g",
+            f"./application.py {FileSystemTest.filename} -z -g",
             f"./application.py {FileSystemTest.filename} -g -g",
-            "./application.py -i -g non_existent_file",
+            "./application.py -z -g non_existent_file",
             "./application.py -g -g non_existent_file",
         ]
 
@@ -293,16 +293,16 @@ class ApplicationTest(unittest.TestCase):
             "  -g --gnu          Apply GNU readline functionality to python's input.",
             "  -r --recursive    Show the output as a tree data structure.",
             "  -h --help         Show this user manual and exit.",
-            "option -i not recognized",
+            "option -z not recognized",
             "Usage:",
             "  python ./application.py [options ...] file",
             "Options:",
             "  -g --gnu          Apply GNU readline functionality to python's input.",
             "  -r --recursive    Show the output as a tree data structure.",
             "  -h --help         Show this user manual and exit.",
-            "No such file or directory: '-i'",
+            "No such file or directory: '-z'",
             "No such file or directory: '-g'",
-            "option -i not recognized",
+            "option -z not recognized",
             "No such file or directory: 'non_existent_file'",
         ]
 

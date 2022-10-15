@@ -48,6 +48,7 @@ The command line options supported by the program are as follows.
 
 ```
 -g --gnu          Apply GNU readline functionality to python's input.
+-i --implicit     Add all the necessary intermediate steps.
 -r --recursive    Show the output as a tree data structure.
 -h --help         Show this user manual and exit.
 ```
@@ -66,22 +67,26 @@ A comprehensive guide through the crafting process step by step. Intended to use
 ```
 > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy
 ================================================================
+CHARACTER
+================================================================
+4 stick
+----------------------------------------------------------------
+1 wood
+================================================================
 CRAFTING BENCH
 ================================================================
-1 machining_bench
+1 stone_furnace
 ----------------------------------------------------------------
-120 iron_nail
- 40 iron_ingot
- 24 rope
- 20 wood
- 12 stone
- 10 epoxy
+80 stone
+12 leather
+12 wood
+ 4 stick
 ================================================================
-ANVIL BENCH
+STONE FURNACE
 ================================================================
-120 iron_nail
+92 iron_ingot
 ----------------------------------------------------------------
-12 iron_ingot
+184 iron_ore
 ================================================================
 CRAFTING BENCH
 ================================================================
@@ -93,29 +98,38 @@ CRAFTING BENCH
  20 wood
  10 stone
 ================================================================
-STONE FURNACE
+ANVIL BENCH
 ================================================================
-92 iron_ingot
+120 iron_nail
 ----------------------------------------------------------------
-184 iron_ore
+12 iron_ingot
 ================================================================
 CRAFTING BENCH
 ================================================================
-1 stone_furnace
+1 machining_bench
 ----------------------------------------------------------------
-80 stone
-12 leather
-12 wood
- 4 stick
+120 iron_nail
+ 40 iron_ingot
+ 24 rope
+ 20 wood
+ 12 stone
+ 10 epoxy
 ================================================================
-CHARACTER
+TOTAL RESOURCES
 ================================================================
-4 stick
+  1 anvil_bench
+  1 machining_bench
+  1 stone_furnace
+-10 epoxy
 ----------------------------------------------------------------
-1 wood
+288 fiber
+184 iron_ore
+102 stone
+ 53 wood
+ 12 leather
 ```
 
-### Recursive algorithm
+### `-r` Recursive algorithm
 
 Advanced players will find this method most intuitive.
 
@@ -137,6 +151,50 @@ RECURSIVE DATA STRUCTURE
   20 wood
   10 stone
 ----------------------------------------------------------------
+1 machining_bench [crafting_bench]
+  20 wood
+  12 stone
+  120 iron_nail [anvil_bench]
+    12 iron_ingot [stone_furnace]
+      24 iron_ore
+  40 iron_ingot [stone_furnace]
+    80 iron_ore
+  24 rope [crafting_bench]
+    288 fiber
+```
+
+### `-i` Implicit preprocessor
+
+You don't have to write down the whole manufacturing process.
+
+```
+> 1 machining_bench - 10 epoxy
+==============================
+RECURSIVE DATA STRUCTURE
+==============================
+1 crafting_bench [character]
+  60 fiber
+  50 wood
+  12 stone
+  20 leather
+------------------------------
+1 stone_furnace [crafting_bench]
+  4 stick [character]
+    1 wood
+  12 wood
+  80 stone
+  12 leather
+------------------------------
+1 mortar_and_pestle [crafting_bench]
+  4 silica_ore
+  12 stone
+------------------------------
+1 anvil_bench [crafting_bench]
+  40 iron_ingot [stone_furnace]
+    80 iron_ore
+  20 wood
+  10 stone
+------------------------------
 1 machining_bench [crafting_bench]
   20 wood
   12 stone

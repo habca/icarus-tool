@@ -154,6 +154,14 @@ class Equation:
 
         return Equation(new_resources)
 
+    def get_quantity(self, name: str) -> Fraction:
+        copy = self.make_copy()
+        copy = self.evaluate()
+        for resource in copy.resources:
+            if resource.name == name:
+                return resource.amount
+        return Fraction(0)
+
 
 class EquationTree:
     def __init__(self, data: Resource = None, station=None) -> None:
@@ -266,29 +274,6 @@ class Calculator:
 
             # Equation did not change so it is ready.
             if all([r.name in self.variables for r in positive]):
-                break
-
-        return equation
-
-    def calculate_2nd(self, user_input: str) -> Iterator[str]:
-        """
-        Second version of function calculate.
-        Generates recipe names one at a time.
-        User may then repeat the process.
-        TODO: ei kaytossa
-        """
-
-        equation: Equation = Equation.parse(user_input)
-        while True:
-            equation = equation.evaluate()
-            suodatettu = self.suodata(equation)
-            for resource in suodatettu:
-                if resource.name in self.resources:
-                    yield resource.name
-            equation = self.korvaa(equation, suodatettu)
-
-            # Equation did not change so it is ready.
-            if equation == suodatettu:
                 break
 
         return equation
@@ -522,6 +507,57 @@ class Calculator:
             new_resources += resources
             equation = Equation([r for r in equation if r not in resources])
         return Equation(new_resources[::-1])
+
+    def find_resources(self, equation: Equation) -> Iterator[str]:
+        """
+        Second version of function calculate.
+        Generates recipe names one at a time.
+        User may then repeat the process.
+        """
+
+        while True:
+            equation = equation.evaluate()
+            suodatettu = self.suodata(equation)
+            for resource in suodatettu:
+                if resource.name in self.resources:
+                    yield resource.name
+            equation = self.korvaa(equation, suodatettu)
+
+            # Equation did not change so it is ready.
+            if equation == suodatettu:
+                break
+
+        return equation
+
+    def find_workstations(self, equation: Equation) -> Equation:
+        """List the required workstations."""
+
+        original = equation.make_copy()
+        equation = equation.make_copy()
+        equation = equation.evaluate()
+
+        stations = []
+        names = self.find_resources(equation)
+        for name in names:
+            if name in self.stations:
+                station = self.stations[name]
+                if station in self.resources:
+                    stations.append(station)
+        stations = list(dict.fromkeys(stations))
+        workstations: list[Resource] = []
+        for station in stations[:]:
+            quantity = equation.get_quantity(station)
+            if quantity < 1:
+                # TODO: maybe destroy workstation?
+                amount: Fraction = 1 + abs(quantity)
+                resource = Resource(amount, station)
+                workstations.append(resource)
+
+        if workstations:
+            original.resources += workstations
+            return self.find_workstations(original)
+        else:
+            return original
 
 
 class Validator:

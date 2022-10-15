@@ -495,20 +495,6 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(self.get_last_element(e0), self.get_last_element(e2))
         self.assertEqual(self.get_last_element(e0), e2)
 
-    def test_calculate_2nd(self):
-        e1 = [
-            "electric_extractor",
-            "iron_ingot",
-            "electronics",
-            "refined_gold",
-            "copper_ingot",
-            "organic_resin",
-            "epoxy",
-            "tree_sap",
-            "stick",
-        ]
-        self.assertEqual(e1, list(self.calc.calculate_2nd("3 electric_extractor")))
-
     def test_calculate_subtraction_zero(self):
         e1 = "1 machining_bench - 1 fabricator"
         e2 = "1 machining_bench"
@@ -768,6 +754,66 @@ class CalculatorTest(unittest.TestCase):
     def get_last_element(self, equation: str) -> str:
         gen = self.calc.calculate(Equation.parse(equation))
         return str(deque(gen, maxlen=1).pop())
+
+
+class TestFindWorkstation(unittest.TestCase):
+    def setUp(self) -> None:
+        self.calc = Calculator()
+        file = FileSystem(FileSystemTest.filename)
+        file.read(self.calc)
+
+    def test_find_resources(self):
+        e1 = [
+            "electric_extractor",
+            "iron_ingot",
+            "electronics",
+            "refined_gold",
+            "copper_ingot",
+            "organic_resin",
+            "epoxy",
+            "tree_sap",
+            "stick",
+        ]
+        a1 = Equation.parse("3 electric_extractor")
+        self.assertEqual(e1, list(self.calc.find_resources(a1)))
+
+    def test_find_workstations_all(self):
+        e1 = Equation.parse("1 fabricator")
+        stations = self.calc.find_workstations(e1)
+        expected = [
+            "1 fabricator",
+            "1 machining_bench",
+            "1 concrete_furnace",
+            "1 cement_mixer",
+            "1 mortar_and_pestle",
+            "1 stone_furnace",
+            "1 crafting_bench",
+            "1 anvil_bench",
+        ]
+        expected = Equation([Resource.parse(e) for e in expected])
+        self.assertEqual(expected, stations)
+
+    def test_find_workstations_required(self):
+        """+ skipataan, - skipataan, 0 mukaan."""
+
+        e1 = Equation.parse(
+            "1 fabricator + 1 machining_bench - 3 stone_furnace + 0 concrete_furnace"
+        )
+        stations = self.calc.find_workstations(e1)
+        expected = [
+            "1 fabricator",
+            "1 machining_bench",
+            "-3 stone_furnace",
+            "0 concrete_furnace",
+            "1 concrete_furnace",
+            "1 cement_mixer",
+            "1 mortar_and_pestle",
+            "4 stone_furnace",
+            "1 crafting_bench",
+            "1 anvil_bench",
+        ]
+        expected = Equation([Resource.parse(e) for e in expected])
+        self.assertEqual(expected, stations)
 
 
 class ValidatorTest(unittest.TestCase):

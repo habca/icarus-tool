@@ -95,6 +95,9 @@ class Application:
         # Algorithm depends on command line arguments.
         self.algorithm: Algorithm = Iterative(self)
 
+        # Process the equation before applying the algorithm.
+        self.preprocessor: Preprocessor = Explicit(self)
+
         self.user_input: str = None
 
     def manual(self, script: str):
@@ -176,6 +179,33 @@ class Application:
         # To make program's output more readable.
         separator = "-" * (len(self.user_input) + 2)
 
+        """
+        > 1 anvil_bench + 1 crafting_bench
+        ==================================
+        CHARACTER
+        ==================================
+        1 crafting_bench
+        ----------------------------------
+        60 fiber
+        50 wood
+        20 leather
+        12 stone
+        ==================================
+        STONE FURNACE
+        ==================================
+        40 iron_ingot
+        ----------------------------------
+        80 iron_ore
+        ==================================
+        CRAFTING BENCH
+        ==================================
+        1 anvil_bench
+        ----------------------------------
+        40 iron_ingot
+        20 wood
+        10 stone
+        """
+
         previous_station: str | None = None
         for i in range(len(equations)):
 
@@ -223,6 +253,7 @@ class Application:
         separator = "-" * (len(self.user_input) + 2)
 
         """
+        > 1 anvil_bench + 1 crafting_bench
         ==================================
         TOTAL RESOURCES
         ==================================
@@ -268,6 +299,24 @@ class Application:
         # To make program's output more readable.
         separator = "-" * (len(self.user_input) + 2)
 
+        """
+        > 1 anvil_bench + 1 crafting_bench
+        ==================================
+        RECURSIVE DATA STRUCTURE
+        ==================================
+        1 crafting_bench [character]
+        60 fiber
+        50 wood
+        12 stone
+        20 leather
+        ----------------------------------
+        1 anvil_bench [crafting_bench]
+        40 iron_ingot [stone_furnace]
+            80 iron_ore
+        20 wood
+        10 stone
+        """
+
         def traverse(root: EquationTree, count: int = 0, step: int = 2) -> None:
             if root.data:
                 resource: Resource = root.data
@@ -300,6 +349,7 @@ class Application:
             try:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
+                equation = self.preprocessor.process(equation)
                 self.resolve_recipes(equation)
                 self.algorithm.calculate(equation)
             except SystemExit:
@@ -316,7 +366,9 @@ class Application:
     def init(self, argv: list[str]) -> None:
         try:
             # Parse command line arguments.
-            opts, args = getopt.getopt(argv[1:], "grh", ["gnu", "recursive", "help"])
+            opts, args = getopt.getopt(
+                argv[1:], "girh", ["gnu", "implicit", "recursive", "help"]
+            )
 
             if args == []:
                 raise SyntaxError()
@@ -347,6 +399,11 @@ class Application:
                 if opt in ("-r", "--recursive"):
                     algorithm = Recursive(self)
                     self.algorithm = algorithm
+
+                # Include all necessary workstations
+                if opt in ("-i", "--implicit"):
+                    preprocessor = Implicit(self)
+                    self.preprocessor = preprocessor
 
                 # Print user manual and exit.
                 if opt in ("-h", "--help"):
@@ -383,6 +440,27 @@ class Recursive(Algorithm):
         equation_tree = self.application.calculator.calculate_recursive(equation)
         self.application.print_output_recursive(equation_tree)
         self.application.print_total_resources(total)
+
+
+class Preprocessor(ABC):
+    def __init__(self, application: Application):
+        self.application = application
+
+    @abstractmethod
+    def process(self, equation: Equation) -> Equation:
+        pass
+
+
+class Explicit(Preprocessor):
+    def process(self, equation: Equation) -> Equation:
+        """Calculator does not change input at all."""
+        return equation
+
+
+class Implicit(Preprocessor):
+    def process(self, equation: Equation) -> Equation:
+        """Calculator extends input when deemed necessary."""
+        return self.application.calculator.find_workstations(equation)
 
 
 if __name__ == "__main__":
