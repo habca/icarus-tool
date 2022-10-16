@@ -1,4 +1,5 @@
 from fractions import Fraction
+from mapping import recipe_sets_to_outputs
 from typing import Callable, Iterator, Optional
 import difflib
 import math
@@ -345,7 +346,8 @@ class Calculator:
             # Variable is required elsewhere as a workbench.
             if part.name in self.stations:
                 station = self.stations[part.name]
-                if variable == station:
+                mapped = recipe_sets_to_outputs(station)
+                if variable in (station, mapped):
                     variables.append(part.name)
 
             # Recursive function call for a derivative expression.
@@ -536,18 +538,22 @@ class Calculator:
         equation = equation.make_copy()
         equation = equation.evaluate()
 
-        stations = []
+        stations: list[str] = []
         names = self.find_resources(equation)
         for name in names:
             if name in self.stations:
                 station = self.stations[name]
+                if station not in self.resources:
+                    # Recipes will be read directly from the game file.
+                    # There's no need to support any other mapping function.
+                    station = recipe_sets_to_outputs(station)
                 if station in self.resources:
                     stations.append(station)
         stations = list(dict.fromkeys(stations))
         workstations: list[Resource] = []
         for station in stations[:]:
-            quantity = equation.get_quantity(station)
-            if quantity < 1:
+            quantity: Fraction = equation.get_quantity(station)
+            if quantity <= 0:
                 # TODO: maybe destroy workstation?
                 amount: Fraction = 1 + abs(quantity)
                 resource = Resource(amount, station)
@@ -558,6 +564,43 @@ class Calculator:
             return self.find_workstations(original)
         else:
             return original
+
+    def resolve_recipes_implicit(self, equation: Equation, callback: Callable) -> None:
+        """
+        Ask the user which recipe to use.
+        Take into account all intermediate steps.
+        """
+
+        memory: list[str] = []
+        equation = equation.evaluate()
+        stack: list[str] = [r.name for r in equation]
+        while stack != []:
+            resource: str = stack.pop(0)
+            if resource in memory:
+                continue
+
+            memory.append(resource)
+
+            if resource in self.options:
+                options = self.options[resource]
+
+                choice: int = callback(options)
+
+                line: str = options[choice]
+                del self.options[resource]
+                self.assign_equation(line)
+
+            if resource in self.stations:
+                station = self.stations[resource]
+                if station not in memory and station not in stack:
+                    stack.append(station)
+
+            if resource in self.resources:
+                new_resources = self.resources[resource]
+                for new_resource in new_resources:
+                    name = new_resource.name
+                    if name not in memory and name not in stack:
+                        stack.append(name)
 
 
 class Validator:

@@ -39,6 +39,9 @@ class FileSystemTest(unittest.TestCase):
 class JsonSystemTest(unittest.TestCase):
     filename = "data/crafting/D_ProcessorRecipes.json"
 
+    def setUp(self) -> None:
+        self.maxDiff = None
+
     def test_read(self):
         reader = JsonSystem(JsonSystemTest.filename)
         reader.read(calculator := Calculator())
@@ -61,13 +64,6 @@ class JsonSystemTest(unittest.TestCase):
             self.assertIn(station, calculator.resources)
             self.assertNotIn(station, calculator.variables)
             self.assertNotIn(station, calculator.options)
-
-        # TODO: vaihda nimet samoiksi kuin pelissa
-        # self.assertIn("machining_bench", calculator.resources)
-        # self.assertIn("hunting_rifle", calculator.resources)
-        # self.assertIn("iron_ingot", calculator.resources)
-        # self.assertIn("iron_ore", calculator.variables)
-        # self.assertIn("aluminium_ore", calculator.variables)
 
         self.assertEqual(388, resources := len(calculator.resources))
         self.assertEqual(9, errors := len(calculator.errors))
@@ -291,6 +287,7 @@ class ApplicationTest(unittest.TestCase):
             "  python ./application.py [options ...] file",
             "Options:",
             "  -g --gnu          Apply GNU readline functionality to python's input.",
+            "  -i --implicit     Add all the necessary intermediate steps.",
             "  -r --recursive    Show the output as a tree data structure.",
             "  -h --help         Show this user manual and exit.",
             "option -z not recognized",
@@ -298,6 +295,7 @@ class ApplicationTest(unittest.TestCase):
             "  python ./application.py [options ...] file",
             "Options:",
             "  -g --gnu          Apply GNU readline functionality to python's input.",
+            "  -i --implicit     Add all the necessary intermediate steps.",
             "  -r --recursive    Show the output as a tree data structure.",
             "  -h --help         Show this user manual and exit.",
             "No such file or directory: '-z'",
@@ -363,6 +361,41 @@ class ApplicationTest(unittest.TestCase):
         # Remove comments which clarify user interactions.
         expected_output = [l for l in expected_output if not l.startswith("#")]
         return expected_output
+
+
+class TestPreprocessor(unittest.TestCase):
+    def setUp(self) -> None:
+        self.maxDiff = None
+
+    def test_implicit_process(self):
+        user_input = [
+            "1 fabricator",
+            "1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "2",
+            "0",
+            "exit",
+        ]
+
+        expected_output = ApplicationTest.read_testfile(
+            "test/test_implicit_fabricator.txt"
+        )
+
+        application = Application()
+        application.init(["./application.py", "-ir", JsonSystemTest.filename])
+        actual_output = ApplicationTest.get_output(user_input, application.main)
+
+        self.assertEqual(expected_output, actual_output)
 
 
 if __name__ == "__main__":

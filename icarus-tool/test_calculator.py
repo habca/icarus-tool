@@ -599,6 +599,18 @@ class CalculatorTest(unittest.TestCase):
         expected = Equation([Resource(Fraction(4), "stick")])
         self.assertEqual(expected, self.calc.suodata(equation))
 
+    def test_suodata_practical_6(self):
+        equation = Equation.parse(
+            "48 aluminium_ore + 60 gold_ore + 180 copper_ore + 386 wood + 92 oxite + 176 sulfur + 542 stone + 208 silica + 6 iron_ore + 1 coal_ore + 73 iron_ingot + 252 fiber + 32 leather"
+        )
+        expected = Equation([Resource(Fraction(73), "iron_ingot")])
+        self.assertEqual(expected, self.calc.suodata(equation))
+
+    def test_suodata_practical_7(self):
+        equation = Equation.parse(
+            "1 fabricator + 1 machining_bench + 1 concrete_furnace + 1 cement_mixer + 1 stone_furnace + 1 mortar_and_pestle + 1 crafting_bench + 1 anvil_bench"
+        )
+
     def test_suodata_raw_materials(self):
         equation = Equation.parse("1 iron_ore + 1 wood")
         expected = equation.make_copy()

@@ -98,8 +98,6 @@ class Application:
         # Process the equation before applying the algorithm.
         self.preprocessor: Preprocessor = Explicit(self)
 
-        self.user_input: str = None
-
     def manual(self, script: str):
         print()
         print("Usage:")
@@ -107,6 +105,7 @@ class Application:
         print()
         print("Options:")
         print("  -g --gnu          Apply GNU readline functionality to python's input.")
+        print("  -i --implicit     Add all the necessary intermediate steps.")
         print("  -r --recursive    Show the output as a tree data structure.")
         print("  -h --help         Show this user manual and exit.")
         print()
@@ -141,8 +140,6 @@ class Application:
         # Ensure there are only pre-assigned variable names.
         self.calculator.validator.validate_value_calculation(equation_obj)
 
-        self.user_input = equation
-
         return equation_obj
 
     def recover(self, equation: str) -> None:
@@ -155,29 +152,25 @@ class Application:
                 message = "- " + name + ": " + ", ".join(word_list)
                 print(message)
 
-    def resolve_recipes(self, equation: Equation) -> None:
-        # Callback function to request user interaction.
-        def ask_optional(options: list[str]) -> int:
-            for i, option in enumerate(options):
-                print(f"({i}) {option}")
+    def ask_optional(self, options: list[str]) -> int:
+        """Callback function to request user interaction."""
 
-            while True:
-                choice = input(":: Which recipe would you like to use? ")
-                print()  # Empty line to make welcome text readable.
+        for i, option in enumerate(options):
+            print(f"({i}) {option}")
 
-                if choice in ("exit", "quit"):
-                    raise SystemExit
+        while True:
+            choice = input(":: Which recipe would you like to use? ")
+            print()  # Empty line to make welcome text readable.
 
-                if choice.isdigit() and 0 <= int(choice) < len(options):
-                    return int(choice)
+            if choice in ("exit", "quit"):
+                raise SystemExit
 
-        # Calculator knows all the recipes, but cannot inquire an user.
-        # Therefore it's necessary to use callback function as a parameter.
-        self.calculator.resolve_recipes(equation, callback=ask_optional)
+            if choice.isdigit() and 0 <= int(choice) < len(options):
+                return int(choice)
 
-    def print_output(self, equations: list[Equation]) -> None:
+    def print_output(self, equations: list[Equation], equation: Equation) -> None:
         # To make program's output more readable.
-        separator = "-" * (len(self.user_input) + 2)
+        separator = "-" * (len(str(equation)) + 2)
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -248,9 +241,9 @@ class Application:
             for resource_name in resources_str:
                 print(resource_name)
 
-    def print_total_resources(self, equation: Equation) -> None:
+    def print_total_resources(self, equation: Equation, user_input: Equation) -> None:
         # To make program's output more readable.
-        separator = "-" * (len(self.user_input) + 2)
+        separator = "-" * (len(str(user_input)) + 2)
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -268,7 +261,7 @@ class Application:
         """
 
         # From here, print the program's input.
-        resources = Equation.parse(self.user_input)
+        resources = user_input
         resources = resources.suodata(all=True, round=False)
         resources = resources.sort_resources()
         resources_str = resources.format_resources()
@@ -294,10 +287,10 @@ class Application:
         for resource_name in resources_str:
             print(resource_name)
 
-    def print_output_recursive(self, root: EquationTree) -> None:
+    def print_output_recursive(self, root: EquationTree, equation: Equation) -> None:
 
         # To make program's output more readable.
-        separator = "-" * (len(self.user_input) + 2)
+        separator = "-" * (len(str(equation)) + 2)
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -350,7 +343,6 @@ class Application:
                 user_input = self.ask_input()
                 equation = self.parse_input(user_input)
                 equation = self.preprocessor.process(equation)
-                self.resolve_recipes(equation)
                 self.algorithm.calculate(equation)
             except SystemExit:
                 break
@@ -430,16 +422,16 @@ class Algorithm(ABC):
 class Iterative(Algorithm):
     def calculate(self, equation: Equation) -> None:
         equations = list(self.application.calculator.calculate(equation))
-        self.application.print_output(equations[:-1][::-1])
-        self.application.print_total_resources(equations[-1])
+        self.application.print_output(equations[:-1][::-1], equation)
+        self.application.print_total_resources(equations[-1], equation)
 
 
 class Recursive(Algorithm):
     def calculate(self, equation: Equation) -> None:
         total = deque(self.application.calculator.calculate(equation), maxlen=1).pop()
         equation_tree = self.application.calculator.calculate_recursive(equation)
-        self.application.print_output_recursive(equation_tree)
-        self.application.print_total_resources(total)
+        self.application.print_output_recursive(equation_tree, equation)
+        self.application.print_total_resources(total, equation)
 
 
 class Preprocessor(ABC):
@@ -453,13 +445,24 @@ class Preprocessor(ABC):
 
 class Explicit(Preprocessor):
     def process(self, equation: Equation) -> Equation:
-        """Calculator does not change input at all."""
+        """
+        Calculator knows all the recipes, but cannot inquire an user.
+        Therefore it's necessary to use callback function as a parameter.
+        """
+
+        self.application.calculator.resolve_recipes(
+            equation, callback=self.application.ask_optional
+        )
         return equation
 
 
 class Implicit(Preprocessor):
     def process(self, equation: Equation) -> Equation:
         """Calculator extends input when deemed necessary."""
+
+        self.application.calculator.resolve_recipes_implicit(
+            equation, callback=self.application.ask_optional
+        )
         return self.application.calculator.find_workstations(equation)
 
 
