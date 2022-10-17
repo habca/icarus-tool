@@ -13,12 +13,12 @@ Powershell might not provide the same output as Bash shell. The reason remains u
 ```
 py -m venv .wenv
 .wenv\Scripts\activate
-python -m pip install pyreadline mypy black
+python -m pip install --upgrade pip
+python -m pip install pyreadline mypy black flask
 
 python -m unittest
 python -m mypy application.py calculator.py test_application.py test_calculator.py
 python -m black *.py
-python application.py -g data\tech_tree.txt
 deactivate
 ```
 
@@ -29,19 +29,22 @@ The `readline` package is most likely already installed as a dependency of Bash.
 ```
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install readline mypy black
+python -m pip install --upgrade pip
+python -m pip install readline mypy black flask
 
 python -m unittest
 python -m mypy *.py
 python -m black *.py
-python application.py -g data/tech_tree.txt
 deactivate
 ```
 
 ## Usage
 
+Program has a local command line interface and a flask app to web deployment. The configuration of the web application corresponds to the command line parameters `-i` and `-r`.
+
 ```
 python application.py [options ...] file
+python app.py
 ```
 
 The command line options supported by the program are as follows.

@@ -98,6 +98,8 @@ class Application:
         # Process the equation before applying the algorithm.
         self.preprocessor: Preprocessor = Explicit(self)
 
+        self.separator = "-" * 72
+
     def manual(self, script: str):
         print()
         print("Usage:")
@@ -110,10 +112,11 @@ class Application:
         print("  -h --help         Show this user manual and exit.")
         print()
 
-    def help(self):
-        print()  # Empty line to make welcome text readable.
-        print("Usage:")
-        print("  amount name [+/- amount name ...]")
+    def help(self) -> list[str]:
+        output: list[str] = []
+        output.append("Usage:")
+        output.append("  amount name [+/- amount name ...]")
+        return output
 
     def ask_input(self) -> str:
         """Throws SyntaxError, ValueError or SystemExit!"""
@@ -127,6 +130,9 @@ class Application:
         # Terminates the program by raising a SystemExit.
         if equation in ("exit", "quit"):
             raise SystemExit
+
+        # Separator should match the user input line.
+        self.separator = "-" * (len(equation) + 2)
 
         # Return a valid equation.
         return equation
@@ -142,15 +148,17 @@ class Application:
 
         return equation_obj
 
-    def recover(self, equation: str) -> None:
+    def recover(self, equation: str) -> list[str]:
+        output: list[str] = []
         resources = Equation.parse(equation)
         similar_words = self.calculator.find_similar(resources)
         if similar_words != {}:
-            print()  # Line break for a readable terminal output.
-            print(f":: Did you mean?")
+            output.append("")  # Line break for a readable terminal output.
+            output.append(f":: Did you mean?")
             for name, word_list in similar_words.items():
                 message = "- " + name + ": " + ", ".join(word_list)
-                print(message)
+                output.append(message)
+        return output
 
     def ask_optional(self, options: list[str]) -> int:
         """Callback function to request user interaction."""
@@ -168,9 +176,10 @@ class Application:
             if choice.isdigit() and 0 <= int(choice) < len(options):
                 return int(choice)
 
-    def print_output(self, equations: list[Equation], equation: Equation) -> None:
+    def print_output(self, equations: list[Equation], equation: Equation) -> list[str]:
         # To make program's output more readable.
-        separator = "-" * (len(str(equation)) + 2)
+        separator: str = self.separator
+        output: list[str] = []
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -215,21 +224,21 @@ class Application:
             # Otherwise separate equations from each other.
             current_station = self.calculator.get_station(resources)
             if current_station != previous_station:
-                print(separator.replace("-", "="))
-                print(current_station.replace("_", " ").upper())
-                print(separator.replace("-", "="))
+                output.append(separator.replace("-", "="))
+                output.append(current_station.replace("_", " ").upper())
+                output.append(separator.replace("-", "="))
             else:
-                print(separator.replace("-", "="))
+                output.append(separator.replace("-", "="))
 
             # Update current station.
             previous_station = current_station
 
             # Print recipes above the separator.
             for resource_name in resources_str:
-                print(resource_name)
+                output.append(resource_name)
 
             # Separate recipes and resources by the separator.
-            print(separator)
+            output.append(separator)
 
             # Pick resources craftable in the current station only.
             resources = self.calculator.resources_per_station(equations[i])
@@ -239,11 +248,16 @@ class Application:
 
             # Print resources below the separator.
             for resource_name in resources_str:
-                print(resource_name)
+                output.append(resource_name)
 
-    def print_total_resources(self, equation: Equation, user_input: Equation) -> None:
+        return output
+
+    def print_total_resources(
+        self, equation: Equation, user_input: Equation
+    ) -> list[str]:
         # To make program's output more readable.
-        separator = "-" * (len(str(user_input)) + 2)
+        separator: str = self.separator
+        output: list[str] = []
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -267,16 +281,16 @@ class Application:
         resources_str = resources.format_resources()
 
         # There may be multiple crafting stations.
-        print(separator.replace("-", "="))
-        print("TOTAL RESOURCES")
-        print(separator.replace("-", "="))
+        output.append(separator.replace("-", "="))
+        output.append("TOTAL RESOURCES")
+        output.append(separator.replace("-", "="))
 
         # Print sorted and formated user input.
         for resource_name in resources_str:
-            print(resource_name)
+            output.append(resource_name)
 
         # Separate crafting recipes and material costs.
-        print(separator)
+        output.append(separator)
 
         # From here, print the program's output.
         resources = equation.suodata(all=True, round=True)
@@ -285,12 +299,17 @@ class Application:
 
         # Print sorted and formated program output.
         for resource_name in resources_str:
-            print(resource_name)
+            output.append(resource_name)
 
-    def print_output_recursive(self, root: EquationTree, equation: Equation) -> None:
+        return output
+
+    def print_output_recursive(
+        self, root: EquationTree, equation: Equation
+    ) -> list[str]:
 
         # To make program's output more readable.
-        separator = "-" * (len(str(equation)) + 2)
+        separator: str = self.separator
+        output: list[str] = []
 
         """
         > 1 anvil_bench + 1 crafting_bench
@@ -316,13 +335,13 @@ class Application:
                 message = " " * count + str(resource)
                 if root.station:
                     message += " [%s]" % root.station
-                print(message)
+                output.append(message)
 
             for i, node in enumerate(root.children):
                 # Separate root elements from user input.
                 # Because they form different tree stuctures.
                 if i > 0 and not root.data:
-                    print(separator)
+                    output.append(separator)
 
                 # Do not increase indendation on empty root.
                 # Root node artificially connects user input.
@@ -331,29 +350,33 @@ class Application:
                 else:
                     traverse(node, count)
 
-        print(separator.replace("-", "="))
-        print("RECURSIVE DATA STRUCTURE")
-        print(separator.replace("-", "="))
+        output.append(separator.replace("-", "="))
+        output.append("RECURSIVE DATA STRUCTURE")
+        output.append(separator.replace("-", "="))
 
         traverse(root)
+
+        return output
 
     def main(self):
         while True:
             try:
-                user_input = self.ask_input()
-                equation = self.parse_input(user_input)
+                user_input: str = self.ask_input()
+                equation: Equation = self.parse_input(user_input)
                 equation = self.preprocessor.process(equation)
-                self.algorithm.calculate(equation)
+                output: list[str] = self.algorithm.calculate(equation)
             except SystemExit:
                 break
             except KeyboardInterrupt:
                 break
             except SyntaxError as err:
                 print(str(err))
-                self.help()
+                output = self.help()
             except ValueError as err:
                 print(str(err))
-                self.recover(user_input)
+                output = self.recover(user_input)
+            for line in output:
+                print(line)
 
     def init(self, argv: list[str]) -> None:
         try:
@@ -415,23 +438,25 @@ class Algorithm(ABC):
         self.application = application
 
     @abstractmethod
-    def calculate(self, equation: Equation) -> None:
+    def calculate(self, equation: Equation) -> list[str]:
         pass
 
 
 class Iterative(Algorithm):
-    def calculate(self, equation: Equation) -> None:
+    def calculate(self, equation: Equation) -> list[str]:
         equations = list(self.application.calculator.calculate(equation))
-        self.application.print_output(equations[:-1][::-1], equation)
-        self.application.print_total_resources(equations[-1], equation)
+        output = self.application.print_output(equations[:-1][::-1], equation)
+        output += self.application.print_total_resources(equations[-1], equation)
+        return output
 
 
 class Recursive(Algorithm):
-    def calculate(self, equation: Equation) -> None:
+    def calculate(self, equation: Equation) -> list[str]:
         total = deque(self.application.calculator.calculate(equation), maxlen=1).pop()
         equation_tree = self.application.calculator.calculate_recursive(equation)
-        self.application.print_output_recursive(equation_tree, equation)
-        self.application.print_total_resources(total, equation)
+        output = self.application.print_output_recursive(equation_tree, equation)
+        output += self.application.print_total_resources(total, equation)
+        return output
 
 
 class Preprocessor(ABC):

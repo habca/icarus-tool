@@ -81,9 +81,7 @@ class ApplicationTest(unittest.TestCase):
             "Usage:",
             "  amount name [+/- amount name ...]",
         ]
-        self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, Application().help)
-        )
+        self.assertEqual(expected_output, Application().help())
 
     def test_main(self):
         user_input = [

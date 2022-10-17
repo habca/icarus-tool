@@ -14,7 +14,7 @@
     <TestFramework>unittest</TestFramework>
     <InterpreterId>MSBuild|.wenv|$(MSBuildProjectFullPath)</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-g data/crafting/D_ProcessorRecipes.json</CommandLineArguments>
+    <CommandLineArguments>-gir data/crafting/D_ProcessorRecipes.json</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
