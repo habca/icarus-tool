@@ -1,16 +1,16 @@
-from fractions import Fraction
-from collections import deque
-from application import FileSystem, JsonSystem
-from calculator import Calculator, Equation, Resource, EquationTree
-from test_application import FileSystemTest, JsonSystemTest
-
 import unittest
+from collections import deque
+from fractions import Fraction
+
+from application import FileSystem, JsonSystem
+from calculator import Calculator, Equation, EquationTree, Resource
+from test_application import FileSystemTest, JsonSystemTest
 
 
 class ResourceTest(unittest.TestCase):
     def test_to_string(self):
-        r1 = Resource(1, "anvil_bench")
-        r2 = Resource(10, "iron_ingot")
+        r1 = Resource(Fraction(1), "anvil_bench")
+        r2 = Resource(Fraction(10), "iron_ingot")
 
         self.assertEqual("1 anvil_bench", str(r1))
         self.assertEqual("10 iron_ingot", str(r2))
@@ -30,10 +30,10 @@ class ResourceTest(unittest.TestCase):
         self.assertEqual("-10 iron_ingot", str(r2))
 
     def test_equals(self):
-        r1 = Resource(2, "biofuel_extractor")
-        r2 = Resource(2, "biofuel_extractor")
-        r3 = Resource(2, "biofuel_generator")
-        r4 = Resource(4, "biofuel_generator")
+        r1 = Resource(Fraction(2), "biofuel_extractor")
+        r2 = Resource(Fraction(2), "biofuel_extractor")
+        r3 = Resource(Fraction(2), "biofuel_generator")
+        r4 = Resource(Fraction(4), "biofuel_generator")
 
         self.assertEqual(r1, r2)
         self.assertNotEqual(r2, r3)
@@ -44,8 +44,10 @@ class ResourceTest(unittest.TestCase):
 
 class EquationTest(unittest.TestCase):
     def test_to_string(self):
-        e1 = Equation([Resource(12, "fiber")])
-        e2 = Equation([Resource(12, "fiber"), Resource(18, "stick")])
+        e1 = Equation([Resource(Fraction(12), "fiber")])
+        e2 = Equation(
+            [Resource(Fraction(12), "fiber"), Resource(Fraction(18), "stick")]
+        )
 
         self.assertEqual("12 fiber", str(e1))
         self.assertEqual("12 fiber + 18 stick", str(e2))
@@ -67,10 +69,10 @@ class EquationTest(unittest.TestCase):
         self.assertEqual("-1 wood", str(e3))
 
     def test_equals(self):
-        r1 = Resource(2, "biofuel_generator")
-        r2 = Resource(4, "biofuel_generator")
-        r3 = Resource(2, "biofuel_extractor")
-        r4 = Resource(2, "biofuel_extractor")
+        r1 = Resource(Fraction(2), "biofuel_generator")
+        r2 = Resource(Fraction(4), "biofuel_generator")
+        r3 = Resource(Fraction(2), "biofuel_extractor")
+        r4 = Resource(Fraction(2), "biofuel_extractor")
 
         e1 = Equation([r1, r2, r3, r4])
         e2 = Equation([r1, r2, r3, r4])
@@ -173,10 +175,10 @@ class EquationTest(unittest.TestCase):
         self.assertEqual(str(e2), str(e2.sort_resources()))
 
     def test_format_resources(self):
-        r1 = Resource(10, "copper_ingot")
-        r2 = Resource(2, "iron_ingot")
-        r3 = Resource(100, "gold_ore")
-        r4 = Resource(10, "aluminium_ingot")
+        r1 = Resource(Fraction(10), "copper_ingot")
+        r2 = Resource(Fraction(2), "iron_ingot")
+        r3 = Resource(Fraction(100), "gold_ore")
+        r4 = Resource(Fraction(10), "aluminium_ingot")
 
         l1 = Equation([r1, r2, r3, r4]).format_resources()
 
@@ -518,10 +520,10 @@ class CalculatorTest(unittest.TestCase):
         """There may be none, one or many good enough matches."""
         calc = self.calc
 
-        e1 = Equation([Resource(1, "anvil")])
-        e2 = Equation([Resource(1, "anvil_bvve")])
-        e3 = Equation([Resource(1, "anvil_benchs")])
-        e4 = Equation([Resource(1, "anvi")])
+        e1 = Equation([Resource(Fraction(1), "anvil")])
+        e2 = Equation([Resource(Fraction(1), "anvil_bvve")])
+        e3 = Equation([Resource(Fraction(1), "anvil_benchs")])
+        e4 = Equation([Resource(Fraction(1), "anvi")])
 
         self.assertEqual(["anvil_bench"], calc.find_similar(e1)["anvil"])
         self.assertIn("anvil_bench", calc.find_similar(e2)["anvil_bvve"])

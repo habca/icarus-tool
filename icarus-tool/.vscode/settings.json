@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        ".",
+        "./server",
         "-p",
         "test_*.py"
     ],
@@ -10,5 +10,6 @@
     "python.testing.unittestEnabled": true,
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.envFile": "${workspaceFolder}/.env"
 }

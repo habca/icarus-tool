@@ -2,6 +2,8 @@
 
 The command line tool calculates total amount of resources and groups them by workstations. Tech tree has been updated after **Icarus week forty two update**.
 
+TL;DR <http://habca.pythonanywhere.com/plaintext/1%20fabricator>
+
 ## Getting started
 
 Create a virtual environment and install dependencies before running the application.

@@ -1,9 +1,10 @@
-from fractions import Fraction
-from mapping import recipe_sets_to_outputs
-from typing import Callable, Iterator, Optional
 import difflib
 import math
 import re
+from fractions import Fraction
+from typing import Callable, Iterator, Optional
+
+from mapping import recipe_sets_to_outputs
 
 
 class Resource:
@@ -165,7 +166,7 @@ class Equation:
 
 
 class EquationTree:
-    def __init__(self, data: Resource = None, station=None) -> None:
+    def __init__(self, data: Optional[Resource] = None, station=None) -> None:
         self.children: list[EquationTree] = []
         self.data: Optional[Resource] = data
         self.station: Optional[str] = station

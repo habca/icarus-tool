@@ -1,13 +1,13 @@
+import unittest
+import unittest.mock
 from typing import Any, Callable
+
 from application import Application, FileSystem, JsonSystem
 from calculator import Calculator
 
-import unittest
-import unittest.mock
-
 
 class FileSystemTest(unittest.TestCase):
-    filename = "data/tech_tree.txt"
+    filename = "server/data/tech_tree.txt"
 
     def test_read(self):
         reader = FileSystem(FileSystemTest.filename)
@@ -37,7 +37,7 @@ class FileSystemTest(unittest.TestCase):
 
 
 class JsonSystemTest(unittest.TestCase):
-    filename = "data/crafting/D_ProcessorRecipes.json"
+    filename = "server/data/crafting/D_ProcessorRecipes.json"
 
     def setUp(self) -> None:
         self.maxDiff = None
@@ -132,7 +132,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_biofuel_extractor_biofuel_generator.txt"
+            "server/test/test_biofuel_extractor_biofuel_generator.txt"
         )
 
         application = Application()
@@ -147,7 +147,9 @@ class ApplicationTest(unittest.TestCase):
             "exit",
         ]
 
-        expected_output = ApplicationTest.read_testfile("test/test_fabricator.txt")
+        expected_output = ApplicationTest.read_testfile(
+            "server/test/test_fabricator.txt"
+        )
 
         application = Application()
         application.init(["./application.py", "-g", FileSystemTest.filename])
@@ -162,7 +164,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_cement_mixer_concrete_furnace.txt"
+            "server/test/test_cement_mixer_concrete_furnace.txt"
         )
 
         application = Application()
@@ -177,7 +179,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_stone_furnace_anvil_bench_machining_bench.txt"
+            "server/test/test_stone_furnace_anvil_bench_machining_bench.txt"
         )
 
         application = Application()
@@ -192,7 +194,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_cement_mixer_concrete_furnace_thermos.txt"
+            "server/test/test_cement_mixer_concrete_furnace_thermos.txt"
         )
 
         application = Application()
@@ -207,7 +209,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
+            "server/test/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
         )
 
         application = Application()
@@ -323,7 +325,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_kit_machining_bench_epoxy.txt"
+            "server/test/test_kit_machining_bench_epoxy.txt"
         )
 
         application = Application()
@@ -386,7 +388,7 @@ class TestPreprocessor(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "test/test_implicit_fabricator.txt"
+            "server/test/test_implicit_fabricator.txt"
         )
 
         application = Application()

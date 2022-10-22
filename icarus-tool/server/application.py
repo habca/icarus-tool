@@ -1,9 +1,11 @@
-﻿from collections import deque
-from typing import Any
-from calculator import Calculator, Equation, EquationTree, Resource
-from abc import ABC, abstractmethod
-import sys, getopt
+﻿import getopt
 import json
+import sys
+from abc import ABC, abstractmethod
+from collections import deque
+from typing import Any
+
+from calculator import Calculator, Equation, EquationTree, Resource
 
 
 class FileSystem:
@@ -40,7 +42,7 @@ class JsonSystem(FileSystem):
                 for line in JsonSystem.to_equation(recipe):
                     calculator.assign_equation(line)
             except IndexError:
-                calculator.errors.append(line)
+                calculator.errors.append(recipe)
 
     @classmethod
     def to_equation(cls, recipe: dict[str, Any]) -> list[str]:
@@ -359,9 +361,10 @@ class Application:
         return output
 
     def main(self):
+        user_input: str = ""
         while True:
             try:
-                user_input: str = self.ask_input()
+                user_input = self.ask_input()
                 equation: Equation = self.parse_input(user_input)
                 equation = self.preprocessor.process(equation)
                 output: list[str] = self.algorithm.calculate(equation)
@@ -375,6 +378,7 @@ class Application:
             except ValueError as err:
                 print(str(err))
                 output = self.recover(user_input)
+
             for line in output:
                 print(line)
 

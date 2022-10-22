@@ -2,10 +2,11 @@
 
 <head>
     <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='site.css')}}" />
 </head>
 
 <body>
-    <pre style=white-space:pre-wrap>
+    <pre class="message">
     {% for line in output: %}
         {{ line }}
     {% endfor %}

@@ -5,14 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Node.js: Launch Program",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/client/app.js",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "application.py",
+            "program": "server/application.py",
             "args": [
                 "-g",
                 "-r",
-                "data/crafting/D_ProcessorRecipes.json",
+                "server/data/crafting/D_ProcessorRecipes.json",
             ],
             "console": "integratedTerminal",
             "justMyCode": true
@@ -23,7 +32,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "app.py",
+                "FLASK_APP": "server.webapp.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1"
             },
