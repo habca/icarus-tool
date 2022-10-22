@@ -37,8 +37,8 @@ python -m pip install readline mypy black flask
 
 export PYTHONPATH=server/src
 python -m unittest discover server/test
-python -m mypy server/src/*.py
-python -m black server/src/*.py
+python -m mypy server/**/*.py
+python -m black server/**/*.py
 deactivate
 ```
 
@@ -318,7 +318,7 @@ To change command line arguments, edit `.vscode/launch.json` file and use either
 
 Running program in an integrated terminal (`F5`) or (`Ctrl+F5`) fails to activate and VS Code uses `Python Debug Console` instead [2]. It remains open after program completes and ceases working properly until `Python Debug Console` process is killed.
 
-PYTHONPATH does not specify a path to a Python interpreter itself [3], so the environment variable must be initialized before running the python interpreter. Doing so ensures that both `Run Python File in Terminal` in Explorer and `Run Python File` in Code Editor work correctly for unit tests.
+The environment variable `PYTHONPATH` must be initialized before running the python interpreter. Doing so ensures that both `Run Python File in Terminal` in Explorer and `Run Python File` in Code Editor work correctly for unit tests [3].
 
 ### Visual Studio Community
 

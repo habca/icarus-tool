@@ -132,7 +132,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_biofuel_extractor_biofuel_generator.txt"
+            "server/test/testdata/test_biofuel_extractor_biofuel_generator.txt"
         )
 
         application = Application()
@@ -148,7 +148,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_fabricator.txt"
+            "server/test/testdata/test_fabricator.txt"
         )
 
         application = Application()
@@ -164,7 +164,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_cement_mixer_concrete_furnace.txt"
+            "server/test/testdata/test_cement_mixer_concrete_furnace.txt"
         )
 
         application = Application()
@@ -179,7 +179,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_stone_furnace_anvil_bench_machining_bench.txt"
+            "server/test/testdata/test_stone_furnace_anvil_bench_machining_bench.txt"
         )
 
         application = Application()
@@ -194,7 +194,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_cement_mixer_concrete_furnace_thermos.txt"
+            "server/test/testdata/test_cement_mixer_concrete_furnace_thermos.txt"
         )
 
         application = Application()
@@ -209,7 +209,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
+            "server/test/testdata/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
         )
 
         application = Application()
@@ -325,7 +325,7 @@ class ApplicationTest(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_kit_machining_bench_epoxy.txt"
+            "server/test/testdata/test_kit_machining_bench_epoxy.txt"
         )
 
         application = Application()
@@ -388,7 +388,7 @@ class TestPreprocessor(unittest.TestCase):
         ]
 
         expected_output = ApplicationTest.read_testfile(
-            "server/testdata/test_implicit_fabricator.txt"
+            "server/test/testdata/test_implicit_fabricator.txt"
         )
 
         application = Application()
