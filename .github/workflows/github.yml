@@ -30,4 +30,5 @@ jobs:
     - name: Test with unittest
       run: |
         cd icarus-tool
-        python -m unittest
+        export PYTHONPATH=server/src
+        python -m unittest discover server/test

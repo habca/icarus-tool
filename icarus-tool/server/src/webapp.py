@@ -47,7 +47,7 @@ def index():
 
 @app.route("/api/data")
 def get_data():
-    return send_from_directory("data", "tech_tree.txt")
+    return send_from_directory("../data", "tech_tree.txt")
 
 
 if __name__ == "__main__":

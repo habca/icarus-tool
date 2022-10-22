@@ -18,9 +18,10 @@ py -m venv .wenv
 python -m pip install --upgrade pip
 python -m pip install pyreadline mypy black flask
 
-python -m unittest
-python -m mypy application.py calculator.py test_application.py test_calculator.py
-python -m black *.py
+set PYTHONPATH=server\src
+python -m unittest discover server\test
+python -m mypy server\src\application.py [...]
+python -m black server\src\*.py
 deactivate
 ```
 
@@ -34,9 +35,10 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install readline mypy black flask
 
-python -m unittest
-python -m mypy *.py
-python -m black *.py
+export PYTHONPATH=server/src
+python -m unittest discover server/test
+python -m mypy server/src/*.py
+python -m black server/src/*.py
 deactivate
 ```
 
@@ -302,7 +304,7 @@ snap install code --classic
 - Command Palette `(Ctrl+Shift+P)`
 
       Python: Select Interpreter (./.venv/bin/python)
-      Python: Configure Tests (unittest > Root directory > test_*.py)
+      Python: Configure Tests (unittest > server/test > test_*.py)
 
 - Settings `(Ctrl+,)`
 
@@ -316,6 +318,8 @@ To change command line arguments, edit `.vscode/launch.json` file and use either
 
 Running program in an integrated terminal (`F5`) or (`Ctrl+F5`) fails to activate and VS Code uses `Python Debug Console` instead [2]. It remains open after program completes and ceases working properly until `Python Debug Console` process is killed.
 
+PYTHONPATH does not specify a path to a Python interpreter itself [3], so the environment variable must be initialized before running the python interpreter. Doing so ensures that both `Run Python File in Terminal` in Explorer and `Run Python File` in Code Editor work correctly for unit tests.
+
 ### Visual Studio Community
 
 To change command line arguments, edit `Project > Properties > Debug > Script Arguments` field and use either `Start Debugging (F5)` or `Start Without Debugging (Ctrl+F5)`.
@@ -326,3 +330,4 @@ For me, there was a major problem detecting breakpoints when debugging test case
 
 - [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>
 - [2] <https://github.com/microsoft/vscode/issues/158218>
+- [3] <https://code.visualstudio.com/docs/python/environments#_use-of-the-pythonpath-variable>

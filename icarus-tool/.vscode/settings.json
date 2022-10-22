@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./server",
+        "./server/test",
         "-p",
         "test_*.py"
     ],
@@ -11,5 +11,8 @@
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
-    "python.envFile": "${workspaceFolder}/.env"
+    "python.envFile": "${workspaceFolder}/.env",
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/server/src"
+    },
 }

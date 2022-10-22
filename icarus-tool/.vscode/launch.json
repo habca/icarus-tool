@@ -17,7 +17,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "server/application.py",
+            "program": "server/src/application.py",
             "args": [
                 "-g",
                 "-r",
@@ -32,7 +32,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "server.webapp.py",
+                "FLASK_APP": "server.src.webapp.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1"
             },
