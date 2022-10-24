@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./server/test",
+        "./test",
         "-p",
         "test_*.py"
     ],
@@ -13,6 +13,6 @@
     "python.formatting.provider": "black",
     "python.envFile": "${workspaceFolder}/.env",
     "terminal.integrated.env.linux": {
-        "PYTHONPATH": "${workspaceFolder}/server/src"
-    },
+        "PYTHONPATH": "${workspaceFolder}/src"
+    }
 }

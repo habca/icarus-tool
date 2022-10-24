@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # TODO: Global variable is not thread-save.
 application = Application()
-application.init(["webapp.py", "-i", "-r", "server/data/tech_tree.txt"])
+application.init(["webapp.py", "-i", "-r", "data/tech_tree.txt"])
 
 # Test case for debugging.
 print("Try me: http://localhost:5000/plaintext/1%20fabricator", file=sys.stdout)
