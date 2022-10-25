@@ -390,7 +390,7 @@ class Application:
             )
 
             if args == []:
-                raise SyntaxError()
+                raise SyntaxError("To see usage, type --help")
 
             for argument in args:
                 # Application class should create a file reader.
@@ -433,8 +433,9 @@ class Application:
             print(str(err))
         except FileNotFoundError as err:
             print(str(err).replace("[Errno 2] ", ""))
-        except SyntaxError:
-            self.manual(argv[0])
+        except SyntaxError as err:
+            print(str(err))
+            # self.manual(argv[0])
 
 
 class Algorithm(ABC):

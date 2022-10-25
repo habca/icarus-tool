@@ -1,0 +1,23 @@
+{
+    "program_args": [
+        "./application.py",
+        "-g",
+        "data/tech_tree.txt"
+    ],
+    "user_input": [
+        "1 anvi",
+        "1 anvil",
+        "1 anvil_benchs + 1 anvil_bvve",
+        "exit"
+    ],
+    "expected_output": [
+        "ValueError: anvi",
+        "ValueError: anvil",
+        ":: Did you mean?",
+        "- anvil: anvil_bench",
+        "ValueError: anvil_benchs, anvil_bvve",
+        ":: Did you mean?",
+        "- anvil_benchs: anvil_bench, masonry_bench, animal_bed",
+        "- anvil_bvve: anvil_bench, animal_bed"
+    ]
+}

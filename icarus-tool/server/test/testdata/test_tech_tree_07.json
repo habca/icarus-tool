@@ -1,0 +1,30 @@
+{
+    "program_args": [
+        "./application.py",
+        "data/tech_tree.txt"
+    ],
+    "user_input": [
+        "1 crafting_bench",
+        "exit"
+    ],
+    "expected_output": [
+        "==================",
+        "CHARACTER",
+        "==================",
+        "1 crafting_bench",
+        "------------------",
+        "60 fiber",
+        "50 wood",
+        "20 leather",
+        "12 stone",
+        "==================",
+        "TOTAL RESOURCES",
+        "==================",
+        "1 crafting_bench",
+        "------------------",
+        "60 fiber",
+        "50 wood",
+        "20 leather",
+        "12 stone"
+    ]
+}

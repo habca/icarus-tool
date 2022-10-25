@@ -1,14 +1,17 @@
+import json
 import unittest
 import unittest.mock
 from typing import Any, Callable
 
 from application import Application, FileSystem, JsonSystem
 from calculator import Calculator
+from ddt import data, ddt, file_data, unpack
 
 
 class FileSystemTest(unittest.TestCase):
     filename = "data/tech_tree.txt"
 
+    # TODO: calculator is responsible for its state
     def test_read_txt(self):
         reader = FileSystem(FileSystemTest.filename)
         reader.read(calculator := Calculator())
@@ -36,6 +39,7 @@ class FileSystemTest(unittest.TestCase):
         self.assertEqual(0, len(calculator.options))
 
 
+# TODO: calculator is responsible for its state
 class JsonSystemTest(unittest.TestCase):
     filename = "data/crafting/D_ProcessorRecipes.json"
 
@@ -71,153 +75,88 @@ class JsonSystemTest(unittest.TestCase):
         self.assertTrue(643 <= resources + errors + options)
 
 
+@ddt
 class ApplicationTest(unittest.TestCase):
     def setUp(self) -> None:
         self.maxDiff = None
 
     def test_help(self):
-        user_input = ["exit"]
         expected_output = [
             "Usage:",
             "  amount name [+/- amount name ...]",
         ]
         self.assertEqual(expected_output, Application().help())
 
-    def test_main(self):
+    def test_manual(self):
+        expected_output = [
+            "Usage:",
+            "  python ./application.py [options ...] file",
+            "Options:",
+            "  -g --gnu          Apply GNU readline functionality to python's input.",
+            "  -i --implicit     Add all the necessary intermediate steps.",
+            "  -r --recursive    Show the output as a tree data structure.",
+            "  -h --help         Show this user manual and exit.",
+        ]
+
+        self.assertEqual(
+            expected_output,
+            ApplicationTest.get_output(
+                [], lambda: Application().manual("./application.py")
+            ),
+        )
+
+    def test_init(self):
         user_input = [
-            "1 crafting_bench",
-            "exit",
+            "./application.py",
+            "./application.py -z -g",
+            "./application.py -g -g",
+            f"./application.py {FileSystemTest.filename} -z -g",
+            f"./application.py {FileSystemTest.filename} -g -g",
+            "./application.py -z -g non_existent_file",
+            "./application.py -g -g non_existent_file",
         ]
 
         expected_output = [
-            "==================",
-            "CHARACTER",
-            "==================",
-            "1 crafting_bench",
-            "------------------",
-            "60 fiber",
-            "50 wood",
-            "20 leather",
-            "12 stone",
-            "==================",
-            "TOTAL RESOURCES",
-            "==================",
-            "1 crafting_bench",
-            "------------------",
-            "60 fiber",
-            "50 wood",
-            "20 leather",
-            "12 stone",
+            "To see usage, type --help",
+            "option -z not recognized",
+            "To see usage, type --help",
+            "No such file or directory: '-z'",
+            "No such file or directory: '-g'",
+            "option -z not recognized",
+            "No such file or directory: 'non_existent_file'",
         ]
 
-        lines = [
-            "character : 1 crafting_bench = 60 fiber + 50 wood + 12 stone + 20 leather",
-            "crafting_bench : 1 anvil_bench = 40 iron_ingot + 20 wood + 10 stone",
-            "crafting_bench : 1 stone_furnace = 4 stick + 12 wood + 80 stone + 12 leather",
-            "stone_furnace : 1 iron_ingot = 2 iron_ore",
-            "character : 10 stick = 1 wood",
-        ]
+        def run_test_argv() -> None:
+            for error in user_input:
+                application = Application()
+                application.init(error.split())
 
-        application = Application()
-        for line in lines:
-            application.calculator.assign_equation(line)
         self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, application.main)
+            expected_output, ApplicationTest.get_output(user_input, run_test_argv)
         )
 
-    def test_application_biofuel_extractor_biofuel_generator(self):
-        user_input = [
-            "1 biofuel_extractor + 1 biofuel_generator",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_biofuel_extractor_biofuel_generator.txt"
-        )
-
+    @data(
+        json.load(open("test/testdata/test_tech_tree_01.json")),
+        json.load(open("test/testdata/test_tech_tree_02.json")),
+        json.load(open("test/testdata/test_tech_tree_03.json")),
+        json.load(open("test/testdata/test_tech_tree_04.json")),
+        json.load(open("test/testdata/test_tech_tree_05.json")),
+        json.load(open("test/testdata/test_tech_tree_06.json")),
+        json.load(open("test/testdata/test_tech_tree_07.json")),
+        json.load(open("test/testdata/test_tech_tree_08.json")),
+        json.load(open("test/testdata/test_processor_recipes_01.json")),
+        json.load(open("test/testdata/test_processor_recipes_02.json")),
+    )
+    @unpack
+    def test_main(
+        self, program_args: list[str], user_input: list[str], expected_output: list[str]
+    ):
         application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-
+        application.init(program_args)
         actual_output = ApplicationTest.get_output(user_input, application.main)
         self.assertEqual(expected_output, actual_output)
 
-    def test_application_fabricator(self):
-        user_input = [
-            "1 fabricator",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_fabricator.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_application_cement_mixer_concrete_furnace(self):
-        user_input = [
-            "1 cement_mixer + 1 concrete_furnace",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_cement_mixer_concrete_furnace.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_application_stone_furnace_anvil_bench_machining_bench(self):
-        user_input = [
-            "1 stone_furnace + 1 anvil_bench + 1 machining_bench",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_stone_furnace_anvil_bench_machining_bench.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_application_cement_mixer_concrete_furnace_thermos(self):
-        user_input = [
-            "1 cement_mixer + 1 concrete_furnace + 1 thermos",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_cement_mixer_concrete_furnace_thermos.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_application_subtract(self):
-        user_input = [
-            "1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_stone_furnace_anvil_bench_machining_bench_epoxy.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_resolve_recipes(self):
+    def test_ask_optional(self):
         """
         > 1 cement_mixer
         (0) stone_furnace : 1 refined_metal = 2 metal_ore
@@ -247,94 +186,8 @@ class ApplicationTest(unittest.TestCase):
         application.init(["./application.py", JsonSystemTest.filename])
         ApplicationTest.get_output(user_input, application.main)
 
-    def test_recover(self):
-        user_input = [
-            "1 anvi",
-            "1 anvil",
-            "1 anvil_benchs + 1 anvil_bvve",
-            "exit",
-        ]
-
-        expected_output = [
-            "ValueError: anvi",
-            "ValueError: anvil",
-            ":: Did you mean?",
-            "- anvil: anvil_bench",
-            "ValueError: anvil_benchs, anvil_bvve",
-            ":: Did you mean?",
-            "- anvil_benchs: anvil_bench, masonry_bench, animal_bed",
-            "- anvil_bvve: anvil_bench, animal_bed",
-        ]
-
-        application = Application()
-        application.init(["./application.py", "-g", FileSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    def test_argv_gnu_option(self):
-        user_input = [
-            "./application.py",
-            "./application.py -z -g",
-            "./application.py -g -g",
-            f"./application.py {FileSystemTest.filename} -z -g",
-            f"./application.py {FileSystemTest.filename} -g -g",
-            "./application.py -z -g non_existent_file",
-            "./application.py -g -g non_existent_file",
-        ]
-
-        expected_output = [
-            "Usage:",
-            "  python ./application.py [options ...] file",
-            "Options:",
-            "  -g --gnu          Apply GNU readline functionality to python's input.",
-            "  -i --implicit     Add all the necessary intermediate steps.",
-            "  -r --recursive    Show the output as a tree data structure.",
-            "  -h --help         Show this user manual and exit.",
-            "option -z not recognized",
-            "Usage:",
-            "  python ./application.py [options ...] file",
-            "Options:",
-            "  -g --gnu          Apply GNU readline functionality to python's input.",
-            "  -i --implicit     Add all the necessary intermediate steps.",
-            "  -r --recursive    Show the output as a tree data structure.",
-            "  -h --help         Show this user manual and exit.",
-            "No such file or directory: '-z'",
-            "No such file or directory: '-g'",
-            "option -z not recognized",
-            "No such file or directory: 'non_existent_file'",
-        ]
-
-        def run_test_argv() -> None:
-            for error in user_input:
-                application = Application()
-                application.init(error.split())
-
-        self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, run_test_argv)
-        )
-
-    def test_application_recursive(self):
-        user_input = [
-            "1 kit_machining_bench + 1 anvil_bench - 10 epoxy",
-            "0",
-            "0",
-            "0",
-            "0",
-            "2",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_kit_machining_bench_epoxy.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-r", JsonSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-        self.assertEqual(expected_output, actual_output)
-
-    @classmethod
-    def get_output(cls, user_input: list[str], callback: Callable):
+    @staticmethod
+    def get_output(user_input: list[str], callback: Callable):
         with unittest.mock.patch("builtins.print") as mock_print:
             with unittest.mock.patch("builtins.input") as mock_input:
                 mock_input.side_effect = user_input
@@ -350,52 +203,6 @@ class ApplicationTest(unittest.TestCase):
                 ]
                 args = [arg for arg in args if arg != ""]
                 return args
-
-    @classmethod
-    def read_testfile(cls, filename) -> list[str]:
-        with open(filename) as reader:
-            data = reader.read()
-        expected_output = data.splitlines()
-        expected_output = [l for l in expected_output if l != ""]
-        expected_output[:1] = []  # Remove first line.
-        # Remove comments which clarify user interactions.
-        expected_output = [l for l in expected_output if not l.startswith("#")]
-        return expected_output
-
-
-class TestPreprocessor(unittest.TestCase):
-    def setUp(self) -> None:
-        self.maxDiff = None
-
-    def test_implicit_process(self):
-        user_input = [
-            "1 fabricator",
-            "1",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "2",
-            "0",
-            "exit",
-        ]
-
-        expected_output = ApplicationTest.read_testfile(
-            "test/testdata/test_implicit_fabricator.txt"
-        )
-
-        application = Application()
-        application.init(["./application.py", "-ir", JsonSystemTest.filename])
-        actual_output = ApplicationTest.get_output(user_input, application.main)
-
-        self.assertEqual(expected_output, actual_output)
 
 
 if __name__ == "__main__":
