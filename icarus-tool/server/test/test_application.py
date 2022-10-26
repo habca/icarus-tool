@@ -98,59 +98,39 @@ class ApplicationTest(unittest.TestCase):
             "  -h --help         Show this user manual and exit.",
         ]
 
-        self.assertEqual(
-            expected_output,
-            ApplicationTest.get_output(
-                [], lambda: Application().manual("./application.py")
-            ),
-        )
+        def testmethod():
+            application = Application()
+            application.manual("./application.py")
 
-    def test_init(self):
-        user_input = [
-            "./application.py",
-            "./application.py -z -g",
-            "./application.py -g -g",
-            f"./application.py {FileSystemTest.filename} -z -g",
-            f"./application.py {FileSystemTest.filename} -g -g",
-            "./application.py -z -g non_existent_file",
-            "./application.py -g -g non_existent_file",
-        ]
+        actual_output = ApplicationTest.get_output([], testmethod)
+        self.assertEqual(expected_output, actual_output)
 
-        expected_output = [
-            "To see usage, type --help",
-            "option -z not recognized",
-            "To see usage, type --help",
-            "No such file or directory: '-z'",
-            "No such file or directory: '-g'",
-            "option -z not recognized",
-            "No such file or directory: 'non_existent_file'",
-        ]
+    @file_data("testdata/test_init.json")
+    def test_init(self, program_args: str, expected_output: str):
+        def testmethod() -> None:
+            application = Application()
+            application.init(program_args.split())
 
-        def run_test_argv() -> None:
-            for error in user_input:
-                application = Application()
-                application.init(error.split())
-
-        self.assertEqual(
-            expected_output, ApplicationTest.get_output(user_input, run_test_argv)
-        )
+        [actual_output] = ApplicationTest.get_output([], testmethod)
+        self.assertEqual(expected_output, actual_output)
 
     @data(
-        json.load(open("test/testdata/test_tech_tree_01.json")),
-        json.load(open("test/testdata/test_tech_tree_02.json")),
-        json.load(open("test/testdata/test_tech_tree_03.json")),
-        json.load(open("test/testdata/test_tech_tree_04.json")),
-        json.load(open("test/testdata/test_tech_tree_05.json")),
-        json.load(open("test/testdata/test_tech_tree_06.json")),
-        json.load(open("test/testdata/test_tech_tree_07.json")),
-        json.load(open("test/testdata/test_tech_tree_08.json")),
-        json.load(open("test/testdata/test_processor_recipes_01.json")),
-        json.load(open("test/testdata/test_processor_recipes_02.json")),
+        "test_tech_tree_01.json",
+        "test_tech_tree_02.json",
+        "test_tech_tree_03.json",
+        "test_tech_tree_04.json",
+        "test_tech_tree_05.json",
+        "test_tech_tree_06.json",
+        "test_tech_tree_07.json",
+        "test_tech_tree_08.json",
+        "test_processor_recipes_01.json",
+        "test_processor_recipes_02.json",
     )
-    @unpack
-    def test_main(
-        self, program_args: list[str], user_input: list[str], expected_output: list[str]
-    ):
+    def test_main(self, value: str):
+        filename: str = "test/testdata/%s" % value
+        data: dict[str, list[str]] = json.load(open(filename))
+        program_args, user_input, expected_output = data.values()
+
         application = Application()
         application.init(program_args)
         actual_output = ApplicationTest.get_output(user_input, application.main)

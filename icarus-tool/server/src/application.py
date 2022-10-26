@@ -360,14 +360,18 @@ class Application:
 
         return output
 
+    def process(self, user_input: str) -> list[str]:
+        equation: Equation = self.parse_input(user_input)
+        equation = self.preprocessor.process(equation)
+        output: list[str] = self.algorithm.calculate(equation)
+        return output
+
     def main(self):
         user_input: str = ""
         while True:
             try:
                 user_input = self.ask_input()
-                equation: Equation = self.parse_input(user_input)
-                equation = self.preprocessor.process(equation)
-                output: list[str] = self.algorithm.calculate(equation)
+                output: list[str] = self.process(user_input)
             except SystemExit:
                 break
             except KeyboardInterrupt:

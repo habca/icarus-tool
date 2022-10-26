@@ -4,185 +4,92 @@ from fractions import Fraction
 
 from application import FileSystem, JsonSystem
 from calculator import Calculator, Equation, EquationTree, Resource
+from ddt import data, ddt, file_data, unpack
+
 from test_application import FileSystemTest, JsonSystemTest
 
 
+@ddt
 class ResourceTest(unittest.TestCase):
-    def test_to_string(self):
-        r1 = Resource(Fraction(1), "anvil_bench")
-        r2 = Resource(Fraction(10), "iron_ingot")
+    @data(
+        "1 anvil_bench",
+        "10 iron_ingot",
+        "-1 anvil_bench",
+        "-10 iron_ingot",
+    )
+    def test_parse(self, value: str):
+        r = Resource.parse(value)
+        self.assertEqual(value, str(r))
+        self.assertEqual(r, Resource.parse(str(r)))
 
-        self.assertEqual("1 anvil_bench", str(r1))
-        self.assertEqual("10 iron_ingot", str(r2))
-
-    def test_parse(self):
-        r1 = Resource.parse("1 anvil_bench")
-        r2 = Resource.parse("10 iron_ingot")
-
-        self.assertEqual("1 anvil_bench", str(r1))
-        self.assertEqual("10 iron_ingot", str(r2))
-
-    def test_parse_negative(self):
-        r1 = Resource.parse("-1 anvil_bench")
-        r2 = Resource.parse("-10 iron_ingot")
-
-        self.assertEqual("-1 anvil_bench", str(r1))
-        self.assertEqual("-10 iron_ingot", str(r2))
-
-    def test_equals(self):
-        r1 = Resource(Fraction(2), "biofuel_extractor")
-        r2 = Resource(Fraction(2), "biofuel_extractor")
-        r3 = Resource(Fraction(2), "biofuel_generator")
-        r4 = Resource(Fraction(4), "biofuel_generator")
-
-        self.assertEqual(r1, r2)
-        self.assertNotEqual(r2, r3)
-
-        self.assertTrue(r1 == r2 != r3 != r4)
-        self.assertFalse(r1 != r2 == r3 == r4)
+    @data(
+        ("2 biofuel_extractor", True),
+        ("2 biofuel_generator", False),
+        ("4 biofuel_generator", False),
+    )
+    @unpack
+    def test_eq(self, value: str, expected: bool):
+        r = Resource.parse("2 biofuel_extractor")
+        self.assertEqual(expected, r == Resource.parse(value))
 
 
+@ddt
 class EquationTest(unittest.TestCase):
-    def test_to_string(self):
-        e1 = Equation([Resource(Fraction(12), "fiber")])
-        e2 = Equation(
-            [Resource(Fraction(12), "fiber"), Resource(Fraction(18), "stick")]
-        )
+    @data(
+        "12 fiber",
+        "12 fiber + 18 stick",
+        "-12 fiber",
+        "-12 fiber - 18 stick",
+    )
+    def test_parse(self, value: str):
+        e = Equation.parse(value)
+        self.assertEqual(value, str(e))
+        self.assertEqual(e, Equation.parse(str(e)))
 
-        self.assertEqual("12 fiber", str(e1))
-        self.assertEqual("12 fiber + 18 stick", str(e2))
+    def test_parse_subtract_negative(self):
+        e = Equation.parse("-12 fiber - -18 stick")
+        self.assertEqual("-12 fiber + 18 stick", str(e))
+        self.assertEqual(e, Equation.parse(str(e)))
 
-    def test_parse(self):
-        e1 = Equation.parse("12 fiber + 18 stick")
-        e2 = Equation.parse("1 wood")
+    @data(
+        ("2 fiber + 4 fiber + 2 wood + 2 wood", True),
+        ("2 fiber + 4 fiber + 4 wood + 0 wood", False),
+        ("2 fiber + 4 fiber + 6 wood - 2 wood", False),
+        ("2 fiber + 4 fiber + 2 wood", False),
+        ("-2 fiber - 2 wood - 4 fiber - 2 wood", False),
+        ("2 wood + 2 wood + 4 fiber + 2 fiber", False),
+    )
+    @unpack
+    def test_eq(self, value: str, expected: bool):
+        e = Equation.parse("2 fiber + 4 fiber + 2 wood + 2 wood")
+        self.assertEqual(expected, e == Equation.parse(value))
 
-        self.assertEqual("12 fiber + 18 stick", str(e1))
-        self.assertEqual("1 wood", str(e2))
-
-    def test_parse_negative(self):
-        e1 = Equation.parse("-12 fiber - -18 stick")
-        e2 = Equation.parse("-12 fiber - 18 stick")
-        e3 = Equation.parse("-1 wood")
-
-        self.assertEqual("-12 fiber + 18 stick", str(e1))
-        self.assertEqual("-12 fiber - 18 stick", str(e2))
-        self.assertEqual("-1 wood", str(e3))
-
-    def test_equals(self):
-        r1 = Resource(Fraction(2), "biofuel_generator")
-        r2 = Resource(Fraction(4), "biofuel_generator")
-        r3 = Resource(Fraction(2), "biofuel_extractor")
-        r4 = Resource(Fraction(2), "biofuel_extractor")
-
-        e1 = Equation([r1, r2, r3, r4])
-        e2 = Equation([r1, r2, r3, r4])
-
-        e3 = Equation([r4, r3, r2, r1])
-        e4 = Equation([r1, r3, r2, r4])
-
-        e5 = Equation([r1, r2, r3])
-        e6 = Equation([r2, r3, r4])
-
-        self.assertEqual(e1, e2)
-        self.assertNotEqual(e2, e3)
-
-        self.assertTrue(e1 == e2 != e3 != e4 != e5 != e6)
-        self.assertFalse(e1 != e2 == e3 == e4 == e5 == e6)
-
-    def test_evaluate_ceil(self):
-        """
-        Equation should round up fractions.
-
-        > 124/5 wood + 160 stone + 0/24 leather
-        = 25 wood + 160 stone + 0 leather
-
-        > 1/3 wood + 0 stone + 1/3 wood
-        = 1 wood + 0 stone
-        """
-
-        r1 = Resource(Fraction(124, 5), "wood")
-        r2 = Resource(Fraction(160), "stone")
-        r3 = Resource(Fraction(0, 24), "leather")
-
-        e1 = Equation([r1, r2, r3]).evaluate()
-
-        self.assertEqual("25 wood + 160 stone + 0 leather", str(e1))
-
-        r1 = Resource(Fraction(1, 3), "wood")
-        r2 = Resource(Fraction(0), "stone")
-        r3 = Resource(Fraction(1, 3), "wood")
-
-        e1 = Equation([r1, r2, r3]).evaluate()
-
-        self.assertEqual("1 wood + 0 stone", str(e1))
-
-    def test_evaluate_sum(self):
-        """
-        Equation should sum resources of same name.
-
-        > 10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 16 wood
-        = 10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur
-        """
-
-        r1 = Resource(Fraction(10), "gold_ore")
-        r2 = Resource(Fraction(30), "copper_ore")
-        r3 = Resource(Fraction(10), "wood")
-        r4 = Resource(Fraction(10), "oxite")
-        r5 = Resource(Fraction(20), "sulfur")
-        r6 = Resource(Fraction(16), "wood")
-
-        e1 = Equation([r1, r2, r3, r4, r5, r6]).evaluate()
-
-        self.assertEqual(5, len(e1.resources))
-
-        iterator = iter(e1)
-
-        self.assertEqual("10 gold_ore", str(next(iterator)))
-        self.assertEqual("30 copper_ore", str(next(iterator)))
-        self.assertEqual("26 wood", str(next(iterator)))
-        self.assertEqual("10 oxite", str(next(iterator)))
-        self.assertEqual("20 sulfur", str(next(iterator)))
-
-    def test_evaluate_subtract(self):
-        """
-        Equation should subtract negative amounts.
-
-        > 1 wood - 2 wood + 0 stone + 0/2 sulfur
-        = 0 wood + 0 stone + 0 sulfur
-        """
-
-        r1 = Resource(Fraction(1), "wood")
-        r2 = Resource(Fraction(-2), "wood")
-        r3 = Resource(Fraction(-2), "stone")
-        r4 = Resource(Fraction(-3, 2), "sulfur")
-
-        e1 = Equation([r1, r2, r3, r4]).evaluate()
-
-        self.assertEqual("-1 wood - 2 stone - 1 sulfur", str(e1))
+    @data(
+        ("124/5 wood + 160 stone + 0/24 leather", "25 wood + 160 stone + 0 leather"),
+        ("1/3 wood + 0 stone + 1/3 wood", "1 wood + 0 stone"),
+        (
+            "10 gold_ore + 30 copper_ore + 10 wood + 10 oxite + 20 sulfur + 16 wood",
+            "10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 20 sulfur",
+        ),
+        ("1 wood - 2 wood - 2 stone - 3/2 sulfur", "-1 wood - 2 stone - 1 sulfur"),
+    )
+    @unpack
+    def test_evaluate(self, value: str, expected: str):
+        e = Equation.parse(value).evaluate()
+        self.assertEqual(expected, str(e))
 
     def test_sort_resources(self):
         """Sort by an amount then by a name."""
-        r1 = Resource(Fraction(10), "gold_ore")
-        r2 = Resource(Fraction(30), "copper_ore")
-        r3 = Resource(Fraction(26), "wood")
-        r4 = Resource(Fraction(10), "oxite")
-        r5 = Resource(Fraction(26), "sulfur")
 
-        e1 = Equation([r1, r2, r3, r4, r5])
-        e2 = Equation([r2, r5, r3, r1, r4])
+        e1 = "10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 26 sulfur"
+        e2 = "30 copper_ore + 26 sulfur + 26 wood + 10 gold_ore + 10 oxite"
 
-        self.assertEqual(str(e2), str(e1.sort_resources()))
-        self.assertEqual(str(e2), str(e2.sort_resources()))
+        self.assertEqual(e2, str(Equation.parse(e1).sort_resources()))
+        self.assertEqual(e2, str(Equation.parse(e2).sort_resources()))
 
     def test_format_resources(self):
-        r1 = Resource(Fraction(10), "copper_ingot")
-        r2 = Resource(Fraction(2), "iron_ingot")
-        r3 = Resource(Fraction(100), "gold_ore")
-        r4 = Resource(Fraction(10), "aluminium_ingot")
-
-        l1 = Equation([r1, r2, r3, r4]).format_resources()
-
-        iterator = iter(l1)
+        e = "10 copper_ingot + 2 iron_ingot + 100 gold_ore + 10 aluminium_ingot"
+        iterator = iter(Equation.parse(e).format_resources())
 
         self.assertEqual("100 gold_ore", next(iterator))
         self.assertEqual(" 10 aluminium_ingot", next(iterator))
@@ -190,6 +97,7 @@ class EquationTest(unittest.TestCase):
         self.assertEqual("  2 iron_ingot", next(iterator))
         self.assertRaises(StopIteration, next, iterator)
 
+    # TODO: erota eri funktioiksi
     def test_suodata(self):
         equation = Equation.parse("-1 stone + 1 wood - 12 wood")
 
@@ -542,7 +450,7 @@ class CalculatorTest(unittest.TestCase):
 
         e1 = Equation.parse("1 machining_bench - 10 epoxy")
         words = list(self.calculator.find_similar(e1))
-        self.assertEquals(["machining_bench"], words)
+        self.assertEqual(["machining_bench"], words)
 
     def test_order_by_station(self):
         r1 = Resource(Fraction(1), "biofuel_extractor")

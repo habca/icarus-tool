@@ -1,5 +1,3 @@
-import sys
-
 from flask import Flask, make_response, render_template, send_from_directory
 
 from application import Application
@@ -10,11 +8,6 @@ app = Flask(__name__)
 # TODO: Global variable is not thread-save.
 application = Application()
 application.init(["webapp.py", "-i", "-r", "data/tech_tree.txt"])
-
-# Test case for debugging.
-print("Try me: http://localhost:5000/plaintext/1%20fabricator", file=sys.stdout)
-print("Try me: http://localhost:5000/api/data", file=sys.stdout)
-print("Try me: http://localhost:5000/", file=sys.stdout)
 
 
 @app.route("/plaintext/<user_input>")

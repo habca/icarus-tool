@@ -1,0 +1,30 @@
+[
+    {
+        "program_args": "./application.py",
+        "expected_output": "To see usage, type --help"
+    },
+    {
+        "program_args": "./application.py -z -g",
+        "expected_output": "option -z not recognized"
+    },
+    {
+        "program_args": "./application.py -g -g",
+        "expected_output": "To see usage, type --help"
+    },
+    {
+        "program_args": "./application.py data/tech_tree.txt -z -g",
+        "expected_output": "No such file or directory: '-z'"
+    },
+    {
+        "program_args": "./application.py data/tech_tree.txt -g -g",
+        "expected_output": "No such file or directory: '-g'"
+    },
+    {
+        "program_args": "./application.py -z -g non_existent_file",
+        "expected_output": "option -z not recognized"
+    },
+    {
+        "program_args": "./application.py -g -g non_existent_file",
+        "expected_output": "No such file or directory: 'non_existent_file'"
+    }
+]
