@@ -8,6 +8,11 @@ TL;DR <http://habca.pythonanywhere.com/plaintext/1%20fabricator>
 
 Create a virtual environment and install dependencies before running the application.
 
+### Requirements
+
+python -m pip freeze > requirements.txt
+python -m pip install -r requirements.txt
+
 ### Windows
 
 Powershell might not provide the same output as Bash shell. The reason remains unknown.
@@ -16,7 +21,7 @@ Powershell might not provide the same output as Bash shell. The reason remains u
 py -m venv .wenv
 .wenv\Scripts\activate
 python -m pip install --upgrade pip
-python -m pip install pyreadline mypy black flask
+python -m pip install pyreadline mypy black flask dtt types-requests
 
 set PYTHONPATH=server\src
 python -m unittest discover server\test
@@ -33,12 +38,12 @@ The `readline` package is most likely already installed as a dependency of Bash.
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install readline mypy black flask
+python -m pip install readline mypy black flask dtt types-requests
 
-export PYTHONPATH=server/src
-python -m unittest discover server/test
-python -m mypy server/**/*.py
-python -m black server/**/*.py
+export PYTHONPATH=src
+python -m unittest discover test
+python -m mypy ./**/*.py
+python -m black ./**/*.py
 deactivate
 ```
 
@@ -250,7 +255,7 @@ GNU readline provides a `TAB` completion, `^R` reverse search, `^L` clear screen
 
 ```
 > 1 biofuel_
-biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar              
+biofuel_can                biofuel_deep-mining_drill  biofuel_generator          biofuel_radar
 biofuel_composter          biofuel_extractor          biofuel_lamp               biofuel_stove
 ```
 
@@ -278,9 +283,11 @@ Program inquires a recipe if there are multiple variations for a same item.
 Which recipe would you like to use? 0
 ```
 
-## Developers
+## Development
 
-A unit testing framework `unittest` and a static code analysis tool `mypy` proved to be very useful in the developing process. The source code formatter `black` makes visual styling decisions a trifling matter.
+`Node.js` provides build tools for working with TypeScript. A unit testing framework is `mocha` and
+
+compiles TypeScript for transpiles Front-end client is is TypeScript which is buil build with to Front-end is written with TypeScript and unit testing
 
 ### Visual Studio Code
 
@@ -297,6 +304,14 @@ ln -s /var/lib/snapd/snap /snap
 snap install code --classic
 ```
 
+#### Python Server
+
+A unit testing framework `unittest` and.
+A static code analysis tool `mypy` provides type checking.
+A code formatter `black` takes care of styling decisions.
+A web application framework `Flask` provides routing for a back-end REST API.
+Library `dtt` Unit tests have a large amount of While
+
 - Quick Open `(Ctrl+P)`
 
       ext install ms-python.python
@@ -304,7 +319,7 @@ snap install code --classic
 - Command Palette `(Ctrl+Shift+P)`
 
       Python: Select Interpreter (./.venv/bin/python)
-      Python: Configure Tests (unittest > server/test > test_*.py)
+      Python: Configure Tests (unittest > test > test_*.py)
 
 - Settings `(Ctrl+,)`
 
@@ -320,14 +335,60 @@ Running program in an integrated terminal (`F5`) or (`Ctrl+F5`) fails to activat
 
 The environment variable `PYTHONPATH` must be initialized before running the python interpreter. Doing so ensures that both `Run Python File in Terminal` in Explorer and `Run Python File` in Code Editor work correctly for unit tests [3].
 
+#### TypeScript Client
+
+Install JavaScript runtime `Node.js` and its package manager `npm` which provides TypeScript compiler `tsc`.
+
+```
+pacman -Syu nodejs npm
+
+npm install typescript --save-dev
+npm install mocha --save-dev
+// npm install ts-node --save-dev
+npm install source-map-support --save-dev
+npm install eslint --save-dev
+
+npm install @types/node --save-dev
+npm install @types/mocha --save-dev
+```
+
+- Quick Open `(Ctrl+P)`
+
+      ext install firefox-devtools.vscode-firefox-debug
+      ext install dbaeumer.vscode-eslint
+      ext install hbenl.vscode-mocha-test-adapter
+      ext install esbenp.prettier-vscode
+
+- Command Palette `(Ctrl+Shift+P)`
+
+      ESLint: Create ESLint configuration (commonjs, defaults)
+
+- Run Build Task `(Ctrl+Shift+B)`
+
+      tsc: watch - tsconfig.json
+
+- Settings `(Ctrl+,)`
+
+      TypeScript: Report Style Checks As Warnings (no)
+
 ### Visual Studio Community
 
 To change command line arguments, edit `Project > Properties > Debug > Script Arguments` field and use either `Start Debugging (F5)` or `Start Without Debugging (Ctrl+F5)`.
 
 For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing.
 
+For TypeScript, do not use the outdir or outfile option in tsconfig.json, because Test Explorer won't be able to find your unit tests [4].
+
+You will need to set "module": "commonjs" in your tsconfig.json for your code to work [5].
+
+### Deployment
+
+Python server is hosted on PythonAnywhere as Flask web application. To update TypeScript client, move the compiled JavaScript code into the server's `static` folder. Notice that `templates` should be pure HTML which contains an empty root element for runtime consruction. This is to keep UI apart from an exhausting number of web frameworks or template engines.
+
 ## References
 
 - [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>
 - [2] <https://github.com/microsoft/vscode/issues/158218>
 - [3] <https://code.visualstudio.com/docs/python/environments#_use-of-the-pythonpath-variable>
+- [4] <https://learn.microsoft.com/en-us/visualstudio/javascript/unit-testing-javascript-with-visual-studio?view=vs-2022&tabs=mocha#write-unit-tests-in-a-nodejs-project-njsproj>
+- [5] <https://github.com/mochajs/mocha-examples/tree/master/packages/typescript#es-modules>

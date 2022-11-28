@@ -1,6 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Icarus calculator</title>
+    <link rel="stylesheet" href="./styles/styles.css">
+    <script src="./scripts/script.js"></script>
+</head>
+
 <body>
-    <h1>Hello world</h1>
-    <script>
-        debugger;
-    </script>
+    <h1> Material calculator</h1>
+    <h6>Project Gray v.0.0.0.1.1 pre-beta / PRODUCTION / patent pending / Copyright (c) 1992 by Ville Web Designs LLC. / All rights reserved </h6>
+    <div id="search_container">
+        <input type="text" id="search_bar"></input>
+        <input type="button" value="Search" onclick=getItems()></input>
+        <select id="search_results" multiple="multiple"></select>
+        <button id="move_right" value=">>" onclick=moveSelectedRight()> >> </button>
+    </div>
+    
+    <div id="results_container">
+        <ul id="results_list">
+        </ul>
+    </div>
+    
+    <div id="totals_container">
+        <h2> Total resources </h2>
+    </div>
+    
 </body>
+
+</html>
