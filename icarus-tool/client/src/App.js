@@ -1,5 +1,7 @@
 import { useState } from "react";
-import "./styles/styles.css";
+import "./App.css";
+import json_object from "./data/data.json";
+
 
 // TODO: 1 fabricator + 1 fabricator => 3 fabricator
 // TODO: 1 hunting_rifle + 1 hunting_rifle => 3 hunting_rifle
@@ -7,55 +9,10 @@ import "./styles/styles.css";
 const App = () => {
   // Set data to data_items
   const data_items = ["fabricator", "food", "filth", "abra", "kadabra"];
-  const data_object = [
-    {
-      name: "fabricator",
-      amount: 1,
-      station: "machining_bench",
-      children: [
-        {
-          name: "aluminium_ingot",
-          amount: 40,
-          station: "concrete_furnace",
-          children: [
-            {
-              name: "aluminium_ore",
-              amount: 40,
-              station: undefined,
-              children: []
-            }
-          ]
-        },
-        {
-          name: "electronics",
-          amount: 30,
-          station: "machining_bench",
-          children: []
-        }, 
-        {
-          name: "concrete_mix",
-          amount: 30,
-          station: "cement_mixer",
-          children: []
-        },
-        {
-          name: "carbon_fiber",
-          amount: 8,
-          station: "concrete_furnace",
-          children: []
-        }, 
-        {
-          name: "steel_screw",
-          amount: 30,
-          station: "machining_bench",
-          children: []
-        }
-      ]
-    }
-  ];
 
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
+  const [jsonArray, setJsonArray] = useState( json_object);
+  const [selectedArray, setSelectedArray] = useState([]);
 
   const onchange = (event) => {
     setSearch(event.target.value);
@@ -67,7 +24,13 @@ const App = () => {
     const results = options
       .filter(option => option.selected)
       .map(option => option.value);
-    setResults(results);
+    setJsonArray(results);
+  };
+
+  const removeSelected = () => {
+    let newJsonArray = [ ...jsonArray ];
+    newJsonArray = newJsonArray.filter(item => !selectedArray.includes(item.name));
+    setJsonArray(newJsonArray);
   };
 
   return (
@@ -87,10 +50,13 @@ const App = () => {
       </div>
 
       <div id="results_container">
+        <button onClick={removeSelected}> X </button>
         <ul id="results_list">
           {
-            data_object.map(child => {
-              return <TreeElement key={child.name} name={child.name} amount={child.amount} station={child.station} children={child.children}></TreeElement>
+            jsonArray.map(item => {
+              return (
+              <TreeElement key={item.name} first={true} name={item.name} amount={item.amount} count={item.count} station={item.station} children={item.children} jsonArray={jsonArray} setJsonArray={setJsonArray} selectedArray={selectedArray} setSelectedArray={setSelectedArray} />
+              )
               // TODO: poista/muokkaa itemin määriä
             })
           }
@@ -106,15 +72,78 @@ const App = () => {
   );
 }
 
+
+
 const TreeElement = (props) => {
-  const { name, amount, station, children } = props;
+  const { name, first, amount, count, station, children, jsonArray, setJsonArray, selectedArray, setSelectedArray } = props;
+
+  const increase = (name) => (event) => {
+    let copy = [ ...jsonArray ];
+    copy = copy.map(item => {
+      if (item.name === name) {
+        const oldValue = 1;
+        const multiplier = event.target.value;
+        const newValue = oldValue * multiplier;
+        
+        multiply(item.children, oldValue, newValue);
+        item.amount = newValue;
+      }
+      return item;
+    });
+    setJsonArray(copy);
+  }
+
+  const multiply = (children, parentOldValue, parentNewValue) => {
+    children.forEach(item => {
+      const oldValue = item.amount;
+      if (!item.multiplier) {
+        item.multiplier = oldValue / parentOldValue;
+      }
+      const multiplier = item.multiplier;
+
+      const newValue = parentNewValue * multiplier;
+
+      multiply(item.children, oldValue, newValue);
+      item.amount = newValue;
+    });
+  }
+
+  const selectItem = (name) => (event) => {
+    const newSelectedArray = [ ...selectedArray ];
+    if (event.target.value === "ON") {
+      event.target.value = "OFF";
+      newSelectedArray.remove(name);
+    } else {
+      event.target.value = "ON";
+      newSelectedArray.push(name);
+    };
+    setSelectedArray(newSelectedArray);
+  }
+
   return(
     <>
-      <li>{amount} {name} [{station}]</li>
+        {first ? 
+          <>
+          <li>
+            <button onClick={selectItem(name)} value="OFF">
+            {amount} {name} [{station}]
+            </button>
+            <input onChange={increase(name)} type="number" min={0} max={10000} step={count} value={amount}></input>
+            </li>
+            
+          </>
+          : 
+          <>
+            <li>
+            {amount} {name} [{station}]
+            </li>
+          </>
+        }
+        
       <ul>
         {children.map(child => {
           // TODO: yliviivaus checkbox
-          return <TreeElement key={child.name} name={child.name} amount={child.amount} station={child.station} children={child.children}></TreeElement>
+          return <TreeElement key={child.name} first={false} name={child.name} amount={child.amount} station={child.station} children={child.children}></TreeElement>
         })}
       </ul>
     </>

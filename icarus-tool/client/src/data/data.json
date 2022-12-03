@@ -1,0 +1,60 @@
+[
+  {
+    "name": "fabricator",
+    "amount": 1,
+    "count": 10,
+    "station": "machining_bench",
+    "children": [
+      {
+        "name": "aluminium_ingot",
+        "amount": 40,
+        "count": 1,
+        "station": "concrete_furnace",
+        "children": [
+          {
+            "name": "aluminium_ore",
+            "amount": 40,
+            "count": 1,
+            "station": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "electronics",
+        "amount": 30,
+        "count": 1,
+        "station": "machining_bench",
+        "children": []
+      },
+      {
+        "name": "concrete_mix",
+        "amount": 30,
+        "count": 1,
+        "station": "cement_mixer",
+        "children": []
+      },
+      {
+        "name": "carbon_fiber",
+        "amount": 8,
+        "count": 1,
+        "station": "concrete_furnace",
+        "children": []
+      },
+      {
+        "name": "steel_screw",
+        "amount": 30,
+        "count": 1,
+        "station": "machining_bench",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "iron_ore",
+    "amount": 40,
+    "count": 1,
+    "station": null,
+    "children": []
+  }
+]
