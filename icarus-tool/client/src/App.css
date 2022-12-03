@@ -4,27 +4,38 @@ body {
 }
 
 @keyframes float {
-  0% {transform: rotate(0deg);}
-  25% {transform: rotate(3deg); }
-  50% {transform: scale(0.75, 1.5)}
-  75% {transform: rotate(-4deg);}
-  100% {transform: rotate(0deg);}
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: scale(0.75, 1.5);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 h1 {
-  text-align:center;
+  text-align: center;
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   color: red;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-  animation-name:float;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+  animation-name: float;
   animation-duration: 10s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
 h6 {
-  width:100%;
-  background-color:gray;
+  width: 100%;
+  background-color: gray;
 }
 
 #move_right {
@@ -55,7 +66,7 @@ h6 {
   border-radius: 20px;
 }
 
-#search_container > input{
+#search_container > input {
   margin: 10px 10px;
 }
 
@@ -73,6 +84,14 @@ h6 {
   border-radius: 20px;
 }
 
-button[value=ON] {
-  background-color: brown;
+button[value="ON"] {
+  background-color: gray;
+}
+
+.CROSSOUT {
+  text-decoration: line-through;
+}
+
+.NORMAL {
+  text-decoration: none;
 }

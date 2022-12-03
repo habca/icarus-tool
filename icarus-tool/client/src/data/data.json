@@ -51,10 +51,18 @@
     ]
   },
   {
-    "name": "iron_ore",
+    "name": "iron_ingot",
     "amount": 40,
     "count": 1,
-    "station": null,
-    "children": []
+    "station": "stone_furnace",
+    "children": [
+      {
+        "name": "iron_ore",
+        "amount": 80,
+        "count": 1,
+        "station": null,
+        "children": []
+      }
+    ]
   }
 ]
