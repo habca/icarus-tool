@@ -388,7 +388,7 @@ class Application:
         try:
             # Parse command line arguments.
             opts, args = getopt.getopt(
-                argv[1:], "girh", ["gnu", "implicit", "recursive", "help"]
+                argv[1:], "girjh", ["gnu", "implicit", "recursive", "json", "help"]
             )
 
             for argument in args:
@@ -415,7 +415,11 @@ class Application:
 
                 # Configure application's output.
                 if opt in ("-r", "--recursive"):
-                    algorithm = Recursive(self)
+                    algorithm: Algorithm = Recursive(self)
+                    self.algorithm = algorithm
+
+                if opt in ("-j", "--json"):
+                    algorithm = RecursiveJson(self)
                     self.algorithm = algorithm
 
                 # Include all necessary workstations
@@ -458,6 +462,16 @@ class Recursive(Algorithm):
         equation_tree = self.application.calculator.calculate_recursive(equation)
         output = self.application.print_output_recursive(equation_tree)
         output += self.application.print_total_resources(total, equation)
+        return output
+
+
+class RecursiveJson(Algorithm):
+    def calculate(self, equation: Equation) -> list[str]:
+        equation_tree = self.application.calculator.calculate_recursive(equation)
+        dictionaries = self.application.calculator.convert_to_dictionaries(
+            equation_tree
+        )
+        output = json.dumps(dictionaries, indent=2).strip().split("\n")
         return output
 
 
