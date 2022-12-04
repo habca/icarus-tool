@@ -1,0 +1,319 @@
+[
+  {
+    "name": "fabricator",
+    "amount": 1,
+    "count": 1,
+    "station": "machining_bench",
+    "children": [
+      {
+        "name": "aluminium_ingot",
+        "amount": 40,
+        "count": 1,
+        "station": "concrete_furnace",
+        "children": [
+          {
+            "name": "aluminium_ore",
+            "amount": 40,
+            "count": 1,
+            "station": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "electronics",
+        "amount": 30,
+        "count": 1,
+        "station": "machining_bench",
+        "children": [
+          {
+            "name": "refined_gold",
+            "amount": 30,
+            "count": 1,
+            "station": "concrete_furnace",
+            "children": [
+              {
+                "name": "gold_ore",
+                "amount": 60,
+                "count": 1,
+                "station": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "name": "copper_ingot",
+            "amount": 90,
+            "count": 1,
+            "station": "stone_furnace",
+            "children": [
+              {
+                "name": "copper_ore",
+                "amount": 180,
+                "count": 1,
+                "station": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "name": "organic_resin",
+            "amount": 60,
+            "count": 1,
+            "station": "mortar_and_pestle",
+            "children": [
+              {
+                "name": "wood",
+                "amount": 60,
+                "count": 1,
+                "station": null,
+                "children": []
+              },
+              {
+                "name": "oxite",
+                "amount": 60,
+                "count": 1,
+                "station": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "name": "epoxy",
+            "amount": 60,
+            "count": 1,
+            "station": "mortar_and_pestle",
+            "children": [
+              {
+                "name": "sulfur",
+                "amount": 120,
+                "count": 1,
+                "station": null,
+                "children": []
+              },
+              {
+                "name": "tree_sap",
+                "amount": 240,
+                "count": 1,
+                "station": "mortar_and_pestle",
+                "children": [
+                  {
+                    "name": "stick",
+                    "amount": 960,
+                    "count": 1,
+                    "station": "character",
+                    "children": [
+                      {
+                        "name": "wood",
+                        "amount": 96,
+                        "count": 1,
+                        "station": null,
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "concrete_mix",
+        "amount": 30,
+        "count": 1,
+        "station": "cement_mixer",
+        "children": [
+          {
+            "name": "tree_sap",
+            "amount": 30,
+            "count": 1,
+            "station": "mortar_and_pestle",
+            "children": [
+              {
+                "name": "stick",
+                "amount": 120,
+                "count": 1,
+                "station": "character",
+                "children": [
+                  {
+                    "name": "wood",
+                    "amount": 12,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "stone",
+            "amount": 240,
+            "count": 1,
+            "station": null,
+            "children": []
+          },
+          {
+            "name": "silica_ore",
+            "amount": 120,
+            "count": 1,
+            "station": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "carbon_fiber",
+        "amount": 8,
+        "count": 1,
+        "station": "concrete_furnace",
+        "children": [
+          {
+            "name": "carbon_paste",
+            "amount": 8,
+            "count": 1,
+            "station": "mortar_and_pestle",
+            "children": [
+              {
+                "name": "silica_ore",
+                "amount": 8,
+                "count": 1,
+                "station": null,
+                "children": []
+              },
+              {
+                "name": "aluminium_ingot",
+                "amount": 8,
+                "count": 1,
+                "station": "concrete_furnace",
+                "children": [
+                  {
+                    "name": "aluminium_ore",
+                    "amount": 8,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "name": "organic_resin",
+                "amount": 32,
+                "count": 1,
+                "station": "mortar_and_pestle",
+                "children": [
+                  {
+                    "name": "wood",
+                    "amount": 32,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  },
+                  {
+                    "name": "oxite",
+                    "amount": 32,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "name": "epoxy",
+                "amount": 16,
+                "count": 1,
+                "station": "mortar_and_pestle",
+                "children": [
+                  {
+                    "name": "sulfur",
+                    "amount": 32,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  },
+                  {
+                    "name": "tree_sap",
+                    "amount": 64,
+                    "count": 1,
+                    "station": "mortar_and_pestle",
+                    "children": [
+                      {
+                        "name": "stick",
+                        "amount": 256,
+                        "count": 1,
+                        "station": "character",
+                        "children": [
+                          {
+                            "name": "wood",
+                            "amount": 26,
+                            "count": 1,
+                            "station": null,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "steel_screw",
+        "amount": 30,
+        "count": 1,
+        "station": "machining_bench",
+        "children": [
+          {
+            "name": "steel_ingot",
+            "amount": 1,
+            "count": 1,
+            "station": "concrete_furnace",
+            "children": [
+              {
+                "name": "steel_bloom",
+                "amount": 1,
+                "count": 1,
+                "station": "mortar_and_pestle",
+                "children": [
+                  {
+                    "name": "iron_ore",
+                    "amount": 6,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  },
+                  {
+                    "name": "coal_ore",
+                    "amount": 1,
+                    "count": 1,
+                    "station": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "iron_ingot",
+    "amount": 40,
+    "count": 1,
+    "station": "stone_furnace",
+    "children": [
+      {
+        "name": "iron_ore",
+        "amount": 80,
+        "count": 1,
+        "station": null,
+        "children": []
+      }
+    ]
+  }
+]

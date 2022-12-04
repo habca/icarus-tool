@@ -597,6 +597,29 @@ class Calculator:
                     if name not in memory and name not in stack:
                         stack.append(name)
 
+    def convert_to_dictionaries(self, equation: EquationTree):
+        """
+        Converts an equation tree into a list of dictionaries
+        where a single dictionary represents a resource class.
+        Use this with json.dumps to stringify an equation tree.
+        """
+
+        def traverse(equations: list[EquationTree]):
+            return list(
+                map(
+                    lambda root: {
+                        "name": root.data.name,  # type: ignore
+                        "amount": int(root.data.amount),  # type: ignore
+                        "count": 1,  # TODO
+                        "station": root.station,
+                        "children": traverse(root.children),  # type: ignore
+                    },
+                    equations,
+                )
+            )
+
+        return traverse(equation.children)
+
 
 class Validator:
     pattern_num = "[1-9]+[0-9]*(?:/[1-9]+[0-9]*)*"

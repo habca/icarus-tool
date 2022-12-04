@@ -1,3 +1,4 @@
+import json
 import unittest
 from collections import deque
 from fractions import Fraction
@@ -672,12 +673,24 @@ class CalculatorTest(unittest.TestCase):
         gen = self.calc.calculate(Equation.parse(equation))
         return str(deque(gen, maxlen=1).pop())
 
+    def test_convert_to_dictionaries(self):
+        equation = Equation.parse("1 fabricator + 40 iron_ingot")
+        equation_tree = self.calc.calculate_recursive(equation)
+        dictionaries = self.calc.convert_to_dictionaries(equation_tree)
+        actual = json.dumps(dictionaries, indent=2)
+
+        with open("test/testdata/test_json_api_01.json") as reader:
+            expect: str = reader.read().strip()
+
+        self.maxDiff = None
+        self.assertEqual(expect, actual)
+
 
 class TestFindWorkstation(unittest.TestCase):
     def setUp(self) -> None:
         self.calc = Calculator()
-        file = FileSystem(FileSystemTest.filename)
-        file.read(self.calc)
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(self.calc)
 
     def test_find_resources(self):
         e1 = [
