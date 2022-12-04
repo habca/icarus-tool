@@ -113,7 +113,7 @@ class Equation:
     def evaluate(self) -> "Equation":
         variables: dict[str, Resource] = dict()
 
-        for resource in self.resources:
+        for resource in self.make_copy().resources:
             if resource.name not in variables.keys():
                 variables[resource.name] = resource
             else:
@@ -149,15 +149,12 @@ class Equation:
             if resource.amount < 0 and round:
                 resource.amount = Fraction(0)
 
-            if resource.amount <= 0 and all:
-                new_resources.append(resource)
-            elif resource.amount > 0:
+            if (resource.amount <= 0 and all) or resource.amount > 0:
                 new_resources.append(resource)
 
         return Equation(new_resources)
 
     def get_quantity(self, name: str) -> Fraction:
-        copy = self.make_copy()
         copy = self.evaluate()
         for resource in copy.resources:
             if resource.name == name:
@@ -257,8 +254,8 @@ class Calculator:
                 del self.options[resource.name]
                 self.assign_equation(line)
             if resource.name in self.resources:
-                next: Equation = self.resources[resource.name]
-                stack += next.resources.copy()
+                next_equation: Equation = self.resources[resource.name]
+                stack += next_equation.resources.copy()
 
     def calculate(self, equation: Equation) -> Iterator[Equation]:
         """
@@ -384,10 +381,7 @@ class Calculator:
         for i in range(1, len(resources)):
             station = self.stations[resources[i].name]
             value = self.get_station_value(station)
-            if max_value < value:
-                max_value = value
-                max_station = station
-            elif max_value == value and max_station < station:
+            if max_value < value or (max_value == value and max_station < station):
                 max_value = value
                 max_station = station
 
@@ -638,9 +632,8 @@ class Validator:
                         errors.append(resource.name)
 
             # Attempt to create raw materials is pointless.
-            if resource.name in self.calc.variables:
-                if resource.amount >= 0:
-                    errors.append(f"{resource.amount} {resource.name}")
+            if resource.name in self.calc.variables and resource.amount >= 0:
+                errors.append(f"{resource.amount} {resource.name}")
 
         if errors != []:
             error: str = ", ".join(errors)

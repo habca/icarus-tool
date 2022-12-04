@@ -2,33 +2,9 @@
 
 The command line tool calculates total amount of resources and groups them by workstations. Tech tree has been updated after **Icarus week forty two update**.
 
-TL;DR <http://habca.pythonanywhere.com/plaintext/1%20fabricator>
-
 ## Getting started
 
-Create a virtual environment and install dependencies before running the application.
-
-### Requirements
-
-python -m pip freeze > requirements.txt
-python -m pip install -r requirements.txt
-
-### Windows
-
-Powershell might not provide the same output as Bash shell. The reason remains unknown.
-
-```
-py -m venv .wenv
-.wenv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install pyreadline mypy black flask dtt types-requests
-
-set PYTHONPATH=server\src
-python -m unittest discover server\test
-python -m mypy server\src\application.py [...]
-python -m black server\src\*.py
-deactivate
-```
+Create a virtual environment and install dependencies before running the application or use the web app at <http://habca.pythonanywhere.com/plaintext/1%20fabricator>.
 
 ### Linux
 
@@ -40,6 +16,10 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install readline mypy black flask dtt types-requests
 
+python -m pip install --upgrade pip
+python -m pip freeze > requirements.txt
+python -m pip install -r requirements.txt
+
 export PYTHONPATH=src
 python -m unittest discover test
 python -m mypy ./**/*.py
@@ -47,13 +27,33 @@ python -m black ./**/*.py
 deactivate
 ```
 
-## Usage
+### Windows
+
+Powershell might not provide the same output as Bash shell. The reason remains unknown.
+
+```
+py -m venv .wenv
+.wenv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install pyreadline mypy black flask dtt types-requests
+
+python -m pip install --upgrade pip
+python -m pip freeze > requirements.txt
+python -m pip install -r requirements.txt
+
+set PYTHONPATH=server\src
+python -m unittest discover server\test
+python -m mypy server\src\application.py [...]
+python -m black server\src\*.py
+deactivate
+```
+
+## Usage for CLI application
 
 Program has a local command line interface and a flask app to web deployment. The configuration of the web application corresponds to the command line parameters `-i` and `-r`.
 
 ```
-python application.py [options ...] file
-python app.py
+python application.py [options ...] [files ...]
 ```
 
 The command line options supported by the program are as follows.
@@ -72,9 +72,23 @@ Usage:
   amount name [+/- amount name ...]
 ```
 
+## Usage for Web application
+
+To start a backend server, run
+
+```
+python app.py
+```
+
+To start a frontend client, run
+
+```
+npm start
+```
+
 ### Iterative algorithm
 
-A comprehensive guide through the crafting process step by step. Intended to use after you have gathered all materials listed in section `total resources`.
+A comprehensive guide through the crafting process step by step.
 
 ```
 > 1 stone_furnace + 1 anvil_bench + 1 machining_bench - 10 epoxy
@@ -126,19 +140,6 @@ CRAFTING BENCH
  20 wood
  12 stone
  10 epoxy
-================================================================
-TOTAL RESOURCES
-================================================================
-  1 anvil_bench
-  1 machining_bench
-  1 stone_furnace
--10 epoxy
-----------------------------------------------------------------
-288 fiber
-184 iron_ore
-102 stone
- 53 wood
- 12 leather
 ```
 
 ### `-r` Recursive algorithm
@@ -221,7 +222,7 @@ RECURSIVE DATA STRUCTURE
 
 ### Summary
 
-A concise presentation listing all the raw materials to be gathered. Non-positive numbers represent the resources already found in the inventory.
+This section lists all the raw materials to be gathered. Non-positive numbers represent the resources already found in the inventory.
 
 ```
 ================================================================
@@ -285,9 +286,7 @@ Which recipe would you like to use? 0
 
 ## Development
 
-`Node.js` provides build tools for working with TypeScript. A unit testing framework is `mocha` and
-
-compiles TypeScript for transpiles Front-end client is is TypeScript which is buil build with to Front-end is written with TypeScript and unit testing
+This section explains how to set up a development environment for future references.
 
 ### Visual Studio Code
 
@@ -304,13 +303,7 @@ ln -s /var/lib/snapd/snap /snap
 snap install code --classic
 ```
 
-#### Python Server
-
-A unit testing framework `unittest` and.
-A static code analysis tool `mypy` provides type checking.
-A code formatter `black` takes care of styling decisions.
-A web application framework `Flask` provides routing for a back-end REST API.
-Library `dtt` Unit tests have a large amount of While
+### Python Flask Server
 
 - Quick Open `(Ctrl+P)`
 
@@ -335,22 +328,7 @@ Running program in an integrated terminal (`F5`) or (`Ctrl+F5`) fails to activat
 
 The environment variable `PYTHONPATH` must be initialized before running the python interpreter. Doing so ensures that both `Run Python File in Terminal` in Explorer and `Run Python File` in Code Editor work correctly for unit tests [3].
 
-#### TypeScript Client
-
-Install JavaScript runtime `Node.js` and its package manager `npm` which provides TypeScript compiler `tsc`.
-
-```
-pacman -Syu nodejs npm
-
-npm install typescript --save-dev
-npm install mocha --save-dev
-// npm install ts-node --save-dev
-npm install source-map-support --save-dev
-npm install eslint --save-dev
-
-npm install @types/node --save-dev
-npm install @types/mocha --save-dev
-```
+### JavaScript React Client
 
 - Quick Open `(Ctrl+P)`
 
@@ -363,32 +341,14 @@ npm install @types/mocha --save-dev
 
       ESLint: Create ESLint configuration (commonjs, defaults)
 
-- Run Build Task `(Ctrl+Shift+B)`
-
-      tsc: watch - tsconfig.json
-
-- Settings `(Ctrl+,)`
-
-      TypeScript: Report Style Checks As Warnings (no)
-
 ### Visual Studio Community
 
 To change command line arguments, edit `Project > Properties > Debug > Script Arguments` field and use either `Start Debugging (F5)` or `Start Without Debugging (Ctrl+F5)`.
 
 For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing.
 
-For TypeScript, do not use the outdir or outfile option in tsconfig.json, because Test Explorer won't be able to find your unit tests [4].
-
-You will need to set "module": "commonjs" in your tsconfig.json for your code to work [5].
-
-### Deployment
-
-Python server is hosted on PythonAnywhere as Flask web application. To update TypeScript client, move the compiled JavaScript code into the server's `static` folder. Notice that `templates` should be pure HTML which contains an empty root element for runtime consruction. This is to keep UI apart from an exhausting number of web frameworks or template engines.
-
 ## References
 
 - [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>
 - [2] <https://github.com/microsoft/vscode/issues/158218>
 - [3] <https://code.visualstudio.com/docs/python/environments#_use-of-the-pythonpath-variable>
-- [4] <https://learn.microsoft.com/en-us/visualstudio/javascript/unit-testing-javascript-with-visual-studio?view=vs-2022&tabs=mocha#write-unit-tests-in-a-nodejs-project-njsproj>
-- [5] <https://github.com/mochajs/mocha-examples/tree/master/packages/typescript#es-modules>

@@ -178,7 +178,7 @@ class Application:
             if choice.isdigit() and 0 <= int(choice) < len(options):
                 return int(choice)
 
-    def print_output(self, equations: list[Equation], equation: Equation) -> list[str]:
+    def print_output(self, equations: list[Equation]) -> list[str]:
         # To make program's output more readable.
         separator: str = self.separator
         output: list[str] = []
@@ -305,9 +305,7 @@ class Application:
 
         return output
 
-    def print_output_recursive(
-        self, root: EquationTree, equation: Equation
-    ) -> list[str]:
+    def print_output_recursive(self, root: EquationTree) -> list[str]:
 
         # To make program's output more readable.
         separator: str = self.separator
@@ -393,9 +391,6 @@ class Application:
                 argv[1:], "girh", ["gnu", "implicit", "recursive", "help"]
             )
 
-            if args == []:
-                raise SyntaxError("To see usage, type --help")
-
             for argument in args:
                 # Application class should create a file reader.
                 # Because is given as a command line argument.
@@ -431,7 +426,6 @@ class Application:
                 # Print user manual and exit.
                 if opt in ("-h", "--help"):
                     self.manual(argv[0])
-                    raise SystemExit
 
         except getopt.GetoptError as err:
             print(str(err))
@@ -439,7 +433,6 @@ class Application:
             print(str(err).replace("[Errno 2] ", ""))
         except SyntaxError as err:
             print(str(err))
-            # self.manual(argv[0])
 
 
 class Algorithm(ABC):
@@ -454,7 +447,7 @@ class Algorithm(ABC):
 class Iterative(Algorithm):
     def calculate(self, equation: Equation) -> list[str]:
         equations = list(self.application.calculator.calculate(equation))
-        output = self.application.print_output(equations[:-1][::-1], equation)
+        output = self.application.print_output(equations[:-1][::-1])
         output += self.application.print_total_resources(equations[-1], equation)
         return output
 
@@ -463,7 +456,7 @@ class Recursive(Algorithm):
     def calculate(self, equation: Equation) -> list[str]:
         total = deque(self.application.calculator.calculate(equation), maxlen=1).pop()
         equation_tree = self.application.calculator.calculate_recursive(equation)
-        output = self.application.print_output_recursive(equation_tree, equation)
+        output = self.application.print_output_recursive(equation_tree)
         output += self.application.print_total_resources(total, equation)
         return output
 

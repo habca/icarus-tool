@@ -1,4 +1,4 @@
-from flask import Flask, make_response, render_template, send_from_directory
+from flask import Flask, make_response, redirect, render_template, send_from_directory
 
 from application import Application
 from calculator import Equation
@@ -8,6 +8,11 @@ app = Flask(__name__)
 # TODO: Global variable is not thread-save.
 application = Application()
 application.init(["webapp.py", "-i", "-r", "data/tech_tree.txt"])
+
+
+@app.route("/plaintext/tech_tree.txt")
+def get_data():
+    return send_from_directory("../data", "tech_tree.txt")
 
 
 @app.route("/plaintext/<user_input>")
@@ -26,21 +31,6 @@ def plaintext(user_input: str):
     response = make_response("\n".join(output))
     response.mimetype = "text/plain"
     return response
-
-
-@app.route("/")
-def index():
-    lines = ["one", "two", "three"]
-    return render_template(
-        "index.html",
-        title="title",
-        output=lines,
-    )
-
-
-@app.route("/api/data")
-def get_data():
-    return send_from_directory("../data", "tech_tree.txt")
 
 
 if __name__ == "__main__":

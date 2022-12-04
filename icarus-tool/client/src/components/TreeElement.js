@@ -18,9 +18,8 @@ const TreeElement = (props) => {
     let copy = [...jsonArray];
     copy = copy.map((item) => {
       if (item.name === name) {
-        const oldValue = 1;
-        const multiplier = event.target.value;
-        const newValue = oldValue * multiplier;
+        const oldValue = item.amount;
+        const newValue = event.target.value;
 
         multiply(item.children, oldValue, newValue);
         item.amount = newValue;
@@ -45,7 +44,7 @@ const TreeElement = (props) => {
     });
   };
 
-  const selectItem = (itemName) => (event) => {
+  const selectItem = (itemName) => () => {
     let newSelectedArray = [...selectedArray];
     if (newSelectedArray.includes(itemName)) {
       newSelectedArray = newSelectedArray.filter((name) => name !== itemName);

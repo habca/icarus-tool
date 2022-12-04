@@ -3,9 +3,12 @@ import unittest
 import unittest.mock
 from typing import Any, Callable
 
+from ddt import data, ddt, file_data
+
 from application import Application, FileSystem, JsonSystem
 from calculator import Calculator
-from ddt import data, ddt, file_data, unpack
+
+APPLICATION = "./application.py"
 
 
 class FileSystemTest(unittest.TestCase):
@@ -100,7 +103,7 @@ class ApplicationTest(unittest.TestCase):
 
         def testmethod():
             application = Application()
-            application.manual("./application.py")
+            application.manual(APPLICATION)
 
         actual_output = ApplicationTest.get_output([], testmethod)
         self.assertEqual(expected_output, actual_output)
@@ -111,7 +114,7 @@ class ApplicationTest(unittest.TestCase):
             application = Application()
             application.init(program_args.split())
 
-        [actual_output] = ApplicationTest.get_output([], testmethod)
+        actual_output = ApplicationTest.get_output([], testmethod)
         self.assertEqual(expected_output, actual_output)
 
     @data(
@@ -123,8 +126,10 @@ class ApplicationTest(unittest.TestCase):
         "test_tech_tree_06.json",
         "test_tech_tree_07.json",
         "test_tech_tree_08.json",
+        "test_tech_tree_09.json",
         "test_processor_recipes_01.json",
         "test_processor_recipes_02.json",
+        "test_processor_recipes_03.json",
     )
     def test_main(self, value: str):
         filename: str = "test/testdata/%s" % value
@@ -156,14 +161,14 @@ class ApplicationTest(unittest.TestCase):
             "(4) character : 1 rope = 5 leather",
         ]
         application = Application()
-        application.init(["./application.py", JsonSystemTest.filename])
+        application.init([APPLICATION, JsonSystemTest.filename])
         actual_output = ApplicationTest.get_output(user_input, application.main)
         self.assertEqual(expected_output, actual_output)
 
         # Application should complete without an error.
         user_input = ["1 cement_mixer", "0", "0", "exit"]
         application = Application()
-        application.init(["./application.py", JsonSystemTest.filename])
+        application.init([APPLICATION, JsonSystemTest.filename])
         ApplicationTest.get_output(user_input, application.main)
 
     @staticmethod

@@ -3,9 +3,6 @@ import "./App.css";
 import TreeElement from "./components/TreeElement";
 import json_object from "./data/data.json";
 
-// TODO: 1 fabricator + 1 fabricator => 3 fabricator
-// TODO: 1 hunting_rifle + 1 hunting_rifle => 3 hunting_rifle
-
 const App = () => {
   // Set data to data_items
   const data_items = ["fabricator", "food", "filth", "abra", "kadabra"];
@@ -39,7 +36,14 @@ const App = () => {
     newJsonArray = newJsonArray.filter(
       (item) => !selectedArray.includes(item.name)
     );
+
+    let newStyleArray = [...styleArray];
+    newStyleArray = newStyleArray.filter(
+      (name) => !selectedArray.includes(name)
+    );
+
     setJsonArray(newJsonArray);
+    setStyleArray(newStyleArray);
     setSelectedArray([]);
   };
 
@@ -58,6 +62,14 @@ const App = () => {
     });
     setStyleArray(newStyleArray);
     setSelectedArray([]);
+  };
+
+  const selectAllItems = () => {
+    if (selectedArray.length < jsonArray.length) {
+      setSelectedArray(jsonArray.map((item) => item.name));
+    } else {
+      setSelectedArray([]);
+    }
   };
 
   const getSelectionStatus = () => {
@@ -98,6 +110,7 @@ const App = () => {
 
       <div id="results_container">
         <button onClick={acquireItem}> Done </button>
+        <button onClick={selectAllItems}> All </button>
         <button onClick={removeSelected}> Delete </button>
         {getSelectionStatus()}
         <ul id="results_list">

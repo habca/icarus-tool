@@ -2,11 +2,11 @@ import unittest
 from collections import deque
 from fractions import Fraction
 
+from ddt import data, ddt, unpack
+from test_application import FileSystemTest, JsonSystemTest
+
 from application import FileSystem, JsonSystem
 from calculator import Calculator, Equation, EquationTree, Resource
-from ddt import data, ddt, file_data, unpack
-
-from test_application import FileSystemTest, JsonSystemTest
 
 
 @ddt
@@ -115,8 +115,8 @@ class CalculatorTest(unittest.TestCase):
     def setUp(self) -> None:
         """Create a calculator before any test method."""
         self.calc = Calculator()
-        file = FileSystem(FileSystemTest.filename)
-        file.read(self.calc)
+        filesystem = FileSystem(FileSystemTest.filename)
+        filesystem.read(self.calc)
 
         self.calculator = Calculator()
         filesystem = JsonSystem(JsonSystemTest.filename)
@@ -515,11 +515,6 @@ class CalculatorTest(unittest.TestCase):
         )
         expected = Equation([Resource(Fraction(73), "iron_ingot")])
         self.assertEqual(expected, self.calc.suodata(equation))
-
-    def test_suodata_practical_7(self):
-        equation = Equation.parse(
-            "1 fabricator + 1 machining_bench + 1 concrete_furnace + 1 cement_mixer + 1 stone_furnace + 1 mortar_and_pestle + 1 crafting_bench + 1 anvil_bench"
-        )
 
     def test_suodata_raw_materials(self):
         equation = Equation.parse("1 iron_ore + 1 wood")
