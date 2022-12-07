@@ -348,7 +348,18 @@ For me, there was a major problem detecting breakpoints when debugging test case
 
 ## Deployment
 
-Startup Command installs requirements into a virtual environment and launches a flask application from the source folder. Azure App Service deployment engine automatically activates a virtual environment and runs `pip install -r requirements.txt` [4]. Production use of Azure requires a paid subscription.
+### Client
+
+The server hosts the client-side application as a static website to avoid CORS issues. To deploy on production environment, run
+
+```
+npm install
+npm run build
+```
+
+### Server
+
+Startup command installs requirements into a virtual environment and launches a flask application from the source folder using a production dedicated server `Gunicorn`.
 
 ```
 python -m venv .venv
@@ -360,6 +371,31 @@ python -m pip install -r requirements.txt
 export PYTHONPATH=src
 gunicorn --bind=0.0.0.0 --timeout 600 app:app
 ```
+
+### PythonAnywhere
+
+Hosting a static website requires `node` and `npm`. Here is how to install `v18.12.1` for reference, but one should choose the latest LTS.
+
+```
+git clone --depth 1 https://github.com/creationix/nvm.git
+source ~/nvm/nvm.sh
+
+nvm ls-remote
+nvm install v18.12.1
+nvm use v18.12.1
+nvm alias default v18.12.1
+
+rm -r node_modules
+rm package-lock.json
+
+npm install react-scripts
+npm install
+npm run build
+```
+
+### Azure
+
+Due to the project structure of the source code, the python interpreter must be set to use the PYTHONPATH environment variable. App Service deployment engine automatically activates a virtual environment and runs `pip install -r requirements.txt` [4]. Production use of Azure requires a paid subscription.
 
 ## References
 

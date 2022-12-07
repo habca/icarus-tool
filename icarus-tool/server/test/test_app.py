@@ -20,7 +20,7 @@ class TestApp(unittest.TestCase):
 
         # Get the output from the Web server.
         encoded = value.replace(" ", "%20")
-        url = "http://localhost:5000/plaintext/%s" % encoded
+        url = "/api/plaintext/%s" % encoded
         with app.test_client() as client:
             actual = client.get(url).data.decode("utf-8")
 
@@ -39,11 +39,22 @@ class TestApp(unittest.TestCase):
 
         # Get the output from the Web server.
         encoded = value.replace(" ", "%20")
-        url = "http://localhost:5000/json/%s" % encoded
+        url = "/api/json/%s" % encoded
         with app.test_client() as client:
             actual = client.get(url).data.decode("utf-8")
 
         # Output should not differ between CLI and Web application.
+        self.assertEqual(expected, actual)
+
+    def test_index(self):
+        """Client build should exist on deployment server."""
+
+        with open("../client/build/index.html") as reader:
+            expected = reader.read()
+
+        with app.test_client() as client:
+            actual = client.get("/index.html").data.decode("utf-8")
+
         self.assertEqual(expected, actual)
 
 

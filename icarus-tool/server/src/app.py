@@ -3,21 +3,20 @@ from flask import Flask, make_response, send_from_directory
 from application import Application
 from calculator import Equation
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="", static_folder="../../client/build")
 
 
 @app.route("/")
 def index():
-    print("Request for index page received")
-    return "Hello Azure"
+    return send_from_directory(app.static_folder, "index.html")
 
 
-@app.route("/plaintext/tech_tree.txt")
+@app.route("/api/plaintext/tech_tree.txt")
 def get_data():
     return send_from_directory("../data", "tech_tree.txt")
 
 
-@app.route("/plaintext/<user_input>")
+@app.route("/api/plaintext/<user_input>")
 def plaintext(user_input: str):
     config: list[str] = ["app.py", "-i", "-r", "data/tech_tree.txt"]
     output: list[str] = handle_request(config, user_input)
@@ -27,7 +26,7 @@ def plaintext(user_input: str):
     return response
 
 
-@app.route("/json/<user_input>")
+@app.route("/api/json/<user_input>")
 def json(user_input: str):
     config: list[str] = ["app.py", "-i", "-j", "data/tech_tree.txt"]
     output: list[str] = handle_request(config, user_input)
