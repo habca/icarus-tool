@@ -13,14 +13,13 @@ The `readline` package is most likely already installed as a dependency of Bash.
 ```
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install readline mypy black flask dtt types-requests
 
 python -m pip install --upgrade pip
 python -m pip freeze > requirements.txt
 python -m pip install -r requirements.txt
 
 export PYTHONPATH=src
+
 python -m unittest discover test
 python -m mypy ./**/*.py
 python -m black ./**/*.py
@@ -34,14 +33,13 @@ Powershell might not provide the same output as Bash shell. The reason remains u
 ```
 py -m venv .wenv
 .wenv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install pyreadline mypy black flask dtt types-requests
 
 python -m pip install --upgrade pip
 python -m pip freeze > requirements.txt
 python -m pip install -r requirements.txt
 
 set PYTHONPATH=server\src
+
 python -m unittest discover server\test
 python -m mypy server\src\application.py [...]
 python -m black server\src\*.py
@@ -61,6 +59,7 @@ The command line options supported by the program are as follows.
 ```
 -g --gnu          Apply GNU readline functionality to python's input.
 -i --implicit     Add all the necessary intermediate steps.
+-j --json         Show the output of in JSON format.
 -r --recursive    Show the output as a tree data structure.
 -h --help         Show this user manual and exit.
 ```
@@ -347,8 +346,24 @@ To change command line arguments, edit `Project > Properties > Debug > Script Ar
 
 For me, there was a major problem detecting breakpoints when debugging test case with an infinite loop. Test explorer froze up effectively preventing any further testing.
 
+## Deployment
+
+Startup Command installs requirements into a virtual environment and launches a flask application from the source folder. Azure App Service deployment engine automatically activates a virtual environment and runs `pip install -r requirements.txt` [4]. Production use of Azure requires a paid subscription.
+
+```
+python -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+export PYTHONPATH=src
+gunicorn --bind=0.0.0.0 --timeout 600 app:app
+```
+
 ## References
 
 - [1] <https://wiki.archlinux.org/title/Snap#Classic_snaps>
 - [2] <https://github.com/microsoft/vscode/issues/158218>
 - [3] <https://code.visualstudio.com/docs/python/environments#_use-of-the-pythonpath-variable>
+- [4] <https://learn.microsoft.com/en-us/azure/app-service/configure-language-python>

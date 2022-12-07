@@ -6,6 +6,12 @@ from calculator import Equation
 app = Flask(__name__)
 
 
+@app.route("/")
+def index():
+    print("Request for index page received")
+    return "Hello Azure"
+
+
 @app.route("/plaintext/tech_tree.txt")
 def get_data():
     return send_from_directory("../data", "tech_tree.txt")
@@ -13,7 +19,7 @@ def get_data():
 
 @app.route("/plaintext/<user_input>")
 def plaintext(user_input: str):
-    config: list[str] = ["webapp.py", "-i", "-r", "data/tech_tree.txt"]
+    config: list[str] = ["app.py", "-i", "-r", "data/tech_tree.txt"]
     output: list[str] = handle_request(config, user_input)
 
     response = make_response("\n".join(output))
@@ -23,7 +29,7 @@ def plaintext(user_input: str):
 
 @app.route("/json/<user_input>")
 def json(user_input: str):
-    config: list[str] = ["webapp.py", "-i", "-j", "data/tech_tree.txt"]
+    config: list[str] = ["app.py", "-i", "-j", "data/tech_tree.txt"]
     output: list[str] = handle_request(config, user_input)
 
     response = make_response("\n".join(output))

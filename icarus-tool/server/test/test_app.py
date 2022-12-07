@@ -2,18 +2,18 @@ import unittest
 
 from ddt import data, ddt
 
+from app import app
 from application import Application
-from webapp import app
 
 
 @ddt
-class TestWebapp(unittest.TestCase):
+class TestApp(unittest.TestCase):
     @data("1 fabricator", "1 fabricator + 1 fabricator")
     def test_plaintext(self, value: str):
 
         # Create a local application to compare output of web server.
         application = Application()
-        application.init(["webapp.py", "-i", "-r", "data/tech_tree.txt"])
+        application.init(["app.py", "-i", "-r", "data/tech_tree.txt"])
 
         # Get the output from the CLI application.
         expected = "\n".join(application.process(value))
@@ -32,7 +32,7 @@ class TestWebapp(unittest.TestCase):
 
         # Create a local application to compare output of web server.
         application = Application()
-        application.init(["webapp.py", "-i", "-j", "data/tech_tree.txt"])
+        application.init(["app.py", "-i", "-j", "data/tech_tree.txt"])
 
         # Get the output from the CLI application.
         expected = "\n".join(application.process(value))
