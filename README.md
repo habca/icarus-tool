@@ -4,7 +4,7 @@ The command line tool calculates total amount of resources and groups them by wo
 
 ## Getting started
 
-Create a virtual environment and install dependencies before running the application or use the web app at <http://habca.pythonanywhere.com/plaintext/1%20fabricator>.
+Create a virtual environment and install dependencies before running the application or use the web app at <http://habca.pythonanywhere.com>.
 
 ### Linux
 

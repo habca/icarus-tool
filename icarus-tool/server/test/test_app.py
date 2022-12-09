@@ -1,3 +1,4 @@
+import json
 import unittest
 
 from ddt import data, ddt
@@ -28,7 +29,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     @data("1 fabricator", "1 fabricator + 1 fabricator")
-    def test_json(self, value: str):
+    def test_make_json(self, value: str):
 
         # Create a local application to compare output of web server.
         application = Application()
@@ -54,6 +55,19 @@ class TestApp(unittest.TestCase):
 
         with app.test_client() as client:
             actual = client.get("/index.html").data.decode("utf-8")
+
+        self.assertEqual(expected, actual)
+
+    def test_json_all(self):
+
+        application = Application()
+        application.init(["app.py", "-i", "-j", "data/tech_tree.txt"])
+
+        with app.test_client() as client:
+            data = client.get("/api/json").data.decode("utf-8")
+
+        expected: list[str] = list(application.calculator.resources)
+        actual: list[str] = json.loads(data)
 
         self.assertEqual(expected, actual)
 

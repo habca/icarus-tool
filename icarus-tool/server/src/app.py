@@ -1,14 +1,21 @@
-from flask import Flask, make_response, send_from_directory
+import json
+
+from flask import Flask, jsonify, make_response, send_from_directory
+from flask_cors import CORS, cross_origin
 
 from application import Application
 from calculator import Equation
 
-app = Flask(__name__, static_url_path="", static_folder="../../client/build")
+app = Flask(__name__, static_url_path="/", static_folder="../../client/build")
+app.config["CORS_HEADERS"] = "Content-Type"
+
+cors = CORS(app)
 
 
 @app.route("/")
+@cross_origin()
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    return app.send_static_file("index.html")
 
 
 @app.route("/api/plaintext/tech_tree.txt")
@@ -26,8 +33,18 @@ def plaintext(user_input: str):
     return response
 
 
+@app.route("/api/json")
+@cross_origin()
+def json_all():
+    application = Application()
+    application.init(["app.py", "-i", "-r", "data/tech_tree.txt"])
+    array = list(application.calculator.resources)
+    return jsonify(array)
+
+
 @app.route("/api/json/<user_input>")
-def json(user_input: str):
+@cross_origin()
+def make_json(user_input: str):
     config: list[str] = ["app.py", "-i", "-j", "data/tech_tree.txt"]
     output: list[str] = handle_request(config, user_input)
 

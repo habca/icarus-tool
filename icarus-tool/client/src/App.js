@@ -1,14 +1,14 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import "./App.css";
 import TreeElement from "./components/TreeElement";
-import json_object from "./data/data.json";
 
 const App = () => {
-  // Set data to data_items
-  const data_items = ["fabricator", "food", "filth", "abra", "kadabra"];
+  const [data_items, setDataItems] = useState([]);
+  const [results, setResults] = useState([{ name: "fabricator", amount: 1 }]);
 
-  const [search, setSearch] = useState("");
-  const [jsonArray, setJsonArray] = useState(json_object);
+  const [search, setSearch] = useState("fabricator");
+  const [jsonArray, setJsonArray] = useState([]);
   const [selectedArray, setSelectedArray] = useState([]);
   const [styleArray, setStyleArray] = useState([]);
 
@@ -16,15 +16,61 @@ const App = () => {
     setSearch(event.target.value);
   };
 
-  const moveSelectedRight = () => {
+  useEffect(() => {
+    getSearchList();
+    getJsonArray("1 fabricator");
+  }, []);
+
+  const getJsonArray = async (query) => {
+    const url = "/api/json/" + query;
+    await axios
+      .get(url)
+      .then((result) => {
+        setJsonArray(result.data);
+      })
+      .catch((error) => alert(error));
+  };
+
+  const getSearchList = async () => {
+    axios
+      .get("/api/json")
+      .then((result) => {
+        setDataItems(result.data);
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  };
+
+  const moveSelectedRight = async () => {
+    const newResults = [...results];
+
+    let s = [];
+    for (let opt of document.getElementById("search_results").options) {
+      if (opt.selected) {
+        s.push(opt.value);
+      }
+    }
+
+    if (s.length <= 0) return;
+
     // Confirm selected and move to list
-    /*
-    const options = document.getElementById("search_results");
-    const results = options
-      .filter((option) => option.selected)
-      .map((option) => option.value);
-    setJsonArray(results);
-    */
+    s.forEach((name) => {
+      newResults.push({ name: name, amount: 1 });
+    });
+    setResults(newResults);
+
+    const resultToQuery = (results) => {
+      return newResults
+        .map((result) => {
+          const { name, amount } = result;
+          return `${amount} ${name}`;
+        })
+        .join(" + ");
+    };
+
+    const query = resultToQuery(newResults);
+    getJsonArray(query);
   };
 
   /**
