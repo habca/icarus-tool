@@ -8,9 +8,17 @@ from mapping import recipe_sets_to_outputs
 
 
 class Resource:
-    def __init__(self, amount: Fraction, name: str):
-        self.amount = amount
-        self.name = name
+    def __init__(self, resource: tuple[Fraction, str] | str):
+        if isinstance(resource, tuple):
+            amount, name = resource
+            self.amount = amount
+            self.name = name
+        elif isinstance(resource, str):
+            amount, name = Resource.__parse(resource)
+            self.amount = amount
+            self.name = name
+        else:
+            raise TypeError()
 
     def __eq__(self, other: object) -> bool:
         result = False
@@ -25,9 +33,9 @@ class Resource:
         return str(self)
 
     @classmethod
-    def parse(cls, resource: str) -> "Resource":
+    def __parse(cls, resource: str) -> tuple[Fraction, str]:
         amount, name = resource.split(" ")
-        return Resource(Fraction(amount), name)
+        return Fraction(amount), name
 
     def format_resource(self, margin: int) -> str:
         amount: int = int(self.amount)
@@ -38,9 +46,9 @@ class Equation:
     def __init__(self, resources: list[Resource] | list[str] | str) -> None:
         def make_resource(item: Resource | str) -> Resource:
             if isinstance(item, Resource):
-                return Resource(item.amount, item.name)
+                return Resource((item.amount, item.name))
             elif isinstance(item, str):
-                return Resource.parse(item)
+                return Resource(item)
             else:
                 raise TypeError()
 
@@ -48,8 +56,7 @@ class Equation:
             if isinstance(items, list):
                 return [make_resource(item) for item in resources]
             elif isinstance(items, str):
-                # TODO: Merge parse function into constructor.
-                return Equation.parse(items).resources
+                return Equation.__parse(items)
 
         self.resources = make_resources(resources)
 
@@ -94,17 +101,17 @@ class Equation:
     def make_copy(self) -> "Equation":
         resources = []
         for resource in self.resources:
-            resources.append(Resource(resource.amount, resource.name))
+            resources.append(Resource((resource.amount, resource.name)))
         return Equation(resources)
 
     @classmethod
-    def parse(cls, equation: str) -> "Equation":
+    def __parse(cls, equation: str) -> list[Resource]:
         resources: list[Resource] = []
 
         if parts := equation.split():
             amount = Fraction(parts[0])
             name = parts[1]
-            resources.append(Resource(amount, name))
+            resources.append(Resource((amount, name)))
 
         if (len(parts) - 2) % 3 != 0:
             error = "Error in equation: " + str(equation)
@@ -117,12 +124,12 @@ class Equation:
             if operator == "-":
                 amount = -amount
             name = parts[index + 2]
-            resources.append(Resource(amount, name))
+            resources.append(Resource((amount, name)))
 
-        return Equation(resources)
+        return resources
 
     def multiply(self, fraction: Fraction) -> "Equation":
-        resources = [Resource(fraction * r.amount, r.name) for r in self.resources]
+        resources = [Resource((fraction * r.amount, r.name)) for r in self.resources]
         return Equation(resources)
 
     def evaluate(self) -> "Equation":
@@ -216,8 +223,8 @@ class Calculator:
         # Separate an assignment into a Resource and an Equation.
         left, right = assignment_tail.split(" = ")
 
-        resource = Resource.parse(left)
-        equation = Equation.parse(right)
+        resource = Resource(left)
+        equation = Equation(right)
         equation = equation.multiply(Fraction(1, resource.amount))
 
         name = resource.name
@@ -569,7 +576,7 @@ class Calculator:
             if quantity == 0:
                 # TODO: maybe destroy workstation?
                 amount = Fraction(1)  # 1 + abs(quantity)
-                resource = Resource(amount, station)
+                resource = Resource((amount, station))
                 workstations.append(resource)
 
         if workstations:

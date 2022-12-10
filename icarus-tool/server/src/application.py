@@ -143,7 +143,7 @@ class Application:
         # Validate an equation before processing any further.
         self.calculator.validator.validate_syntax_calculation(equation)
 
-        equation_obj: Equation = Equation.parse(equation)
+        equation_obj: Equation = Equation(equation)
 
         # Ensure there are only pre-assigned variable names.
         self.calculator.validator.validate_value_calculation(equation_obj)
@@ -152,7 +152,7 @@ class Application:
 
     def recover(self, equation: str) -> list[str]:
         output: list[str] = []
-        resources = Equation.parse(equation)
+        resources = Equation(equation)
         similar_words = self.calculator.find_similar(resources)
         if similar_words != {}:
             output.append("")  # Line break for a readable terminal output.

@@ -18,10 +18,24 @@ class ResourceTest(unittest.TestCase):
         "-1 anvil_bench",
         "-10 iron_ingot",
     )
-    def test_parse(self, value: str):
-        r = Resource.parse(value)
-        self.assertEqual(value, str(r))
-        self.assertEqual(r, Resource.parse(str(r)))
+    def test_resource_init(self, value: str):
+        r1 = Resource(value)
+        r2 = Resource(Resource._Resource__parse(value))
+
+        self.assertEqual(r1, r2)
+
+    @data(
+        "1 anvil_bench",
+        "10 iron_ingot",
+        "-1 anvil_bench",
+        "-10 iron_ingot",
+    )
+    def test_resource_parse(self, value: str):
+        r1 = Resource(Resource._Resource__parse(value))
+        r2 = Resource(Resource._Resource__parse(str(r1)))
+
+        self.assertEqual(value, str(r1))
+        self.assertEqual(r1, r2)
 
     @data(
         ("2 biofuel_extractor", True),
@@ -30,8 +44,8 @@ class ResourceTest(unittest.TestCase):
     )
     @unpack
     def test_eq(self, value: str, expected: bool):
-        r = Resource.parse("2 biofuel_extractor")
-        self.assertEqual(expected, r == Resource.parse(value))
+        r = Resource("2 biofuel_extractor")
+        self.assertEqual(expected, r == Resource(value))
 
 
 @ddt
@@ -43,24 +57,26 @@ class EquationTest(unittest.TestCase):
         ("-12 fiber - 18 stick", ["-12 fiber", "-18 stick"]),
     )
     @unpack
-    def test_init(self, first, second):
-        self.assertEqual(Equation.parse(first), Equation(second))
+    def test_equation_init(self, first: str, second: list[str]):
+        e1 = Equation(first)
+        e2 = Equation(second)
+
+        self.assertEqual(e1, e2)
 
     @data(
-        "12 fiber",
-        "12 fiber + 18 stick",
-        "-12 fiber",
-        "-12 fiber - 18 stick",
+        ("12 fiber", "12 fiber"),
+        ("12 fiber + 18 stick", "12 fiber + 18 stick"),
+        ("-12 fiber", "-12 fiber"),
+        ("-12 fiber - 18 stick", "-12 fiber - 18 stick"),
+        ("-12 fiber - -18 stick", "-12 fiber + 18 stick"),
     )
-    def test_parse(self, value: str):
-        e = Equation.parse(value)
-        self.assertEqual(value, str(e))
-        self.assertEqual(e, Equation.parse(str(e)))
+    @unpack
+    def test_equation_parse(self, first: str, second: str):
+        e1 = Equation(Equation._Equation__parse(first))
+        e2 = Equation(Equation._Equation__parse(str(e1)))
 
-    def test_parse_subtract_negative(self):
-        e = Equation.parse("-12 fiber - -18 stick")
-        self.assertEqual("-12 fiber + 18 stick", str(e))
-        self.assertEqual(e, Equation.parse(str(e)))
+        self.assertEqual(second, str(e1))
+        self.assertEqual(e1, e2)
 
     @data(
         ("2 fiber + 4 fiber + 2 wood + 2 wood", True),
@@ -71,9 +87,9 @@ class EquationTest(unittest.TestCase):
         ("2 wood + 2 wood + 4 fiber + 2 fiber", False),
     )
     @unpack
-    def test_eq(self, value: str, expected: bool):
-        e = Equation.parse("2 fiber + 4 fiber + 2 wood + 2 wood")
-        self.assertEqual(expected, e == Equation.parse(value))
+    def test_equation_eq(self, value: str, expected: bool):
+        e = Equation("2 fiber + 4 fiber + 2 wood + 2 wood")
+        self.assertEqual(expected, e == Equation(value))
 
     @data(
         ("124/5 wood + 160 stone + 0/24 leather", "25 wood + 160 stone + 0 leather"),
@@ -86,7 +102,7 @@ class EquationTest(unittest.TestCase):
     )
     @unpack
     def test_evaluate(self, value: str, expected: str):
-        e = Equation.parse(value).evaluate()
+        e = Equation(value).evaluate()
         self.assertEqual(expected, str(e))
 
     def test_sort_resources(self):
@@ -95,12 +111,12 @@ class EquationTest(unittest.TestCase):
         e1 = "10 gold_ore + 30 copper_ore + 26 wood + 10 oxite + 26 sulfur"
         e2 = "30 copper_ore + 26 sulfur + 26 wood + 10 gold_ore + 10 oxite"
 
-        self.assertEqual(e2, str(Equation.parse(e1).sort_resources()))
-        self.assertEqual(e2, str(Equation.parse(e2).sort_resources()))
+        self.assertEqual(e2, str(Equation(e1).sort_resources()))
+        self.assertEqual(e2, str(Equation(e2).sort_resources()))
 
     def test_format_resources(self):
         e = "10 copper_ingot + 2 iron_ingot + 100 gold_ore + 10 aluminium_ingot"
-        iterator = iter(Equation.parse(e).format_resources())
+        iterator = iter(Equation(e).format_resources())
 
         self.assertEqual("100 gold_ore", next(iterator))
         self.assertEqual(" 10 aluminium_ingot", next(iterator))
@@ -110,15 +126,15 @@ class EquationTest(unittest.TestCase):
 
     # TODO: erota eri funktioiksi
     def test_suodata(self):
-        equation = Equation.parse("-1 stone + 1 wood - 12 wood")
+        equation = Equation("-1 stone + 1 wood - 12 wood")
 
-        expected = Equation.parse("1 wood")
+        expected = Equation("1 wood")
         self.assertEqual(expected, equation.suodata(all=False, round=False))
 
-        expected = Equation.parse("-1 stone + 1 wood - 12 wood")
+        expected = Equation("-1 stone + 1 wood - 12 wood")
         self.assertEqual(expected, equation.suodata(all=True, round=False))
 
-        expected = Equation.parse("0 stone + 1 wood + 0 wood")
+        expected = Equation("0 stone + 1 wood + 0 wood")
         self.assertEqual(expected, equation.suodata(all=True, round=True))
 
 
@@ -266,8 +282,8 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual([], self.calc.search_variable("iron_ore", e3))
 
     def test_search_optional_expression(self):
-        e1 = Equation.parse("1 rifle_hunting")
-        e2 = Equation.parse(
+        e1 = Equation("1 rifle_hunting")
+        e2 = Equation(
             "12 wood + 8 leather + 40 titanium_ingot + 4 epoxy + 16 steel_screw"
         )
 
@@ -284,7 +300,7 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(["epoxy"], self.calculator.search_variable("epoxy", e2))
 
     def test_search_variable_remove_duplicates(self):
-        e1 = Equation.parse("1 epoxy + 1 epoxy + 1 rope + 1 rope")
+        e1 = Equation("1 epoxy + 1 epoxy + 1 rope + 1 rope")
         self.assertEqual(["epoxy"], self.calculator.search_variable("epoxy", e1))
         self.assertEqual(["rope"], self.calculator.search_variable("rope", e1))
 
@@ -440,10 +456,10 @@ class CalculatorTest(unittest.TestCase):
         """There may be none, one or many good enough matches."""
         calc = self.calc
 
-        e1 = Equation([Resource(Fraction(1), "anvil")])
-        e2 = Equation([Resource(Fraction(1), "anvil_bvve")])
-        e3 = Equation([Resource(Fraction(1), "anvil_benchs")])
-        e4 = Equation([Resource(Fraction(1), "anvi")])
+        e1 = Equation("1 anvil")
+        e2 = Equation("1 anvil_bvve")
+        e3 = Equation("1 anvil_benchs")
+        e4 = Equation("1 anvi")
 
         self.assertEqual(["anvil_bench"], calc.find_similar(e1)["anvil"])
         self.assertIn("anvil_bench", calc.find_similar(e2)["anvil_bvve"])
@@ -460,13 +476,13 @@ class CalculatorTest(unittest.TestCase):
     def test_find_similar_optional_recipes(self):
         """There was a bug and test assures it's gone."""
 
-        e1 = Equation.parse("1 machining_bench - 10 epoxy")
+        e1 = Equation("1 machining_bench - 10 epoxy")
         words = list(self.calculator.find_similar(e1))
         self.assertEqual(["machining_bench"], words)
 
     def test_order_by_station(self):
-        r1 = Resource(Fraction(1), "biofuel_extractor")
-        r2 = Resource(Fraction(1), "biofuel_generator")
+        r1 = Resource("1 biofuel_extractor")
+        r2 = Resource("1 biofuel_generator")
 
         self.assertEqual("fabricator", self.calc.order_by_station([r1, r2]))
 
@@ -479,8 +495,8 @@ class CalculatorTest(unittest.TestCase):
         - mortar_and_pestle: carbon_paste
         - concrete_furnace: aluminium_ingot
         """
-        r1 = Resource(Fraction(8), "carbon_fiber")
-        r2 = Resource(Fraction(1), "steel_ingot")
+        r1 = Resource("8 carbon_fiber")
+        r2 = Resource("1 steel_ingot")
 
         self.assertEqual("concrete_furnace", self.calc.order_by_station([r1, r2]))
 
@@ -493,65 +509,65 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(4, self.calc.get_station_value("concrete_furnace"))
 
     def test_suodata_practical_1(self):
-        equation = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
-        expected = Equation([Resource(Fraction(1), "biofuel_generator")])
+        equation = Equation("1 biofuel_extractor + 1 biofuel_generator")
+        expected = Equation("1 biofuel_generator")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_practical_2(self):
-        equation = Equation.parse("1 cement_mixer + 1 concrete_furnace")
-        expected = Equation([Resource(Fraction(1), "concrete_furnace")])
+        equation = Equation("1 cement_mixer + 1 concrete_furnace")
+        expected = Equation("1 concrete_furnace")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_practical_3(self):
-        equation = Equation.parse("1 stone_furnace + 1 anvil_bench + 1 machining_bench")
-        expected = Equation([Resource(Fraction(1), "machining_bench")])
+        equation = Equation("1 stone_furnace + 1 anvil_bench + 1 machining_bench")
+        expected = Equation("1 machining_bench")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_practical_4(self):
-        equation = Equation.parse(
+        equation = Equation(
             "1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator"
         )
-        expected = Equation([Resource(Fraction(1), "fabricator")])
+        expected = Equation("1 fabricator")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_practical_5(self):
-        equation = Equation.parse(
+        equation = Equation(
             "4 stick + 52 wood + 102 stone + 12 leather + 184 iron_ore + 0 epoxy + 288 fiber"
         )
-        expected = Equation([Resource(Fraction(4), "stick")])
+        expected = Equation("4 stick")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_practical_6(self):
-        equation = Equation.parse(
+        equation = Equation(
             "48 aluminium_ore + 60 gold_ore + 180 copper_ore + 386 wood + 92 oxite + 176 sulfur + 542 stone + 208 silica + 6 iron_ore + 1 coal_ore + 73 iron_ingot + 252 fiber + 32 leather"
         )
-        expected = Equation([Resource(Fraction(73), "iron_ingot")])
+        expected = Equation("73 iron_ingot")
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_raw_materials(self):
-        equation = Equation.parse("1 iron_ore + 1 wood")
+        equation = Equation("1 iron_ore + 1 wood")
         expected = equation.make_copy()
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_does_not_change_parameter(self):
-        equation = Equation.parse("1 anvil_bench + 1 anvil_bench")
+        equation = Equation("1 anvil_bench + 1 anvil_bench")
         expected = equation.make_copy()
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_korvaa_1(self):
         calc = self.calc
 
-        e1 = Equation.parse("1 biofuel_extractor + 1 biofuel_generator")
-        e2 = Equation.parse("1 biofuel_generator")
-        e3 = Equation.parse(
+        e1 = Equation("1 biofuel_extractor + 1 biofuel_generator")
+        e2 = Equation("1 biofuel_generator")
+        e3 = Equation(
             "1 biofuel_extractor + 20 steel_ingot + 8 copper_ingot + 12 electronics + 20 steel_screw + 2 glass"
         )
 
         self.assertEqual(e3, calc.korvaa(e1, e2))
 
-        e1 = Equation.parse("1 biofuel_extractor + 2 biofuel_generator")
-        e2 = Equation.parse("2 biofuel_generator")
-        e3 = Equation.parse(
+        e1 = Equation("1 biofuel_extractor + 2 biofuel_generator")
+        e2 = Equation("2 biofuel_generator")
+        e3 = Equation(
             "1 biofuel_extractor + 40 steel_ingot + 16 copper_ingot + 24 electronics + 40 steel_screw + 4 glass"
         )
 
@@ -560,18 +576,18 @@ class CalculatorTest(unittest.TestCase):
     def test_korvaa_2(self):
         calc = self.calc
 
-        e1 = Equation.parse("40 iron_ingot + 20 wood + 10 stone")
-        e2 = Equation.parse("40 iron_ingot")
-        e3 = Equation.parse("80 iron_ore + 20 wood + 10 stone")
+        e1 = Equation("40 iron_ingot + 20 wood + 10 stone")
+        e2 = Equation("40 iron_ingot")
+        e3 = Equation("80 iron_ore + 20 wood + 10 stone")
 
         self.assertEqual(e3, calc.korvaa(e1, e2))
 
     def test_korvaa_3(self):
         calc = self.calc
 
-        r1 = Equation([Resource(Fraction(2), "hunting_rifle")])
-        r2 = Equation([Resource(Fraction(16), "steel_screw")])
-        r3 = Equation([Resource(Fraction(10), "stick")])
+        r1 = Equation("2 hunting_rifle")
+        r2 = Equation("16 steel_screw")
+        r3 = Equation("10 stick")
 
         e1 = calc.korvaa(r1, r1)
         e2 = calc.korvaa(r2, r2)
@@ -592,13 +608,13 @@ class CalculatorTest(unittest.TestCase):
 
         calc = self.calc
 
-        e1 = Equation([Resource(Fraction(1), "biofuel_generator")])
+        e1 = Equation("1 biofuel_generator")
 
-        r1 = Resource(Fraction(20), "steel_ingot")
-        r2 = Resource(Fraction(8), "copper_ingot")
-        r3 = Resource(Fraction(12), "electronics")
-        r4 = Resource(Fraction(20), "steel_screw")
-        r5 = Resource(Fraction(2), "glass")
+        r1 = Resource("20 steel_ingot")
+        r2 = Resource("8 copper_ingot")
+        r3 = Resource("12 electronics")
+        r4 = Resource("20 steel_screw")
+        r5 = Resource("2 glass")
 
         expected = Equation([r1, r2, r3, r4, r5])
 
@@ -612,8 +628,8 @@ class CalculatorTest(unittest.TestCase):
 
         calc = self.calc
 
-        r1 = Resource(Fraction(40), "iron_ore")
-        r2 = Resource(Fraction(245), "fiber")
+        r1 = Resource("40 iron_ore")
+        r2 = Resource("245 fiber")
 
         e1 = Equation([r1, r2])
 
@@ -628,15 +644,15 @@ class CalculatorTest(unittest.TestCase):
         """
         calc = self.calc
 
-        e1 = Equation.parse("1 biofuel_generator + 40 iron_ore + 245 fiber")
+        e1 = Equation("1 biofuel_generator + 40 iron_ore + 245 fiber")
 
-        r1 = Resource(Fraction(20), "steel_ingot")
-        r2 = Resource(Fraction(8), "copper_ingot")
-        r3 = Resource(Fraction(12), "electronics")
-        r4 = Resource(Fraction(20), "steel_screw")
-        r5 = Resource(Fraction(2), "glass")
-        r6 = Resource(Fraction(40), "iron_ore")
-        r7 = Resource(Fraction(245), "fiber")
+        r1 = Resource("20 steel_ingot")
+        r2 = Resource("8 copper_ingot")
+        r3 = Resource("12 electronics")
+        r4 = Resource("20 steel_screw")
+        r5 = Resource("2 glass")
+        r6 = Resource("40 iron_ore")
+        r7 = Resource("245 fiber")
 
         expected = Equation([r1, r2, r3, r4, r5, r6, r7])
 
@@ -646,8 +662,8 @@ class CalculatorTest(unittest.TestCase):
         """Returns a name of station where items can be crafted."""
         calc = self.calc
 
-        e1 = Equation.parse("1 biofuel_generator")
-        e2 = Equation.parse("40 iron_ore + 245 fiber")
+        e1 = Equation("1 biofuel_generator")
+        e2 = Equation("40 iron_ore + 245 fiber")
 
         self.assertEqual("fabricator", calc.get_station(e1))
         self.assertEqual("total_resources", calc.get_station(e2))
@@ -670,7 +686,7 @@ class CalculatorTest(unittest.TestCase):
         """
         calc = self.calc
 
-        e1 = Equation.parse("1 biofuel_generator + 1 iron_ore")
+        e1 = Equation("1 biofuel_generator + 1 iron_ore")
         with self.assertRaises(AssertionError) as err:
             calc.get_station(e1)
         self.assertEqual(
@@ -678,14 +694,14 @@ class CalculatorTest(unittest.TestCase):
         )
 
     def get_first_element(self, equation: str) -> str:
-        return str(next(self.calc.calculate(Equation.parse(equation))))
+        return str(next(self.calc.calculate(Equation(equation))))
 
     def get_last_element(self, equation: str) -> str:
-        gen = self.calc.calculate(Equation.parse(equation))
+        gen = self.calc.calculate(Equation(equation))
         return str(deque(gen, maxlen=1).pop())
 
     def test_convert_to_dictionaries(self):
-        equation = Equation.parse("1 fabricator + 40 iron_ingot")
+        equation = Equation("1 fabricator + 40 iron_ingot")
         equation_tree = self.calc.calculate_recursive(equation)
         dictionaries = self.calc.convert_to_dictionaries(equation_tree)
         actual = json.dumps(dictionaries, indent=2)
@@ -708,7 +724,7 @@ class CalculatorTest(unittest.TestCase):
             "tree_sap",
             "stick",
         ]
-        a1 = Equation.parse("3 electric_extractor")
+        a1 = Equation("3 electric_extractor")
         self.assertEqual(e1, list(self.calc.find_resources(a1)))
 
     @data(
@@ -779,7 +795,7 @@ class ValidatorTest(unittest.TestCase):
         file.read(self.calculator)
 
     def test_validate_value_calculation_negative_recipes(self):
-        equation = Equation.parse("100 stone - 100 wood")
+        equation = Equation("100 stone - 100 wood")
         expected = "ValueError: 100 stone"
 
         with self.assertRaises(ValueError) as err:
@@ -789,7 +805,7 @@ class ValidatorTest(unittest.TestCase):
     def test_validate_value_calculation_optional_recipe(self):
         """Optional recipe is valid input should not raise an error."""
 
-        e1 = Equation.parse("1 concrete_mix")
+        e1 = Equation("1 concrete_mix")
         self.calculator.validator.validate_value_calculation(e1)
 
 
@@ -800,17 +816,17 @@ class EquationTreeTest(unittest.TestCase):
         filesystem.read(self.calculator)
 
     def test_equation_tree(self):
-        e1 = EquationTree(Resource.parse("1 crafting_bench"))
-        e2 = EquationTree(Resource.parse("60 fiber"))
-        e3 = EquationTree(Resource.parse("50 wood"))
-        e4 = EquationTree(Resource.parse("12 stone"))
-        e5 = EquationTree(Resource.parse("20 leather"))
+        e1 = EquationTree(Resource("1 crafting_bench"))
+        e2 = EquationTree(Resource("60 fiber"))
+        e3 = EquationTree(Resource("50 wood"))
+        e4 = EquationTree(Resource("12 stone"))
+        e5 = EquationTree(Resource("20 leather"))
 
-        e6 = EquationTree(Resource.parse("1 anvil_bench"))
-        e7 = EquationTree(Resource.parse("40 iron_ingot"))
-        e8 = EquationTree(Resource.parse("80 iron_ore"))
-        e9 = EquationTree(Resource.parse("20 wood"))
-        e10 = EquationTree(Resource.parse("10 stone"))
+        e6 = EquationTree(Resource("1 anvil_bench"))
+        e7 = EquationTree(Resource("40 iron_ingot"))
+        e8 = EquationTree(Resource("80 iron_ore"))
+        e9 = EquationTree(Resource("20 wood"))
+        e10 = EquationTree(Resource("10 stone"))
 
         root = EquationTree()
         root.children = [e1, e6]
@@ -836,7 +852,7 @@ class EquationTreeTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_calculate_recursive(self):
-        e1 = Equation.parse("1 crafting_bench + 1 anvil_bench")
+        e1 = Equation("1 crafting_bench + 1 anvil_bench")
         expected = [
             "1 crafting_bench",
             "60 fiber",
@@ -858,11 +874,11 @@ class EquationTreeTest(unittest.TestCase):
         """Tree data structure should have valid quantities."""
 
         # TODO: laske epoxyt puun eri haarassa vahennyslaskun takia
-        e1 = Equation.parse("1 machining_bench - 10 epoxy")
-        e2 = Equation.parse("1 machining_bench - 12 epoxy")
-        e3 = Equation.parse("1 machining_bench - 8 epoxy")
-        e4 = Equation.parse("2 machining_bench - 10 epoxy")
-        e5 = Equation.parse("2 machining_bench - 12 epoxy")
+        e1 = Equation("1 machining_bench - 10 epoxy")
+        e2 = Equation("1 machining_bench - 12 epoxy")
+        e3 = Equation("1 machining_bench - 8 epoxy")
+        e4 = Equation("2 machining_bench - 10 epoxy")
+        e5 = Equation("2 machining_bench - 12 epoxy")
 
         a1 = list(self.calculator.calculate_recursive(e1))
         a2 = list(self.calculator.calculate_recursive(e2))
@@ -927,14 +943,14 @@ class EquationTreeTest(unittest.TestCase):
         self.assertEqual(expected_4, [str(r) for r in a4])
 
     def test_calculate_recursive_same_quantity(self):
-        e1 = Equation.parse("1 machining_bench")
-        e2 = Equation.parse("1 machining_bench + 0 epoxy")
-        e3 = Equation.parse("2 machining_bench")
-        e4 = Equation.parse("1 machining_bench + 1 machining_bench")
-        e5 = Equation.parse("1 machining_bench + 2 epoxy")
-        e6 = Equation.parse("1 machining_bench + 12 epoxy - 10 epoxy")
-        e7 = Equation.parse("-2 epoxy")
-        e8 = Equation.parse("10 epoxy - 12 epoxy")
+        e1 = Equation("1 machining_bench")
+        e2 = Equation("1 machining_bench + 0 epoxy")
+        e3 = Equation("2 machining_bench")
+        e4 = Equation("1 machining_bench + 1 machining_bench")
+        e5 = Equation("1 machining_bench + 2 epoxy")
+        e6 = Equation("1 machining_bench + 12 epoxy - 10 epoxy")
+        e7 = Equation("-2 epoxy")
+        e8 = Equation("10 epoxy - 12 epoxy")
 
         a1 = list(self.calculator.calculate_recursive(e1))
         a2 = list(self.calculator.calculate_recursive(e2))
@@ -951,7 +967,7 @@ class EquationTreeTest(unittest.TestCase):
         self.assertEqual(a7, a8)
 
     def test_calculate_recursive_crafting_order(self):
-        e1 = Equation.parse("1 biofuel_generator + 1 biofuel_extractor")
+        e1 = Equation("1 biofuel_generator + 1 biofuel_extractor")
         a1 = self.calculator.calculate_recursive(e1)
 
         self.assertEqual("1 biofuel_extractor", str(a1.children[0].data))
@@ -959,15 +975,15 @@ class EquationTreeTest(unittest.TestCase):
 
     def test_arrange_resources(self):
         # test_biofuel_extractor_biofuel_generator
-        e1 = Equation.parse("1 biofuel_generator + 1 biofuel_extractor")
+        e1 = Equation("1 biofuel_generator + 1 biofuel_extractor")
         a1 = "1 biofuel_extractor + 1 biofuel_generator"
 
         # test_stone_furnace_anvil_bench_machining_bench.txt
-        e2 = Equation.parse("1 machining_bench + 1 stone_furnace + 1 anvil_bench")
+        e2 = Equation("1 machining_bench + 1 stone_furnace + 1 anvil_bench")
         a2 = "1 stone_furnace + 1 anvil_bench + 1 machining_bench"
 
         # test_cement_mixer_concrete_furnace_thermos.txt
-        e3 = Equation.parse("3 concrete_furnace + 1 thermos + 2 cement_mixer")
+        e3 = Equation("3 concrete_furnace + 1 thermos + 2 cement_mixer")
         a3 = "2 cement_mixer + 3 concrete_furnace + 1 thermos"
 
         self.assertEqual(a1, str(self.calculator.arrange_resources(e1)))
