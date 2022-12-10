@@ -49,10 +49,12 @@ class ResourceTest(unittest.TestCase):
 
         self.assertEqual(r1, r2)
 
-        r1.amount = Fraction(2)
+        with self.assertRaises(AttributeError):
+            r1.amount = Fraction(2)
 
+        self.assertEqual(1, r1.amount)
         self.assertEqual(1, r2.amount)
-        self.assertNotEqual(r1, r2)
+        self.assertEqual(r1, r2)
 
     @data(
         ("2 biofuel_extractor", True),
@@ -103,8 +105,9 @@ class EquationTest(unittest.TestCase):
 
         self.assertEqual(e1, e2)
 
-        r1 = e2.resources[0]
-        r1.amount = Fraction(13)
+        with self.assertRaises(AttributeError):
+            r1 = e2.resources[0]
+            r1.amount = Fraction(13)
 
         self.assertEqual(e1, e2)
 

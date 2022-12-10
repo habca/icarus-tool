@@ -3,7 +3,7 @@ import math
 import re
 from fractions import Fraction
 from functools import reduce
-from typing import Any, Callable, Iterator, Optional, Type
+from typing import Any, Callable, Iterator, Optional
 
 from mapping import recipe_sets_to_outputs
 
@@ -34,11 +34,6 @@ class Resource:
     @property
     def amount(self) -> Fraction:
         return self.__amount
-
-    @amount.setter
-    def amount(self, amount: Fraction) -> None:
-        # Fraction class is immutable.
-        self.__amount = amount
 
     @property
     def name(self) -> str:
@@ -179,11 +174,13 @@ class Equation:
             if resource.name not in variables.keys():
                 variables[resource.name] = resource
             else:
-                variables[resource.name].amount += resource.amount
+                # Resource is immutable.
+                amount = variables[resource.name].amount + resource.amount
+                variables[resource.name] = Resource((amount, resource.name))
 
         for name, resource in variables.items():
-            amount = math.ceil(resource.amount)
-            variables[name].amount = Fraction(amount)
+            amount = math.ceil(resource.amount)  # type: ignore
+            variables[name] = Resource((amount, resource.name))
 
         resources = [variables[name] for name in variables.keys()]
         return Equation(resources)
@@ -208,11 +205,12 @@ class Equation:
 
         new_resources: list[Resource] = []
         for resource in self.resources:
+            new_resource = resource
             if resource.amount < 0 and round:
-                resource.amount = Fraction(0)
+                new_resource = Resource((0, resource.name))
 
             if (resource.amount <= 0 and all) or resource.amount > 0:
-                new_resources.append(resource)
+                new_resources.append(new_resource)
 
         return Equation(new_resources)
 
@@ -476,7 +474,9 @@ class Calculator:
 
                 # Calculate the amounts of new resources.
                 for new_resource in new_equation:
-                    new_resource.amount *= resource.amount
+                    # Resource is immutable.
+                    amount = new_resource.amount * resource.amount
+                    new_resource = Resource((amount, new_resource.name))
                     crafting_cost.append(new_resource)
 
             else:
@@ -614,8 +614,7 @@ class Calculator:
         for station in stations[:]:
             quantity: Fraction = equation.get_quantity(station)
             if quantity == 0:
-                # TODO: maybe destroy workstation?
-                amount = Fraction(1)  # 1 + abs(quantity)
+                amount = Fraction(1)
                 resource = Resource((amount, station))
                 workstations.append(resource)
 

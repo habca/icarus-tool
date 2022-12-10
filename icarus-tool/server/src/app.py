@@ -1,5 +1,3 @@
-import json
-
 from flask import Flask, jsonify, make_response, send_from_directory
 from flask_cors import CORS, cross_origin
 
