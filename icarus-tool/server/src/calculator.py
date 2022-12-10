@@ -2,28 +2,52 @@ import difflib
 import math
 import re
 from fractions import Fraction
-from typing import Callable, Iterator, Optional
+from functools import reduce
+from typing import Any, Callable, Iterator, Optional, Type
 
 from mapping import recipe_sets_to_outputs
 
 
 class Resource:
-    def __init__(self, resource: tuple[Fraction, str] | str):
-        if isinstance(resource, tuple):
-            amount, name = resource
-            self.amount = amount
-            self.name = name
+    """
+    Resource class has only properties and no setters.
+    Variables should be changed by making a new instance.
+    Do not make factory methods, use the constructor!
+    """
+
+    def __init__(self, resource: tuple[Fraction, str] | tuple[int, str] | str | Any):
+
+        self.__amount: Fraction = Fraction(0)
+        self.__name: str = ""
+
+        if isinstance(resource, Resource):
+            copy = Resource.__clone(resource)
+            self.__amount = copy.amount
+            self.__name = copy.name
+        elif isinstance(resource, tuple):
+            self.__amount, self.__name = resource
         elif isinstance(resource, str):
-            amount, name = Resource.__parse(resource)
-            self.amount = amount
-            self.name = name
+            self.__amount, self.__name = Resource.__parse(resource)
         else:
-            raise TypeError()
+            raise TypeError(type(resource))
+
+    @property
+    def amount(self) -> Fraction:
+        return self.__amount
+
+    @amount.setter
+    def amount(self, amount: Fraction) -> None:
+        # Fraction class is immutable.
+        self.__amount = amount
+
+    @property
+    def name(self) -> str:
+        return self.__name
 
     def __eq__(self, other: object) -> bool:
         result = False
         if isinstance(other, Resource):
-            result = (self.amount, self.name) == (other.amount, other.name)
+            result = self.amount == other.amount and self.name == other.name
         return result
 
     def __str__(self) -> str:
@@ -37,33 +61,51 @@ class Resource:
         amount, name = resource.split(" ")
         return Fraction(amount), name
 
+    @classmethod
+    def __clone(cls, resource: "Resource") -> "Resource":
+        return cls((resource.amount, resource.name))
+
     def format_resource(self, margin: int) -> str:
         amount: int = int(self.amount)
         return f"{amount:{margin}d} {self.name}"
 
 
 class Equation:
-    def __init__(self, resources: list[Resource] | list[str] | str) -> None:
+    def __init__(self, resources: list[Resource] | list[str] | str | Any) -> None:
+        self.__resources: list[Resource] = []
+
         def make_resource(item: Resource | str) -> Resource:
             if isinstance(item, Resource):
-                return Resource((item.amount, item.name))
+                return Resource(item)  # Copy constructor.
             elif isinstance(item, str):
                 return Resource(item)
             else:
-                raise TypeError()
+                raise TypeError(type(item))
 
-        def make_resources(items: list[Resource] | list[str] | str):
+        def make_resources(items: Equation | list[Resource] | list[str] | str):
+            if isinstance(items, Equation):
+                return Equation.__clone(items).resources  # Copy constructor.
             if isinstance(items, list):
                 return [make_resource(item) for item in resources]
             elif isinstance(items, str):
                 return Equation.__parse(items)
+            else:
+                raise TypeError(type(items))
 
-        self.resources = make_resources(resources)
+        self.__resources = make_resources(resources)
+
+    @property
+    def resources(self) -> list[Resource]:
+        # Resources are immutable thanks to the copy constructor.
+        return list(map(lambda x: Resource(x), self.__resources))
 
     def __eq__(self, other: object) -> bool:
         result = False
         if isinstance(other, Equation):
-            result = self.resources == other.resources
+            if len(self.resources) == len(other.resources):
+                zipped = zip(self.resources, other.resources)
+                mapped = map(lambda pair: pair[0] == pair[1], zipped)
+                return reduce(lambda acc, cur: acc and cur, mapped, True)
         return result
 
     def __iter__(self) -> Iterator[Resource]:
@@ -98,12 +140,6 @@ class Equation:
         resources = [r for r in self.resources if r != resource]
         return Equation(resources)
 
-    def make_copy(self) -> "Equation":
-        resources = []
-        for resource in self.resources:
-            resources.append(Resource((resource.amount, resource.name)))
-        return Equation(resources)
-
     @classmethod
     def __parse(cls, equation: str) -> list[Resource]:
         resources: list[Resource] = []
@@ -128,14 +164,19 @@ class Equation:
 
         return resources
 
+    @classmethod
+    def __clone(cls, equation: "Equation") -> "Equation":
+        return cls([Resource((r.amount, r.name)) for r in equation])
+
     def multiply(self, fraction: Fraction) -> "Equation":
         resources = [Resource((fraction * r.amount, r.name)) for r in self.resources]
         return Equation(resources)
 
     def evaluate(self) -> "Equation":
+        equation = Equation(self)  # Copy constructor.
         variables: dict[str, Resource] = dict()
 
-        for resource in self.make_copy().resources:
+        for resource in Equation(self):
             if resource.name not in variables.keys():
                 variables[resource.name] = resource
             else:
@@ -312,7 +353,7 @@ class Calculator:
         Example: 1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator -> 1 fabricator
         """
 
-        equation = equation.make_copy()
+        equation = Equation(equation)
 
         new_resources = []
         for resource in equation:
@@ -341,7 +382,7 @@ class Calculator:
             if resource.name in self.resources:
                 if resource in target.resources:
                     substituted = self.resources[resource.name]
-                    substituted = substituted.make_copy()
+                    substituted = Equation(substituted)
                     substituted = substituted.multiply(resource.amount)
                     for new_resource in substituted:
                         new_resources.append(new_resource)
@@ -376,7 +417,7 @@ class Calculator:
             # Recursive function call for a derivative expression.
             if part.name in self.resources.keys():
                 expression = self.resources[part.name]
-                expression = expression.make_copy()
+                expression = Equation(expression)
                 found = self.search_variable(variable, expression, True)
                 if found != []:
                     variables.append(part.name)
@@ -428,7 +469,7 @@ class Calculator:
         """
 
         # Never alter the original copy.
-        equation = equation.make_copy()
+        equation = Equation(equation)
 
         crafting_cost = []
         for resource in equation:
@@ -436,7 +477,7 @@ class Calculator:
 
                 # Never alter the original copy.
                 new_equation = self.resources[resource.name]
-                new_equation = new_equation.make_copy()
+                new_equation = Equation(new_equation)
 
                 # Calculate the amounts of new resources.
                 for new_resource in new_equation:
@@ -493,8 +534,15 @@ class Calculator:
         def create_equation_tree(
             root: EquationTree, equation: Equation, nonpositive: Equation
         ) -> tuple[EquationTree, Equation]:
-            equation.resources += nonpositive
+
+            # Resources are read-only.
+            resources = equation.resources
+            resources += nonpositive
+
+            # Equation is immutable.
+            equation = Equation(resources)
             equation = equation.evaluate()
+
             nonpositive = Equation([r for r in equation if r.amount < 0])
             equation = Equation([r for r in equation if r.amount > 0])
 
@@ -554,8 +602,8 @@ class Calculator:
     def find_workstations(self, equation: Equation) -> Equation:
         """List the required workstations."""
 
-        original = equation.make_copy()
-        equation = equation.make_copy()
+        original = Equation(equation)
+        equation = Equation(equation)
         equation = equation.evaluate()
 
         stations: list[str] = []
@@ -580,8 +628,14 @@ class Calculator:
                 workstations.append(resource)
 
         if workstations:
-            original.resources += workstations
+            # Resources are read-only.
+            resources = original.resources
+            resources += workstations
+
+            # Equation is immutable.
+            original = Equation(resources)
             original = original.evaluate()
+
             return self.find_workstations(original)
         else:
             return original

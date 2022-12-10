@@ -13,14 +13,20 @@ from calculator import Calculator, Equation, EquationTree, Resource
 @ddt
 class ResourceTest(unittest.TestCase):
     @data(
-        "1 anvil_bench",
-        "10 iron_ingot",
-        "-1 anvil_bench",
-        "-10 iron_ingot",
+        (1, "anvil_bench"),
+        (10, "iron_ingot"),
+        (-1, "anvil_bench"),
+        (-10, "iron_ingot"),
     )
-    def test_resource_init(self, value: str):
-        r1 = Resource(value)
-        r2 = Resource(Resource._Resource__parse(value))
+    @unpack
+    def test_resource_init(self, amount: int, name: str):
+        r1 = Resource((amount, name))
+        r2 = Resource((Fraction(amount), name))
+
+        self.assertEqual(r1, r2)
+
+        r1 = Resource._Resource__parse(str(r1))
+        r2 = Resource._Resource__parse(str(r2))
 
         self.assertEqual(r1, r2)
 
@@ -36,6 +42,17 @@ class ResourceTest(unittest.TestCase):
 
         self.assertEqual(value, str(r1))
         self.assertEqual(r1, r2)
+
+    def test_resource_clone(self):
+        r1 = Resource("1 fiber")
+        r2 = Resource._Resource__clone(r1)
+
+        self.assertEqual(r1, r2)
+
+        r1.amount = Fraction(2)
+
+        self.assertEqual(1, r2.amount)
+        self.assertNotEqual(r1, r2)
 
     @data(
         ("2 biofuel_extractor", True),
@@ -76,6 +93,19 @@ class EquationTest(unittest.TestCase):
         e2 = Equation(Equation._Equation__parse(str(e1)))
 
         self.assertEqual(second, str(e1))
+        self.assertEqual(e1, e2)
+
+    def test_equation_clone(self):
+        """Equation should be immutable."""
+
+        e1 = Equation("12 fiber")
+        e2 = Equation._Equation__clone(e1)
+
+        self.assertEqual(e1, e2)
+
+        r1 = e2.resources[0]
+        r1.amount = Fraction(13)
+
         self.assertEqual(e1, e2)
 
     @data(
@@ -546,12 +576,12 @@ class CalculatorTest(unittest.TestCase):
 
     def test_suodata_raw_materials(self):
         equation = Equation("1 iron_ore + 1 wood")
-        expected = equation.make_copy()
+        expected = Equation(equation)
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_suodata_does_not_change_parameter(self):
         equation = Equation("1 anvil_bench + 1 anvil_bench")
-        expected = equation.make_copy()
+        expected = Equation(equation)
         self.assertEqual(expected, self.calc.suodata(equation))
 
     def test_korvaa_1(self):
@@ -606,8 +636,6 @@ class CalculatorTest(unittest.TestCase):
         > 1 biofuel_generator = 20 steel_ingot + 8 copper_ingot + 12 electronics + 20 steel_screw + 2 glass
         """
 
-        calc = self.calc
-
         e1 = Equation("1 biofuel_generator")
 
         r1 = Resource("20 steel_ingot")
@@ -618,7 +646,7 @@ class CalculatorTest(unittest.TestCase):
 
         expected = Equation([r1, r2, r3, r4, r5])
 
-        self.assertEqual(expected, calc.resources_per_station(e1))
+        self.assertEqual(expected, self.calc.resources_per_station(e1))
 
     def test_resources_per_station_raw_materials(self):
         """
@@ -626,16 +654,11 @@ class CalculatorTest(unittest.TestCase):
         > 40 iron_ore + 245 fiber = 40 iron_ore + 245 fiber
         """
 
-        calc = self.calc
-
         r1 = Resource("40 iron_ore")
         r2 = Resource("245 fiber")
-
         e1 = Equation([r1, r2])
 
-        expected = e1.make_copy()
-
-        self.assertEqual(expected, calc.resources_per_station(e1))
+        self.assertEqual(e1, self.calc.resources_per_station(e1))
 
     def test_resources_per_station_multiple_stations(self):
         """
