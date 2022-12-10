@@ -150,16 +150,20 @@ class Application:
 
         return equation_obj
 
-    def recover(self, equation: str) -> list[str]:
+    def recover(self, user_input: str) -> list[str]:
+        assert isinstance(user_input, str)
+
         output: list[str] = []
-        resources = Equation(equation)
-        similar_words = self.calculator.find_similar(resources)
+        equation = Equation(user_input)
+        similar_words = self.calculator.find_similar(equation)
         if similar_words != {}:
             output.append("")  # Line break for a readable terminal output.
             output.append(f":: Did you mean?")
             for name, word_list in similar_words.items():
                 message = "- " + name + ": " + ", ".join(word_list)
                 output.append(message)
+
+        assert isinstance(output, list)
         return output
 
     def ask_optional(self, options: list[str]) -> int:

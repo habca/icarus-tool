@@ -173,7 +173,6 @@ class Equation:
         return Equation(resources)
 
     def evaluate(self) -> "Equation":
-        equation = Equation(self)  # Copy constructor.
         variables: dict[str, Resource] = dict()
 
         for resource in Equation(self):
@@ -353,8 +352,6 @@ class Calculator:
         Example: 1 anvil_bench + 1 machining_bench + 1 cement_mixer + 1 concrete_furnace + 1 fabricator -> 1 fabricator
         """
 
-        equation = Equation(equation)
-
         new_resources = []
         for resource in equation:
             temp = Equation([r for r in equation if r.name != resource.name])
@@ -382,7 +379,6 @@ class Calculator:
             if resource.name in self.resources:
                 if resource in target.resources:
                     substituted = self.resources[resource.name]
-                    substituted = Equation(substituted)
                     substituted = substituted.multiply(resource.amount)
                     for new_resource in substituted:
                         new_resources.append(new_resource)
@@ -417,7 +413,6 @@ class Calculator:
             # Recursive function call for a derivative expression.
             if part.name in self.resources.keys():
                 expression = self.resources[part.name]
-                expression = Equation(expression)
                 found = self.search_variable(variable, expression, True)
                 if found != []:
                     variables.append(part.name)
@@ -426,12 +421,16 @@ class Calculator:
         return list(dict.fromkeys(variables))
 
     def find_similar(self, equation: Equation) -> dict[str, list[str]]:
+        assert isinstance(equation, Equation)
+
         word_list = self.get_keywords()
         similar_words: dict[str, list[str]] = dict()
         for resource in equation:
             words = difflib.get_close_matches(resource.name, word_list)
             if words != [] and resource.name not in word_list:
                 similar_words[resource.name] = words
+
+        assert isinstance(similar_words, dict)
         return similar_words
 
     def order_by_station(self, resources: list[Resource]) -> str:
@@ -468,16 +467,12 @@ class Calculator:
         Example: 40 iron_ore + 245 fiber = 40 iron_ore + 245 fiber
         """
 
-        # Never alter the original copy.
-        equation = Equation(equation)
-
         crafting_cost = []
         for resource in equation:
             if resource.name in self.resources:
 
                 # Never alter the original copy.
                 new_equation = self.resources[resource.name]
-                new_equation = Equation(new_equation)
 
                 # Calculate the amounts of new resources.
                 for new_resource in new_equation:
@@ -602,10 +597,7 @@ class Calculator:
     def find_workstations(self, equation: Equation) -> Equation:
         """List the required workstations."""
 
-        original = Equation(equation)
-        equation = Equation(equation)
         equation = equation.evaluate()
-
         stations: list[str] = []
         names = self.find_resources(equation)
         for name in names:
@@ -629,16 +621,16 @@ class Calculator:
 
         if workstations:
             # Resources are read-only.
-            resources = original.resources
+            resources = equation.resources
             resources += workstations
 
             # Equation is immutable.
-            original = Equation(resources)
-            original = original.evaluate()
+            equation = Equation(resources)
+            equation = equation.evaluate()
 
-            return self.find_workstations(original)
+            return self.find_workstations(equation)
         else:
-            return original
+            return equation
 
     def resolve_recipes_implicit(self, equation: Equation, callback: Callable) -> None:
         """
