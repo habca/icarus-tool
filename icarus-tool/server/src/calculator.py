@@ -35,8 +35,23 @@ class Resource:
 
 
 class Equation:
-    def __init__(self, resources: list[Resource]):
-        self.resources = resources
+    def __init__(self, resources: list[Resource] | list[str] | str) -> None:
+        def make_resource(item: Resource | str) -> Resource:
+            if isinstance(item, Resource):
+                return Resource(item.amount, item.name)
+            elif isinstance(item, str):
+                return Resource.parse(item)
+            else:
+                raise TypeError()
+
+        def make_resources(items: list[Resource] | list[str] | str):
+            if isinstance(items, list):
+                return [make_resource(item) for item in resources]
+            elif isinstance(items, str):
+                # TODO: Merge parse function into constructor.
+                return Equation.parse(items).resources
+
+        self.resources = make_resources(resources)
 
     def __eq__(self, other: object) -> bool:
         result = False
@@ -174,6 +189,9 @@ class EquationTree:
             yield Equation([self.data])
         for tree_data in self.children:
             yield from tree_data
+
+    def __str__(self) -> str:
+        return str(self.data)
 
 
 class Calculator:
@@ -548,14 +566,15 @@ class Calculator:
         workstations: list[Resource] = []
         for station in stations[:]:
             quantity: Fraction = equation.get_quantity(station)
-            if quantity <= 0:
+            if quantity == 0:
                 # TODO: maybe destroy workstation?
-                amount: Fraction = 1 + abs(quantity)
+                amount = Fraction(1)  # 1 + abs(quantity)
                 resource = Resource(amount, station)
                 workstations.append(resource)
 
         if workstations:
             original.resources += workstations
+            original = original.evaluate()
             return self.find_workstations(original)
         else:
             return original

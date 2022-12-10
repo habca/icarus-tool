@@ -219,6 +219,52 @@ RECURSIVE DATA STRUCTURE
     288 fiber
 ```
 
+### `-j` JSON format
+
+Data can be requested from the application in JSON format.
+
+```
+> 1 crafting_bench
+[
+  {
+    "name": "crafting_bench",
+    "amount": 1,
+    "count": 1,
+    "station": "character",
+    "children": [
+      {
+        "name": "fiber",
+        "amount": 60,
+        "count": 1,
+        "station": null,
+        "children": []
+      },
+      {
+        "name": "wood",
+        "amount": 50,
+        "count": 1,
+        "station": null,
+        "children": []
+      },
+      {
+        "name": "stone",
+        "amount": 12,
+        "count": 1,
+        "station": null,
+        "children": []
+      },
+      {
+        "name": "leather",
+        "amount": 20,
+        "count": 1,
+        "station": null,
+        "children": []
+      }
+    ]
+  }
+]
+```
+
 ### Summary
 
 This section lists all the raw materials to be gathered. Non-positive numbers represent the resources already found in the inventory.
