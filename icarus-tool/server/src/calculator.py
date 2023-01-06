@@ -15,7 +15,8 @@ class Resource:
     Do not make factory methods, use the constructor!
     """
 
-    def __init__(self, resource: tuple[Fraction, str] | tuple[int, str] | str | Any):
+    # def __init__(self, resource: tuple[Fraction, str] | tuple[int, str] | str | Any):
+    def __init__(self, resource):
 
         self.__amount: Fraction = Fraction(0)
         self.__name: str = ""
@@ -66,10 +67,12 @@ class Resource:
 
 
 class Equation:
-    def __init__(self, resources: list[Resource] | list[str] | str | Any) -> None:
+    # def __init__(self, resources: list[Resource] | list[str] | str | Any) -> None:
+    def __init__(self, resources) -> None:
         self.__resources: list[Resource] = []
 
-        def make_resource(item: Resource | str) -> Resource:
+        # def make_resource(item: Resource | str) -> Resource:
+        def make_resource(item) -> Resource:
             if isinstance(item, Resource):
                 return Resource(item)  # Copy constructor.
             elif isinstance(item, str):
@@ -77,7 +80,8 @@ class Equation:
             else:
                 raise TypeError(type(item))
 
-        def make_resources(items: Equation | list[Resource] | list[str] | str):
+        # def make_resources(items: Equation | list[Resource] | list[str] | str):
+        def make_resources(items):
             if isinstance(items, Equation):
                 return Equation.__clone(items).resources  # Copy constructor.
             if isinstance(items, list):

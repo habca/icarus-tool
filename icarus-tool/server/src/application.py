@@ -77,10 +77,15 @@ class JsonSystem(FileSystem):
 class Completer:
     def __init__(self, keywords: list[str]):
         self.keywords = sorted(keywords)
-        import readline
 
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(self.auto_complete)
+        try:
+            import readline
+
+            readline.parse_and_bind("tab: complete")
+            readline.set_completer(self.auto_complete)
+        except ImportError as error:
+            print(str(error))
+        
 
     def auto_complete(self, text: str, state: int):
         options = [var for var in self.keywords if var.startswith(text)]

@@ -4,9 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5de0b9f6-f489-43e6-b526-9c925fb490f0</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>application.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>src\application.py</StartupFile>
+    <SearchPath>test;src</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>icarus-tool</Name>
@@ -16,6 +15,10 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>-gir data/crafting/D_ProcessorRecipes.json</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <UnitTestPattern>test_*.py</UnitTestPattern>
+    <UnitTestRootDirectory>test</UnitTestRootDirectory>
+    <Environment>
+    </Environment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,13 +29,53 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="data\crafting\D_ProcessorRecipes.json" />
     <Content Include="data\tech_tree.txt" />
+    <Content Include="src\__pycache__\app.cpython-310.pyc" />
+    <Content Include="src\__pycache__\application.cpython-310.pyc" />
+    <Content Include="src\__pycache__\calculator.cpython-310.pyc" />
+    <Content Include="src\__pycache__\calculator.cpython-39.pyc" />
+    <Content Include="src\__pycache__\mapping.cpython-310.pyc" />
+    <Content Include="src\__pycache__\mapping.cpython-39.pyc" />
+    <Content Include="src\__pycache__\webapp.cpython-310.pyc" />
+    <Content Include="test\testdata\test_init.json" />
+    <Content Include="test\testdata\test_json_api_01.json" />
+    <Content Include="test\testdata\test_processor_recipes_01.json" />
+    <Content Include="test\testdata\test_processor_recipes_02.json" />
+    <Content Include="test\testdata\test_processor_recipes_03.json" />
+    <Content Include="test\testdata\test_tech_tree_01.json" />
+    <Content Include="test\testdata\test_tech_tree_02.json" />
+    <Content Include="test\testdata\test_tech_tree_03.json" />
+    <Content Include="test\testdata\test_tech_tree_04.json" />
+    <Content Include="test\testdata\test_tech_tree_05.json" />
+    <Content Include="test\testdata\test_tech_tree_06.json" />
+    <Content Include="test\testdata\test_tech_tree_07.json" />
+    <Content Include="test\testdata\test_tech_tree_08.json" />
+    <Content Include="test\testdata\test_tech_tree_09.json" />
+    <Content Include="test\__pycache__\edit_file.cpython-310.pyc" />
+    <Content Include="test\__pycache__\helper_functions.cpython-310.pyc" />
+    <Content Include="test\__pycache__\test_app.cpython-310.pyc" />
+    <Content Include="test\__pycache__\test_application.cpython-310.pyc" />
+    <Content Include="test\__pycache__\test_calculator.cpython-310.pyc" />
+    <Content Include="test\__pycache__\test_webapp.cpython-310.pyc" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="application.py" />
-    <Compile Include="calculator.py" />
-    <Compile Include="test_application.py" />
-    <Compile Include="test_calculator.py" />
+    <Compile Include="src\app.py" />
+    <Compile Include="src\application.py" />
+    <Compile Include="src\calculator.py" />
+    <Compile Include="src\mapping.py" />
+    <Compile Include="test\test_app.py" />
+    <Compile Include="test\test_application.py" />
+    <Compile Include="test\test_calculator.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
+    <Folder Include="data\crafting\" />
+    <Folder Include="src\" />
+    <Folder Include="src\__pycache__\" />
+    <Folder Include="test\" />
+    <Folder Include="test\testdata\" />
+    <Folder Include="test\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include=".wenv\">
@@ -44,9 +87,6 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X64</Architecture>
     </Interpreter>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="data\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

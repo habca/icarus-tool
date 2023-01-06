@@ -4,27 +4,27 @@
     "expected_output": []
   },
   {
-    "program_args": "./application.py -z -g",
+    "program_args": "./application.py -z -r",
     "expected_output": ["option -z not recognized"]
   },
   {
-    "program_args": "./application.py -g -g",
+    "program_args": "./application.py -r -r",
     "expected_output": []
   },
   {
-    "program_args": "./application.py data/tech_tree.txt -z -g",
+    "program_args": "./application.py data/tech_tree.txt -z -r",
     "expected_output": ["No such file or directory: '-z'"]
   },
   {
-    "program_args": "./application.py data/tech_tree.txt -g -g",
-    "expected_output": ["No such file or directory: '-g'"]
+    "program_args": "./application.py data/tech_tree.txt -r -r",
+    "expected_output": ["No such file or directory: '-r'"]
   },
   {
-    "program_args": "./application.py -z -g non_existent_file",
+    "program_args": "./application.py -z -r non_existent_file",
     "expected_output": ["option -z not recognized"]
   },
   {
-    "program_args": "./application.py -g -g non_existent_file",
+    "program_args": "./application.py -r -r non_existent_file",
     "expected_output": ["No such file or directory: 'non_existent_file'"]
   },
   {
