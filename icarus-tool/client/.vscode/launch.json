@@ -10,6 +10,13 @@
       "name": "Firefox debugger",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
+    },
+	{
+      "type": "chrome",
+      "request": "launch",
+      "name": "Chrome debugger",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }

@@ -11,7 +11,7 @@
     <Name>icarus-tool</Name>
     <RootNamespace>icarus-tool</RootNamespace>
     <TestFramework>unittest</TestFramework>
-    <InterpreterId>MSBuild|.wenv|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|.venv|$(MSBuildProjectFullPath)</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>-gir data/crafting/D_ProcessorRecipes.json</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
@@ -31,6 +31,7 @@
   <ItemGroup>
     <Content Include="data\crafting\D_ProcessorRecipes.json" />
     <Content Include="data\tech_tree.txt" />
+    <Content Include="requirements.txt" />
     <Content Include="src\__pycache__\app.cpython-310.pyc" />
     <Content Include="src\__pycache__\application.cpython-310.pyc" />
     <Content Include="src\__pycache__\calculator.cpython-310.pyc" />
@@ -78,10 +79,10 @@
     <Folder Include="test\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
-    <Interpreter Include=".wenv\">
-      <Id>.wenv</Id>
+    <Interpreter Include=".venv\">
+      <Id>.venv</Id>
       <Version>3.9</Version>
-      <Description>.wenv (Python 3.9 (64-bit))</Description>
+      <Description>.venv (Python 3.9 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
